@@ -3,90 +3,87 @@
 const map = [];
 const mapStatus = [];
 
-const kSymSpace  =  32;    // space
-const kSymBorder =  97;    // border
-const kSymDirt   =  98;    // dirt
-const kSymDirtFace   =  99;    // Dirty E. Face
-const kSymDirtFaceRight  = 100;    // Dirty E. Face
-const kSymDirtFaceLeft  = 101;    // Dirty E. Face
-const kSymButterfly   = 102;    // butterfly
-const kSymGuard  = 103;    // guardian
+const kSymSpace           =  32;    // space
+const kSymBorder          =  97;    // border
+const kSymDirt            =  98;    // dirt
+const kSymDirtFace        =  99;    // Dirty E. Face
+const kSymDirtFaceRight   = 100;    // Dirty E. Face
+const kSymDirtFaceLeft    = 101;    // Dirty E. Face
+const kSymButterfly       = 102;    // butterfly
+const kSymGuard           = 103;    // guardian
 const kSymDiamondExplode  = 104;    // diamond explosion
 const kSymDiamondExplode2 = 105;    // diamond explosion
-const kSymSpaceExplode  = 106;    // space explosion
-const kSymSpaceExplode2 = 107;    // space explosion
-const kSymAmoeba  = 108;    // amoeba
-const kSymMagicWall  = 109;    // magic wall
-const kSymEgg  = 110;    // monster egg
-const kSymEggWiggle   = 111;    // egg wiggle
-const kSymEggHatch   = 112;    // egg hatch
-const kSymEggOpen   = 113;    // egg opening
-const kSymWall   = 120;    // wall
-const kSymDiamond   = 121;    // diamond
-const kSymRock   = 122;    // rock
+const kSymSpaceExplode    = 106;    // space explosion
+const kSymSpaceExplode2   = 107;    // space explosion
+const kSymAmoeba          = 108;    // amoeba
+const kSymMagicWall       = 109;    // magic wall
+const kSymEgg             = 110;    // monster egg
+const kSymEggWiggle       = 111;    // egg wiggle
+const kSymEggHatch        = 112;    // egg hatch
+const kSymEggOpen         = 113;    // egg opening
+const kSymWall            = 120;    // wall
+const kSymDiamond         = 121;    // diamond
+const kSymRock            = 122;    // rock
 
-const kAgeWiggle   = 50;      // time till egg wiggles
-const kAgeCrack  = 58;       // time till egg cracks
+const kAgeWiggle = 50;    // time till egg wiggles
+const kAgeCrack  = 58;    // time till egg cracks
 const kAgeHatch  = 61;
 
-const kMoved  = 128;    // Status value when moved
+// status flags bits
+const kMoved    = 128;    // Status value when moved
 const kUnmoved  = 127;
-const kFall   = 64;     // added to status when falling
+const kFall     = 64;     // added to status when falling
 const kUnFall   = 191;    // Status value when FALLING
 const kEggTime  = 63;
 const kMoveBits = 3;
-const kUp     = 0;
-const kRight  = 1;
-const kDown   = 2;
-const kLeft   = 3;
 
-const kUpBit = 1;
-const kDownBit = 2;
-const kLeftBit = 4;
-const kRightBit = 8;
-const kFireBit = 16;
+// input bits
+const kUpBit    =  1;
+const kDownBit  =  2;
+const kLeftBit  =  4;
+const kRightBit =  8;
+const kFireBit  = 16;
 
-const kGrowthRate =  2;
-const kCWise      = (-1);
-const kCCWise     = 1;
+const kAmoebaGrowthRate =  2;
+const kCWise      = -1;
+const kCCWise     =  1;
 
 const mapWidth = 80;
 const mapHeight = 25;
 const mapArea = mapWidth * mapHeight;
 
-let     DFAnm     = kSymDirtFaceRight;     // Dirt Face code
-let     GrowFlag  = 0;
-let     ChangeSym = 0;
-const   NumPlayers = 1;
+let     amoebaGrowFlag  = 0;
+let     amoebaChangeSym = 0;
+const   numPlayers = 2;
 
-let     Input;
-
-    // initial # of objects on screen
-const  InitAmoebas = 1;        // amoeba
-const  InitButterflies  = 5;        // butterflies
-const  InitDiamonds  = 10;       // diamonds
+// initial # of objects on screen
+const  InitAmoebas = 1;       // amoeba
+const  InitButterflies  = 5;  // butterflies
+const  InitDiamonds  = 10;    // diamonds
 const  InitGuards = 3;        // Guards
-const  InitRocks  = 280;       // rocks
-const  InitWalls  = 0;        // walls
-const  InitMWalls = 0;        // magic walls.
-let  AmebaCount = 0;
-const  MaxAmebas = 100;
-const  AmebaMorph = kSymEgg;
+const  InitRocks  = 280;      // rocks
+const  InitWalls  = 10;       // walls
+const  InitMWalls = 2;        // magic walls.
+
+let  amoebaCount = 0;
+const  MaxAmoebas = 100;
+const  amoebaMorph = kSymEgg; // what the amoeba changes into if it grows to MaxAmoebas
+
 let  MagicFlag = false;
 let  MagicTime = 250;
 
+const explosionStack = [];
+const players = [];
 
-const explosionStack = [];            // explosion stack
-const DFPos = [];        // Dirt Face's pos.
-const Dead = [];        // Dirt Face death flag
-const PushT = [];        // # of turns rocks have been pushed
-const PushD = [];        // Rock Delay, number of times rock must be pushed.
-const Score = [];
-const Direction = [];
+const kUp     = 0;
+//const kRight  = 1;
+const kDown   = 2;
+const kLeft   = 3;
+const directionMapOffset = [];        // offset to map pos in direction
 
 const symbolToCharMap = new Map([
   [kSymSpace,           ' '],    // space
-  [kSymBorder,          '🅱️'],   // border
+  [kSymBorder,          '🟪'],   // border
   [kSymDirt,            '🟫'],   // dirt
   [kSymDirtFace,        '🙂'],   // Dirty E. Face
   [kSymDirtFaceRight,   '👉'],   // Dirty E. Face
@@ -98,12 +95,12 @@ const symbolToCharMap = new Map([
   [kSymSpaceExplode,    '🌩'],   // space explosion
   [kSymSpaceExplode2,   '💨'],   // space explosion
   [kSymAmoeba,          '🦠'],   // amoeba
-  [kSymMagicWall,       '🌈'],   // magic wall
+  [kSymMagicWall,       '🏧'],   // magic wall
   [kSymEgg,             '🥚'],   // monster egg
   [kSymEggWiggle,       '🍆'],   // egg wiggle
   [kSymEggHatch,        '🐣'],   // egg hatch
   [kSymEggOpen,         '🥥'],   // egg opening
-  [kSymWall,            '🏨'],   // wall
+  [kSymWall,            '⬜️'],   // wall
   [kSymDiamond,         '💎'],   // diamond
   [kSymRock,            '🪨'],   // rock
 ]);
@@ -172,17 +169,24 @@ function initWorld() {
   //
   // Place the players in the upper left and upper right
   //
-  DFPos[0] = mapWidth + 1;
-  DFPos[1] = mapWidth * 2 - 2;
+  const playerStartPositions = [
+    mapWidth + 1,
+    mapWidth * 2 - 2,
+  ];
 
   //
   // Draw and init both players
   //
-  for (let i = 0; i < NumPlayers; i++) {
-    const newPos = DFPos[i];
-    map[newPos] = kSymDirtFace;
-    Dead[i] = false;
-    Score[i] = 0;
+  for (let i = 0; i < numPlayers; i++) {
+    const pos = playerStartPositions[i];
+    players.push({
+      pos,
+      dead: false,
+      score: 0,
+      pushTurns: 0,  // # of turns rocks have been pushed
+      pushDelay: 0,  // Rock Delay, number of times rock must be pushed.
+    });
+    map[pos] = kSymDirtFace;
   }
 }
 
@@ -207,17 +211,17 @@ function addExplosion(sym, pos) {
 }
 
 function doAmoeba(pos) {
-  AmebaCount++;
-  if (ChangeSym === 0) {
+  amoebaCount++;
+  if (amoebaChangeSym === 0) {
     let dir = random(256) & kMoveBits;
     const oldDir = dir;
     do {
-      const newPos = pos + Direction[dir];
+      const newPos = pos + directionMapOffset[dir];
       if (map[newPos] === kSymSpace ||
           map[newPos] === kSymDirt) {
 
-        GrowFlag = true;
-        if (random(256) < kGrowthRate) {
+        amoebaGrowFlag = true;
+        if (random(256) < kAmoebaGrowthRate) {
           mapStatus[newPos].flags |= kMoved;
           if (dir === kUp || dir === kLeft) {
             mapStatus[newPos].flags &= kUnmoved;
@@ -229,7 +233,7 @@ function doAmoeba(pos) {
       dir = (dir + 1) & kMoveBits;
     } while (dir !== oldDir);
   } else {
-    map[pos] = ChangeSym;
+    map[pos] = amoebaChangeSym;
     mapStatus[pos].flags = 0;
   }
 }
@@ -298,7 +302,7 @@ function doEnemy(pos, sym, searchDirection) {
   let dir  = (mapStatus[pos].flags + searchDirection) & kMoveBits;
 
   for (let i = 0; i < 2; i++) {
-    const newPos = pos + Direction[dir];
+    const newPos = pos + directionMapOffset[dir];
     if (map[newPos] === kSymSpace) {
       map[pos] = kSymSpace;
       mapStatus[newPos].flags = dir | kMoved;
@@ -359,25 +363,25 @@ function doSpaceExplode(pos) {
   map[pos] = kSymSpace;
 }
 
-const tileTypeInfo = new Map([
-  [ kSymRock, { fn: doMineral } ],
-  [ kSymDiamond, { fn: doMineral } ],
-  [ kSymGuard, { fn: makeDoEnemyFn(kCCWise) } ],
-  [ kSymButterfly, { fn: makeDoEnemyFn(kCWise) } ],
-  [ kSymEgg, { fn: doEgg } ],
-  [ kSymEggWiggle, { fn: doEgg } ],
-  [ kSymEggHatch, { fn: doEgg } ],
-  [ kSymEggOpen, { fn: doEgg } ],
-  [ kSymAmoeba, { fn: doAmoeba } ],
-  [ kSymDiamondExplode, { fn: doExplode } ],
-  [ kSymSpaceExplode, { fn: doExplode } ],
-  [ kSymDiamondExplode2, { fn: doDiamondExplode, }],
-  [ kSymSpaceExplode2, { fn: doSpaceExplode, }],
+const tileFnMap = new Map([
+  [ kSymRock,            doMineral              ],
+  [ kSymDiamond,         doMineral              ],
+  [ kSymGuard,           makeDoEnemyFn(kCCWise) ],
+  [ kSymButterfly,       makeDoEnemyFn(kCWise)  ],
+  [ kSymEgg,             doEgg                  ],
+  [ kSymEggWiggle,       doEgg                  ],
+  [ kSymEggHatch,        doEgg                  ],
+  [ kSymEggOpen,         doEgg                  ],
+  [ kSymAmoeba,          doAmoeba               ],
+  [ kSymDiamondExplode,  doExplode              ],
+  [ kSymSpaceExplode,    doExplode              ],
+  [ kSymDiamondExplode2, doDiamondExplode       ],
+  [ kSymSpaceExplode2,   doSpaceExplode         ],
 ]);
 
 function nextGen() {
-  AmebaCount = 0;
-  GrowFlag   = false;
+  amoebaCount = 0;
+  amoebaGrowFlag   = false;
 
   for (let si = 0; si < map.length; ++si) {
     const status = mapStatus[si];
@@ -385,46 +389,47 @@ function nextGen() {
       mapStatus[si].flags &= kUnmoved;
     } else {
       const sym = map[si];
-      const tileInfo = tileTypeInfo.get(sym);
-      if (tileInfo) {
-        const fn = tileInfo.fn;
-        if (fn) {
-          fn(si, sym);
-        }
+      const fn = tileFnMap.get(sym);
+      if (fn) {
+        fn(si, sym);
       }
     }
   }
 
-  if (!GrowFlag) {
-    ChangeSym = kSymDiamond;
-  } else if (AmebaCount >= MaxAmebas) {
-    ChangeSym = AmebaMorph;
+  if (!amoebaGrowFlag) {
+    amoebaChangeSym = kSymDiamond;
+  } else if (amoebaCount >= MaxAmoebas) {
+    amoebaChangeSym = amoebaMorph;
   }
 }
 
 function addScore(points, playerNdx) {
-  Score[playerNdx] = points;
+  // TODO: add some effect
+  players[playerNdx].score += points;
 }
 
 function dirtFace(playerNdx) {
-  let dirtFacePos = DFPos[playerNdx];
+  const player = players[playerNdx];
+  const input = player.input;
+  let dirtFacePos = player.pos;
   let newOffset = 0;
-  if (Input & kRightBit) {
-     newOffset =     1; DFAnm = kSymDirtFaceRight;
+  let dfSym = kSymDirtFaceRight;
+  if (input & kRightBit) {
+     newOffset =     1; dfSym = kSymDirtFaceRight;
   }
-  if (Input & kLeftBit) {
-     newOffset =    -1; DFAnm = kSymDirtFaceLeft;
+  if (input & kLeftBit) {
+     newOffset =    -1; dfSym = kSymDirtFaceLeft;
   }
-  if (Input & kDownBit) {
+  if (input & kDownBit) {
      newOffset =  mapWidth;
   }
-  if (Input & kUpBit) {
+  if (input & kUpBit) {
      newOffset = -mapWidth;
   }
 
-  map[dirtFacePos] = DFAnm;
+  map[dirtFacePos] = dfSym;
 
-  if (Input === 0) {                    // nothing pressed
+  if (input === 0) {                    // nothing pressed
     map[dirtFacePos] = kSymDirtFace;
   }
 
@@ -441,7 +446,7 @@ function dirtFace(playerNdx) {
     addScore(1, playerNdx);
   }
 
-  if (Input & kFireBit) {  // Fire Button, should be using better routines.
+  if (input & kFireBit) {  // Fire Button, should be using better routines.
     if (c === kSymDirt || c === kSymDiamond || (c >= kSymEgg && c <= kSymEggHatch)) {
       map[newPos] = kSymSpace;
     }
@@ -450,60 +455,60 @@ function dirtFace(playerNdx) {
     // move Dirt Face
     map[dirtFacePos] = kSymSpace;
     dirtFacePos = newPos;
-    map[dirtFacePos] = DFAnm;
+    map[dirtFacePos] = dfSym;
 
   } else if (map[newPos] === kSymRock && (newOffset !== -mapWidth)) {
 
     // push rocks
-    if (PushD[playerNdx] === newOffset) {
-      PushT[playerNdx]--;
-      if (PushT[playerNdx] === 0) {
+    if (player.pushDelay === newOffset) {
+      player.pushTurns--;
+      if (player.pushTurns === 0) {
        // move rock
-        let Q = newPos;
+        let q = newPos;
         do {
-          Q += newOffset;
-          if (map[Q - mapWidth] === kSymRock) {
-            Q = 0;
+          q += newOffset;
+          if (map[q - mapWidth] === kSymRock) {
+            q = 0;
           }
-        } while (map[Q] === kSymRock && Q !== 0);
+        } while (map[q] === kSymRock && q !== 0);
 
-        if (Q !== 0 && map[Q] === kSymSpace) {
+        if (q !== 0 && map[q] === kSymSpace) {
           map[dirtFacePos] = kSymSpace;
           dirtFacePos = newPos;
-          map[dirtFacePos] = DFAnm;
-          map[Q] = kSymRock;
+          map[dirtFacePos] = dfSym;
+          map[q] = kSymRock;
         }
 
-        PushD[playerNdx] = 0;
+        player.pushDelay = 0;
       }
     } else { // start pushing rocks
-      PushT[playerNdx] = 0;
-      let Q = newPos;
+      player.pushTurns = 0;
+      let q = newPos;
       do {
-        Q += newOffset;
-        PushT[playerNdx]++;
-      } while (map[Q] === kSymRock && map[Q - mapWidth] !== kSymRock);
+        q += newOffset;
+        player.pushTurns++;
+      } while (map[q] === kSymRock && map[q - mapWidth] !== kSymRock);
 
-      if (map[Q] !== kSymSpace) {
-        PushD[playerNdx] = 0;  // can't push
+      if (map[q] !== kSymSpace) {
+        player.pushDelay = 0;  // can't push
       } else {
-        PushD[playerNdx] = newOffset;  // can push
+        player.pushDelay = newOffset;  // can push
       }
     }
   }
-  DFPos[playerNdx] = dirtFacePos;
+  player.pos = dirtFacePos;
 }
 
 function initGame() {
-  explosionStack.length = 0;    //init explosion stack
+  explosionStack.length = 0;    // init explosion stack
 
   MagicTime = 400;
   MagicFlag = false;
 
-  Direction[0] = -mapWidth;
-  Direction[1] = 1;
-  Direction[2] = mapWidth;
-  Direction[3] = -1;
+  directionMapOffset[0] = -mapWidth;
+  directionMapOffset[1] = 1;
+  directionMapOffset[2] = mapWidth;
+  directionMapOffset[3] = -1;
 }
 
 initGame();
@@ -511,7 +516,7 @@ initWorld();
 
 const keyState = new Map();
 window.addEventListener('keydown', e => {
-  console.log(e.code);
+  // console.log(e.code);
   keyState.set(e.code, true);
 });
 window.addEventListener('keyup', e => {
@@ -520,28 +525,36 @@ window.addEventListener('keyup', e => {
 
 const ctx = document.querySelector('#playField').getContext('2d');
 function draw() {
-  ctx.canvas.width = ctx.canvas.clientWidth;
-  ctx.canvas.height = ctx.canvas.clientHeight;
+  ctx.canvas.width = ctx.canvas.clientWidth * devicePixelRatio;
+  ctx.canvas.height = ctx.canvas.clientHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.font = '14px monospace';
+  ctx.font = '16px monospace';
+  const tileSize = 16;
+  const width = mapWidth * tileSize;
+  const height = (mapHeight + numPlayers) * tileSize;
+  ctx.save();
+  ctx.translate((ctx.canvas.clientWidth - width) / 2 | 0 + 0.5, (ctx.canvas.clientHeight - height) / 2 | 0 + 0.5);
 
   for (let y = 0; y < mapHeight; ++y) {
     for (let x = 0; x < mapWidth; ++x) {
-      const xx = x * 16;
-      const yy = y * 16 + 16;
+      const xx = x * tileSize;
+      const yy = y * tileSize + tileSize;
       const char = symbolToCharMap.get(map[y * mapWidth + x]) || '-';
       ctx.fillText(char, xx, yy);
     }
   }
 
   {
-    ctx.fillStyle = 'white';
-    const y = mapHeight * 16 + 16;
-    for (let i = 0; i < NumPlayers; ++i) {
-      ctx.fillText(`Player ${i + 1}: ${Score[i]}`, 10, y + i * 16);
+    const y = mapHeight * tileSize + tileSize;
+    for (let i = 0; i < numPlayers; ++i) {
+      const player = players[i];
+      ctx.fillStyle = player.dead ? 'red' : 'white';
+      ctx.fillText(`Player ${i + 1}: ${player.score} ${player.dead ? '🪦💀' : ''}`, 10, y + i * 16);
     }
   }
+  ctx.restore();
 }
 
 const frameRate = 1 / 10;
@@ -558,12 +571,18 @@ function process(now) {
   while (delay <= 0) {
     delay += frameRate;
 
-    Input =
-        ((keyState.get('KeyW')  || keyState.get('ArrowUp')   ) ? kUpBit    : 0) |
-        ((keyState.get('KeyS')  || keyState.get('ArrowDown') ) ? kDownBit  : 0) |
-        ((keyState.get('KeyA')  || keyState.get('ArrowLeft') ) ? kLeftBit  : 0) |
-        ((keyState.get('KeyD')  || keyState.get('ArrowRight')) ? kRightBit : 0) |
-        ((keyState.get('Space') || keyState.get('ShiftLeft'))  ? kFireBit  : 0);
+    players[0].input =
+        (keyState.get('KeyW')      ? kUpBit    : 0) |
+        (keyState.get('KeyS')      ? kDownBit  : 0) |
+        (keyState.get('KeyA')      ? kLeftBit  : 0) |
+        (keyState.get('KeyD')      ? kRightBit : 0) |
+        (keyState.get('ShiftLeft') ? kFireBit  : 0);
+    players[1].input =
+        (keyState.get('ArrowUp')    ? kUpBit    : 0) |
+        (keyState.get('ArrowDown')  ? kDownBit  : 0) |
+        (keyState.get('ArrowLeft')  ? kLeftBit  : 0) |
+        (keyState.get('ArrowRight') ? kRightBit : 0) |
+        (keyState.get('ShiftRight') ? kFireBit  : 0);
 
     nextGen();
     explode();
@@ -571,14 +590,15 @@ function process(now) {
       magicTime = Math.max(0, magicTime - deltaTime);
     }
 
-    for (let i = 0; i < NumPlayers; i++) {
-      const newPos = DFPos[i];
+    for (let i = 0; i < numPlayers; i++) {
+      const player = players[i];
+      const newPos = player.pos;
       if (map[newPos] >= kSymDirtFace &&
           map[newPos] <= kSymDirtFaceLeft &&
-          Dead[i] === false) {
+          player.dead === false) {
         dirtFace(i);
       } else {
-        Dead[i] = true;
+        player.dead = true;
       }
     }
     draw();
