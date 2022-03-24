@@ -2,7 +2,24 @@
 
 [Live Version](https://greggman.github.io/rockfall/)
 
-In the early 1980s, a game, [BoulderDash]() game out for the Atari 800. My friend John and I got addicted and cleared all the levels.
+* Player 1: ASWD = move, left shift = Dig
+* Player 2: ⬆⬇⬅➡️ = move, right shift = Dig
+
+* Avoid Falling Rocks
+* Push Rocks Left/Right
+* Collect Diamonds or Eggs
+* Avoid Enemies
+* Drop Rocks on Butterflies for more Eggs
+* Drop Rocks on Magic Walls to turn it them into Diamonds
+* Surround Amoeba with rocks to turn into Diamonds
+* When Amoeba gets too big it turns into Eggs
+
+The levels are random so and there is no goal so it's just a proof of concept.
+A real game would require hand designed or algorithmically generated levels.
+
+## History
+
+In the early 1980s, a game, [BoulderDash](https://en.wikipedia.org/wiki/Boulder_Dash) came out for the Atari 800. My friend John and I got addicted and cleared all the levels.
 
 At some point John tried to reproduce the main logic of the game. He did this in a
 language called [Action!](http://www.atarimania.com/utility-atari-400-800-xl-xe-action_12510.html).
@@ -26,3 +43,14 @@ After that I thought it would be fun to use the tilemap shader I wrote for
 
 [This is the result](https://greggman.github.io/rockfall/).
 
+## Legal
+
+I have no idea what the legal implications are. AFAICT, [Game Mechanics can not be
+copyrighted](https://www.americanbar.org/groups/intellectual_property_law/publications/landslide/2014-15/march-april/not-playing-around-board-games-intellectual-property-law/)
+but of course I am not a lawyer. Further, the game is 38yrs old so there are certainly
+no valid patents. And of course, this is just derived. No idea how the original game
+runs. In any case though, use at your own risk.
+
+## LICENSE
+
+MIT
