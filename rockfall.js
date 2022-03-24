@@ -102,7 +102,7 @@ const symbolToCharMap = new Map([
   [kSymEggOpen,         '🥥'],   // egg opening
   [kSymWall,            '⬜️'],   // wall
   [kSymDiamond,         '💎'],   // diamond
-  [kSymRock,            '🪨'],   // rock
+  [kSymRock,            '🌑'],   // rock 🌑🌰🧅    // these are not available on Windows 10 -> 🪨
 ]);
 
 function random(max) {
@@ -551,7 +551,7 @@ function draw() {
     for (let i = 0; i < numPlayers; ++i) {
       const player = players[i];
       ctx.fillStyle = player.dead ? 'red' : 'white';
-      ctx.fillText(`Player ${i + 1}: ${player.score} ${player.dead ? '🪦💀' : ''}`, 10, y + i * 16);
+      ctx.fillText(`Player ${i + 1}: ${player.score} ${player.dead ? '💀' : ''}`, 10, y + i * 16);
     }
   }
   ctx.restore();
