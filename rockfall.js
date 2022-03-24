@@ -1,7 +1,7 @@
 /* eslint-env browser */
 
-const map = [];
-const mapStatus = [];
+let map;
+let mapFlags;
 
 const kSymSpace           =  32;    // space
 const kSymBorder          =  97;    // border
@@ -69,8 +69,8 @@ let  amoebaCount = 0;
 const  MaxAmoebas = 100;
 const  amoebaMorph = kSymEgg; // what the amoeba changes into if it grows to MaxAmoebas
 
-let  MagicFlag = false;
-let  MagicTime = 250;
+let  magicFlag = false;
+let  magicTime = 250;
 
 const explosionStack = [];
 const players = [];
@@ -105,6 +105,16 @@ const symbolToCharMap = new Map([
   [kSymRock,            '🌑'],   // rock 🌑🌰🧅    // these are not available on Windows 10 -> 🪨
 ]);
 
+const kCharPostMagicWall = kSymWall;
+const magicWallAnim = [
+  '🟥',
+  '🟧',
+  '🟨',
+  '🟩',
+  '🟦',
+  '🟪',
+];
+
 function random(max) {
   return Math.random() * max | 0;
 }
@@ -137,13 +147,9 @@ function place(sym, stat, rep, many) {
 }
 
 function initWorld() {
-  //
-  // Fill the map with dirt.
-  //
-  for (let i = 0; i < mapArea; i++) {
-    map[i]  = kSymDirt;
-    mapStatus[i] = {flags: 0, extra: 0};
-  }
+  map = new Uint8Array(mapArea);
+  mapFlags = new Uint8Array(mapArea);
+  map.fill(kSymDirt);
 
   for (let i = 0; i < mapWidth; i++) {
     map[i] = kSymBorder;
@@ -158,13 +164,13 @@ function initWorld() {
     map[pos] = kSymBorder;
   }
 
-  place(kSymDiamond,  0,  kSymDirt,  InitDiamonds);
-  place(kSymWall,  0,  kSymDirt,  InitWalls);
-  place(kSymRock,  0,  kSymDirt,  InitRocks);
-  place(kSymGuard, kUp,   kSymSpace, InitGuards);
-  place(kSymButterfly,  kDown, kSymSpace, InitButterflies);
-  place(kSymAmoeba, 0,  kSymDirt,  InitAmoebas);
-  place(kSymMagicWall, 0,  kSymDirt,  InitMWalls);
+  place(kSymDiamond,   0,     kSymDirt,  InitDiamonds);
+  place(kSymWall,      0,     kSymDirt,  InitWalls);
+  place(kSymRock,      0,     kSymDirt,  InitRocks);
+  place(kSymGuard,     kUp,   kSymSpace, InitGuards);
+  place(kSymButterfly, kDown, kSymSpace, InitButterflies);
+  place(kSymAmoeba,    0,     kSymDirt,  InitAmoebas);
+  place(kSymMagicWall, 0,     kSymDirt,  InitMWalls);
 
   //
   // Place the players in the upper left and upper right
@@ -222,9 +228,9 @@ function doAmoeba(pos) {
 
         amoebaGrowFlag = true;
         if (random(256) < kAmoebaGrowthRate) {
-          mapStatus[newPos].flags |= kMoved;
+          mapFlags[newPos] |= kMoved;
           if (dir === kUp || dir === kLeft) {
-            mapStatus[newPos].flags &= kUnmoved;
+            mapFlags[newPos] &= kUnmoved;
           }
           map[newPos] = kSymAmoeba;
           return;
@@ -234,7 +240,7 @@ function doAmoeba(pos) {
     } while (dir !== oldDir);
   } else {
     map[pos] = amoebaChangeSym;
-    mapStatus[pos].flags = 0;
+    mapFlags[pos] = 0;
   }
 }
 
@@ -253,16 +259,16 @@ function doMineral(pos, minSym) {
       map[pos] = kSymSpace;
       const newPos = pos + mapWidth;
       map[newPos] = minSym;
-      mapStatus[newPos].flags = mapStatus[pos].flags | kFall | kMoved;
-    } else if ((mapStatus[pos].flags & kFall) && downSym === kSymMagicWall) {
+      mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
+    } else if ((mapFlags[pos] & kFall) && downSym === kSymMagicWall) {
       let sym = kSymSpace;
 
-      if (!MagicFlag) {
-        MagicFlag = true;
+      if (!magicFlag) {
+        magicFlag = true;
       }
 
       const newPos = pos + mapWidth * 2;
-      if (MagicTime && map[newPos] === kSymSpace) {
+      if (magicTime && map[newPos] === kSymSpace) {
         switch (minSym) {
           case kSymEgg:     sym = kSymGuard;    break;
           case kSymDiamond: sym = kSymRock;     break;
@@ -273,41 +279,41 @@ function doMineral(pos, minSym) {
 
       if (sym !== kSymSpace) {
         map[newPos] = sym;
-        mapStatus[newPos].flags = mapStatus[pos].flags | kFall | kMoved;
+        mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
       }
     } else {
       if (leftDownSym === kSymSpace && leftSym === kSymSpace) {
         map[pos] = kSymSpace;
         const newPos = pos - 1;
         map[newPos] = minSym;
-        mapStatus[newPos].flags = mapStatus[pos].flags | kFall;
+        mapFlags[newPos] = mapFlags[pos] | kFall;
       } else if (rightDownSym === kSymSpace && rightSym === kSymSpace) {
         map[pos] = kSymSpace;
         const newPos = pos + 1;
         map[newPos] = minSym;
-        mapStatus[newPos].flags = mapStatus[pos].flags | kFall | kMoved;
+        mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
       } else {
-        mapStatus[pos].flags &= kUnFall;
+        mapFlags[pos] &= kUnFall;
       }
     }
-  } else if ((mapStatus[pos].flags & kFall) && downSym >= kSymDirtFace && downSym <= kSymGuard) {
+  } else if ((mapFlags[pos] & kFall) && downSym >= kSymDirtFace && downSym <= kSymGuard) {
     addExplosion(downSym, pos - 1);
   } else {
-    mapStatus[pos].flags &= kUnFall;
+    mapFlags[pos] &= kUnFall;
   }
 }
 
 function doEnemy(pos, sym, searchDirection) {
   const scan = -searchDirection;
-  let dir  = (mapStatus[pos].flags + searchDirection) & kMoveBits;
+  let dir  = (mapFlags[pos] + searchDirection) & kMoveBits;
 
   for (let i = 0; i < 2; i++) {
     const newPos = pos + directionMapOffset[dir];
     if (map[newPos] === kSymSpace) {
       map[pos] = kSymSpace;
-      mapStatus[newPos].flags = dir | kMoved;
+      mapFlags[newPos] = dir | kMoved;
       if (dir === kUp || dir === kLeft) {
-        mapStatus[newPos].flags &= kUnmoved;
+        mapFlags[newPos] &= kUnmoved;
       }
       map[newPos] = sym;
       return;
@@ -315,14 +321,14 @@ function doEnemy(pos, sym, searchDirection) {
                 map[newPos] === kSymDirtFaceRight ||
                 map[newPos] === kSymDirtFaceLeft) ||
                 map[newPos] === kSymAmoeba ||
-               ((mapStatus[newPos].flags & kFall) && dir === 0)) {
+               ((mapFlags[newPos] & kFall) && dir === 0)) {
       addExplosion(sym, pos - (mapWidth + 1));
       return;
     }
     dir = (dir + scan) & kMoveBits;
   }
 
-  mapStatus[pos].flags = dir;
+  mapFlags[pos] = dir;
 }
 
 function makeDoEnemyFn(searchDirection) {
@@ -332,11 +338,11 @@ function makeDoEnemyFn(searchDirection) {
 }
 
 function doEgg(pos) {
-  if (!(mapStatus[pos].flags & kFall)) {
-    mapStatus[pos].flags += 1;
+  if (!(mapFlags[pos] & kFall)) {
+    mapFlags[pos] += 1;
   }
 
-  const age = mapStatus[pos].flags & kEggTime;
+  const age = mapFlags[pos] & kEggTime;
   if (age === kAgeWiggle) {
     map[pos] = kSymEggWiggle;
   } else if (age === kAgeCrack) {
@@ -384,9 +390,9 @@ function nextGen() {
   amoebaGrowFlag   = false;
 
   for (let si = 0; si < map.length; ++si) {
-    const status = mapStatus[si];
-    if (status.flags & kMoved) {
-      mapStatus[si].flags &= kUnmoved;
+    const flags = mapFlags[si];
+    if (flags & kMoved) {
+      mapFlags[si] &= kUnmoved;
     } else {
       const sym = map[si];
       const fn = tileFnMap.get(sym);
@@ -502,8 +508,8 @@ function dirtFace(playerNdx) {
 function initGame() {
   explosionStack.length = 0;    // init explosion stack
 
-  MagicTime = 400;
-  MagicFlag = false;
+  magicTime = 400;
+  magicFlag = false;
 
   directionMapOffset[0] = -mapWidth;
   directionMapOffset[1] = 1;
@@ -560,8 +566,6 @@ function draw() {
 const frameRate = 1 / 10;
 let then = 0;
 let delay = 0;
-let magicFlag;
-let magicTime;
 function process(now) {
   now *= 0.001;
   const deltaTime = Math.min(now - then, 0.1);
@@ -587,7 +591,12 @@ function process(now) {
     nextGen();
     explode();
     if (magicFlag & magicTime > 0) {
-      magicTime = Math.max(0, magicTime - deltaTime);
+      --magicTime;
+      symbolToCharMap.set(
+          kSymMagicWall,
+          magicTime
+              ? magicWallAnim[magicTime % magicWallAnim.length]
+              : kCharPostMagicWall);
     }
 
     for (let i = 0; i < numPlayers; i++) {
