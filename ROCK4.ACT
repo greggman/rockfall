@@ -1,0 +1,666 @@
+
+;
+;ROCKFALL ROUTINE
+;
+
+DEFINE
+ NUMPLAY   ="2",
+ TRUE      ="1",
+ FALSE     ="0",
+ LINE      ="40",  ;playfield length
+ OBLEN     ="1",   ;object length
+ 
+ START     ="1",   ;consol "&" values
+ SELECT    ="2",   ; if consol & value
+ OPTION    ="4",   ; =0 then key pressed
+ CLEAR     ="8",   ;clear CONSOL value
+
+ SCRBAS    ="88",  ;screen mem register
+ SCRWIDTH  ="40",  ;Gr.0 columns
+ SCRHEIGTH ="24",  ;Gr.0 rows
+ SCRAREA   ="960", ;Gr.0 area  
+ SCRAREAI  ="959", ;Gr.0 area index
+    ;screen codes
+ AMEBASYM  ="108", ;amoeba
+ BORDERSYM ="97",  ;border
+ BUTTSYM   ="102", ;butterfly
+ DIAMSYM   ="121", ;diamond
+ DIAEXPLO  ="104", ;diamond explosion
+ DIAEXPLO2 ="105", ;diamond explosion
+ SPAEXPLO  ="106", ;space explosion
+ SPAEXPLO2 ="107", ;space explosion
+ DFSYM     ="99",  ;Dirty E. Face 
+ DFRSYM    ="100",  ;Dirty E. Face 
+ DFLSYM    ="101",  ;Dirty E. Face 
+ DIRTSYM   ="98",  ;dirt 
+ GUARDSYM  ="103", ;guardian
+ ROCKSYM   ="122", ;rock
+ SPACESYM  ="0",   ;space 
+ WALLSYM   ="120", ;wall
+ MWALLSYM  ="109", ;magic wall
+ EGGSYM    ="110", ;monster egg
+ EGGWSYM   ="111", ;egg wiggle
+ EGGHSYM   ="112", ;egg hatch
+ EGGOSYM   ="113", ;egg opening
+
+ MOVED     ="128",  ;Status value when moved
+ UNMOVED   ="127",
+ FALL      ="64",  ;added to status when falling
+ UNFALL    ="191",  ;Status value when FALLING
+ EGGTIME   ="63",
+ MOVEBITS  ="3",
+ UP        ="0",
+ RIGHT     ="1",
+ DOWN      ="2",
+ LEFT      ="3",
+ PTS4      ="2", 
+ PTS3      ="4",
+ PTS2      ="6",
+ PTS1      ="8",
+ PTS0      ="10",
+ GROWTHRATE="2",
+ CWISE     ="-1",
+ CCWISE    ="1"
+
+BYTE 
+ ramsize  = $2E4,
+ color1=709, 
+ color2=710,
+ color4=712,
+ ChBas    = $2F4,
+ ChSet1   =[0],
+ ChSet2   =[0],
+ ChXor    =[0],
+ ExStP    =[0], ;explosion stack pointer
+ DFAnm    =[DFRSYM], ;Dirt Face code
+ MaxHorz  =[40],  ;playfield width
+ MaxHorzI =[39],  ;index = MAXHORZ-1
+ MaxVert  =[24],  ;playfield heigth
+ MaxVertI =[23],  ;index = MAXVERT-1
+ consol   = $D01F,;CONSOL keys
+ crsr     = 752,  ;cursor on/off reg.
+ GrowFlag =[0],
+ ChangeSym=[0],
+ Wiggle   =[50],  ;time till egg wiggles
+ Crack    =[58],   ;time till egg cracks
+ Hatch    =[61],
+ PlayNum  =[2]  
+
+CARD
+  dlist     =$230,  ;display list
+  savmsc    =$58,   ;screen mem. pointer
+  Area      =[960], ;playfield area
+  AreaI     =[959], ;index = Area-1
+    ;initial # of objects on screen
+  InitAmebas=[1],   ;amoeba
+  InitButts =[5],   ;butterflies
+  InitDiams =[10],  ;diamonds
+  InitGuards=[3],   ;Guards 
+  InitRocks =[80], ;rocks 
+  InitWalls =[0],  ;walls
+  AmebaCount=[0],
+  MaxAmebas =[100]
+
+CARD
+    SI=[0], ;screen Scan Index
+    NP=[0], ;new position of object
+    P =[0], ;position of object
+    Q =[0], ;temporary value holder
+    A =[0], ;loop index
+    I =[0]  ;loop index
+   
+BYTE ARRAY
+  FileSpec1="D:ROCK1.SET",
+  FileSpec2="D:ROCK2.SET",
+  Display=[0],;array placed over screen mem.
+  Status(SCRAREA),
+  Info(SCRAREA),
+  ExplStak(50),;explosion stack
+  Points(12),  
+  ScoreLine(20),
+  Dead(NUMPLAY), ;Dirt Face death flag
+  PushT(NUMPLAY), ;# of turns rocks have been pushed
+  DL=[$70 $70 $40 ; Boundry  
+      $46 $00 $00 ; Scoreline.
+      $42 $00 $00 ; Display
+      2 2 2 2 2 2 2 2 2 2 
+      2 2 2 2 2 2 2 2 2 2
+      2 2 2
+      $41 $00 $00] ; End of displaylist
+
+CARD ARRAY
+  PosStak(50),;explosion stack
+  DFPos(NUMPLAY)   ;Dirt Face's pos.
+
+INT ARRAY
+  Direction(8),
+  PushD(NUMPLAY)
+ 
+PROC CIO = $E456(BYTE Areg,Xreg)
+;* Declaring the OS procedure CIO.
+;* 'Xreg' will contain the iocb 
+;* number times 16. 'Areg' is a dummy
+;* filler (CIO expects the iocb# in 
+;* the X register.)
+  
+PROC Do_Character_Set()
+   BYTE RamTop   = $6A,     
+        iocb2cmd = $362  ;iocb 2's command byte
+   CARD 
+        ScrBase, 
+        iocb2buf = $364, ;iocb 2's buffer start address
+        iocb2len = $368  ;iocb 2's buffer length
+
+   ChSet1 = ramsize - 12
+   ChSet2 = ramsize - 8 
+   RamTop = ramsize - 16
+   Graphics(0)
+   ScrBase = savmsc
+   Open(2,FileSpec1,4,0) ;Open channel 2 for read only
+   iocb2cmd = 7            ;'Get binary record' command
+   iocb2buf = 256 * ChSet1 ;set iocb buffer to character set address
+   iocb2len = 256 * 4
+   CIO(0,$20)              ;Call to CIO    
+                           ;$20 is the iocb# times 16
+   Close(2)
+   Open(2,FileSpec2,4,0) ;Open channel 2 for read only
+   iocb2cmd = 7            ;'Get binary record' command
+   iocb2buf = 256 * ChSet2 ;set iocb buffer to character set address
+   iocb2len = 256 * 4
+   CIO(0,$20)              ;Call to CIO    
+                           ;$20 is the iocb# times 16
+   Close(2)
+   ChBas = ChSet1
+   ChXor=ChSet1 ! ChSet2
+RETURN ;from Do_Character_Set
+
+PROC SetUpDisplay()
+ ;Place byte array over screen memory
+
+   Display=savmsc
+   DL(4)=(Scoreline MOD 256)
+   DL(5)=(Scoreline / 256)
+   DL(7)=Peek(88); (Display MOD 256)
+   DL(8)=Peek(89); (Display / 256)
+   DL(33)=(DL MOD 256)
+   DL(34)=(DL / 256)
+   dlist=DL
+RETURN ;from SetUpDisplay
+
+PROC Place(BYTE Sym,  
+                Stat,
+                Rep
+           CARD Many)
+
+  BYTE Count,
+       r,c
+
+  Count=0
+  WHILE Count<Many  
+    DO
+  ;Set up things
+      r=Rand(MaxVertI-1)+1
+      c=Rand(MaxHorzI-1)+1 
+      P=r*SCRWIDTH+c
+      IF Display(P)=DIRTSYM
+        THEN Count==+1 
+             Display(P)=Sym 
+      IF Display(P+OBLEN)=DIRTSYM
+        THEN Display(P+OBLEN)=Rep
+      FI
+      IF Display(P+LINE+OBLEN)=DIRTSYM
+        THEN Display(P+LINE+OBLEN)=Rep
+      FI
+      IF Display(P+LINE)=DIRTSYM
+        THEN Display(P+LINE)=Rep
+      FI
+      FI
+    OD
+RETURN ;from Place
+
+PROC InitWorld()
+ ;Sets up initial random world within
+ ;given parameters
+
+   
+
+  FOR I = 0 to SCRAREAI
+    DO
+      Display(I)=DIRTSYM 
+      Status(I)=0
+      Info(I)=0
+    OD
+
+  Place(DIAMSYM,0,DIRTSYM,InitDiams)
+  Place(WALLSYM,0,DIRTSYM,InitWalls)
+  Place(ROCKSYM,0,DIRTSYM,InitROCKS)
+  Place(GUARDSYM,UP,SPACESYM,InitGuards)
+  Place(BUTTSYM,DOWN,SPACESYM,InitButts)
+ ;Place(AMEBASYM,0,DIRTSYM,InitAmebas)
+  Display(900)=AMEBASYM
+  DFPos(0)=41
+  DFPos(1)=78
+  FOR I=0 TO 1
+    DO 
+      NP=DFPos(I)
+      Display(NP)=DFSYM
+      Dead(I)=FALSE
+    OD
+RETURN ;from InitWorld
+    
+PROC PrintWorld()
+   
+ ;Print border if any
+ ;Print rocks and dirt
+
+  savmsc=Display
+  Color=BORDERSYM
+  Plot(0,0)
+  Drawto(MaxHorzI,0) 
+  Drawto(MaxHorzI,MaxVertI)
+  Drawto(0,MaxVertI)
+  Drawto(0,0)
+RETURN ;from PrintWorld
+
+PROC UpdateScore(BYTE IndX ;player #-1
+                 CARD Pos) ;place to print
+ ;Updates and prints score
+ DEFINE SHIFT="16" ;screen code of '0'
+ BYTE X,Y  
+
+ X=10
+ DO 
+   WHILE Points(X+IndX)>9
+     DO
+       Points(X+IndX-2)==+1 
+       Points(X+IndX)==-10
+     OD
+   X==-1
+ UNTIL X=0
+ OD
+ Points(IndX)== MOD 10
+
+ X=12
+ Y=6
+ WHILE Y<>0
+   DO
+     X==-2
+     Y==-1
+     ScoreLine(Pos+Y)=Points(X+IndX)%SHIFT
+   OD
+RETURN
+
+PROC Explode()
+ ;Sets 3x3 block of screen memory
+ ;equal to Sym with upper left corner
+ ;at Pos.
+ BYTE Sym
+ CARD Pos
+
+  WHILE ExStP>0 
+    DO
+      Sym=ExplStak(ExStP)           
+      Pos=PosStak(ExStP)
+      ExStP==-1
+      FOR Pos=Pos to (Pos+80) STEP LINE
+        DO
+          FOR I=Pos to (Pos+2)
+            DO
+              IF Display(I)<>BORDERSYM
+                THEN Display(I)=Sym
+              FI
+            OD
+        OD
+    OD
+RETURN ;from Explode
+
+PROC DoEnemy(CARD Pos 
+             INT  Search
+             BYTE Sym)
+ ;moves enemy according to search 
+ ;direction
+
+ BYTE I, 
+      Dir
+ INT Scan
+
+ Scan=-Search
+ Dir=(Status(Pos)+Search)&MOVEBITS
+
+ FOR I=1 TO 2
+  DO
+   NP=Pos+Direction(Dir)
+   IF Display(NP)=SPACESYM 
+   THEN
+     Display(Pos)=SPACESYM
+     Status(NP)=Dir % MOVED
+     IF Dir=UP OR Dir=LEFT
+       THEN Status(NP)==&UNMOVED
+     FI
+     Display(NP)=Sym
+     EXIT
+   ELSEIF (Display(NP)>=DFSYM AND
+           Display(NP)<=DFLSYM) OR
+           Display(NP)=AMEBASYM OR
+           ((Status(NP)&FALL)>0 AND
+           Dir=0)
+   THEN 
+     ExStP==+1
+     IF Sym=BUTTSYM
+       THEN ExplStak(ExStP)=DIAEXPLO
+       ELSE ExplStak(ExStP)=SPAEXPLO
+     FI
+     PosStak(ExStP)=Pos-41
+     EXIT
+   FI
+   Dir=(DIR+Scan)&MOVEBITS
+ OD
+ Status(Pos)=DIR
+
+RETURN ;from DoEnemy
+
+PROC DoAmeba(CARD Pos) ; mineral pos.
+ ;cause ameba to grow.
+ ;if it has room
+
+ BYTE OldDir, 
+      Dir
+ 
+ AmebaCount==+1
+ IF ChangeSym=0
+   THEN
+     Dir=Peek($D20A)&MOVEBITS
+     OldDir=Dir
+     DO
+       NP=Pos+Direction(Dir)
+       IF Display(NP)=SPACESYM OR
+          Display(NP)=DIRTSYM
+       THEN
+         GrowFlag=TRUE
+         IF Peek($D20A)<GROWTHRATE
+           THEN
+             Status(NP)==%MOVED
+             IF Dir=UP OR Dir=LEFT
+               THEN Status(NP)==&UNMOVED
+             FI
+             Display(NP)=AMEBASYM
+             EXIT
+         FI
+       FI
+       Dir=(DIR+1)&MOVEBITS
+     UNTIL Dir=OldDir
+     OD
+ ELSE
+   Display(Pos)=ChangeSym
+   Status(Pos)=0
+ FI
+
+RETURN ; from DoAmeba
+ 
+PROC DoMineral(CARD P  ;Mineral Pos.
+               BYTE MinSym) ;symbol
+ ;cause one mineral to fall if
+ ;it needs to
+
+ DEFINE LDIAG ="39",
+        RDIAG ="41" 
+
+ CARD L, D, R, LD, RD ;new positions
+
+ LD=Display(P+LDIAG)
+ D=Display(P+LINE)
+ RD=Display(P+RDIAG)
+ L=Display(P-OBLEN)
+ R=Display(P+OBLEN)
+
+ IF D>MWALLSYM OR D=SPACESYM
+   THEN
+     IF D=SPACESYM      
+       THEN
+         Display(P)=SPACESYM
+         NP=P+LINE
+         Display(NP)=MinSym
+         Status(NP)=Status(P)%FALL%MOVED
+       ELSE
+         IF (LD=SPACESYM) AND
+            (L=SPACESYM)
+           THEN
+             Display(P)=SPACESYM
+             NP=P-OBLEN
+             Display(NP)=MinSym
+             Status(NP)=Status(P)%FALL
+           ELSEIF (RD=SPACESYM) AND 
+                (R=SPACESYM)
+           THEN
+             Display(P)=SPACESYM
+             NP=P+OBLEN
+             Display(NP)=MinSym
+             Status(NP)=Status(P)%FALL%MOVED
+           ELSE Status(P)==&UNFALL
+         FI
+     FI
+   ELSEIF (Status(P)&FALL)>0 
+          AND (D>=DFSYM) AND (D<=GUARDSYM)
+     THEN
+       ExStP==+1
+       IF D=BUTTSYM
+         THEN
+           ExplStak(ExStP)=DIAEXPLO
+         ELSE
+           ExplStak(ExStP)=SPAEXPLO
+       FI
+           PosStak(ExStP)=P-OBLEN
+   ELSE Status(P)==&UNFALL
+ FI
+RETURN ;from DoMineral
+
+PROC DoEgg(CARD Pos)
+ ;move egg and hatch it if
+ ;it is time.
+
+  BYTE Age
+  CARD ESym
+
+ IF (Status(Pos)&FALL)=0
+   THEN Status(Pos)==+1
+ FI
+ Age=Status(Pos)&EGGTIME
+ IF Age=Wiggle
+   THEN Display(Pos)=EGGWSYM
+ ELSEIF Age=Crack
+   THEN Display(Pos)=EGGHSYM
+ ELSEIF Age>=Hatch 
+   THEN Display(Pos)=BUTTSYM
+ FI
+ ESym=Display(Pos)
+ IF ESym<>BUTTSYM
+   THEN DoMineral(Pos,ESym)
+ FI
+RETURN
+
+PROC NextGen=*()
+;Scans entire playfield  processing
+;each object according to its type
+
+  AmebaCount=0
+  Growflag=FALSE
+  SI=0
+  DO           
+  IF Display(SI)>DIRTSYM
+  THEN
+    IF (Status(SI)&MOVED)>0
+      THEN Status(SI)== & UNMOVED
+      ELSEIF Display(SI)=ROCKSYM
+      THEN DoMineral(SI,ROCKSYM)
+      ELSEIF Display(SI)=DIAMSYM
+      THEN DoMineral(SI,DIAMSYM)
+      ELSEIF Display(SI)=GUARDSYM
+      THEN DoEnemy(SI,CCWISE,GUARDSYM)
+      ELSEIF Display(SI)=BUTTSYM
+      THEN DoEnemy(SI,CWISE,BUTTSYM)
+      ELSEIF Display(SI)>=EGGSYM AND
+             Display(SI)<=EGGHSYM
+      THEN DoEgg(SI) 
+      ELSEIF Display(SI)=AMEBASYM
+      THEN DoAmeba(SI)
+      ELSEIF Display(SI)=DIAEXPLO OR
+             Display(SI)=SPAEXPLO
+      THEN Display(SI)==+1
+      ELSEIF Display(SI)=DIAEXPLO2
+      THEN Display(SI)=EGGSYM
+      ELSEIF Display(SI)=SPAEXPLO2
+      THEN Display(SI)=SPACESYM
+    FI
+  FI
+  SI==+1
+  UNTIL(SI=SCRAREA)
+  OD
+  IF GrowFlag=FALSE
+    THEN
+      ChangeSym=DIAMSYM
+  ELSEIF AmebaCount>=MaxAmebas
+    THEN
+      ChangeSym=EGGSYM
+  FI
+
+RETURN ;from NextGen
+
+PROC DirtFace(BYTE P)
+ ;Move Dirt E. Face
+
+ INT  D  ;Delta-Dirt E. Face
+
+ CARD DFP
+ BYTE S,             ;stick value
+      C              ;screen code
+ BYTE ARRAY
+      stick(4) = $278,
+      strig(4) = $284
+
+  DFP=DFPos(P)
+  D=0 
+  S=stick(P)
+  IF S=7 THEN D=1 DFAnm=DFRSYM FI
+  IF S=11 THEN D=-1 DFAnm=DFLSYM FI
+  IF S=13 THEN D=40  FI
+  IF S=14 THEN D=-40 FI
+  Display(DFP)=DFAnm
+  IF S=15 THEN Display(DFP)=DFSYM FI
+
+  NP=DFP+D    ;new position
+  C=Display(NP) ;character at new postion
+  
+  IF C=DIAMSYM THEN Points(PTS3+P)==+1 FI
+  IF C<=EGGSYM AND
+     C>=EGGOSYM
+    THEN Points(PTS1+P)==+1 FI
+  IF C=DIRTSYM THEN Points(PTS0+P)==+1 FI
+
+  IF strig(P)=0
+    ;grab dirt and diamonds
+    THEN
+      IF C=DIRTSYM OR C=DIAMSYM OR
+         (C>=EGGSYM AND C<=EGGHSYM)
+        THEN
+          Display(NP)=SPACESYM
+      FI
+  ELSEIF C=DIRTSYM  OR C=SPACESYM OR
+         C=DIAMSYM OR (C>=EGGSYM AND C<=EGGHSYM)
+    ;move Dirt Face
+    THEN                    
+      Display(DFP)=SPACESYM
+      DFP=NP
+      Display(DFP)=DFAnm
+  ELSEIF (Display(NP)=ROCKSYM) AND
+         (D<>-LINE)
+    THEN ;push rocks
+      IF PushD(P)=D
+        THEN ;keep pushing rocks
+          PushT(P)==-1
+          IF PushT(P)=0
+            THEN ;move rock
+              Q=NP
+              DO
+                Q==+D
+                IF Display(Q-40)=ROCKSYM
+                  THEN Q=0
+                FI
+              UNTIL (Display(Q)<>ROCKSYM) OR
+                    (Q=0)
+              OD
+              IF (Q<>0) AND Display(Q)=SPACESYM
+                THEN 
+                  Display(DFP)=SPACESYM
+                  DFP=NP
+                  Display(DFP)=DFAnm
+                  Display(Q)=ROCKSYM
+              FI
+            PushD(P)=0
+          FI
+        ELSE ;start pushing rocks
+          PushT(P)=0
+          Q=NP
+          DO  
+            Q==+D
+            PushT(P)==+1
+          UNTIL (Display(Q)<>ROCKSYM) OR
+                (Display(Q-40)=ROCKSYM)
+          OD
+          IF Display(Q)<>SPACESYM
+            THEN PushD(P)=0 ;can't push
+            ELSE PushD(P)=D ;can push
+          FI
+      FI
+  FI
+  DFPos(P)=DFP
+RETURN ; from DirtFace.
+
+PROC InitGame()
+
+  Graphics(0)
+  Do_Character_Set()
+  SetUpDisplay()
+  color1=12
+  color2=0
+  color4=0
+  ExStP=0 ;initialize explosion stack
+  Direction(0) = -LINE
+  Direction(1) =  OBLEN
+  Direction(2) =  LINE
+  Direction(3) = -OBLEN
+  FOR I=0 TO 11 DO Points(I)=0 OD
+  FOR I=0 TO 19 DO ScoreLine(I)=0 OD
+RETURN
+     
+Proc Main()
+
+  InitGame()
+  DO
+   InitWorld()
+   PrintWorld()
+   ChangeSym=0
+   consol=CLEAR
+   DO
+     UpdateScore(0,2)
+     UpdateScore(1,12)
+     ChBas==!ChXor
+     IF (consol & START)=0
+       THEN EXIT
+     FI
+     NextGen()
+     Explode()
+     FOR I=0 TO PlayNum 
+       DO
+         NP=DFPos(I)
+         IF Display(NP)>=DFSYM AND
+            Display(NP)<=DFLSYM AND
+            Dead(I)=FALSE
+           THEN DirtFace(I)
+           ELSE Dead(I)=TRUE
+         FI
+       OD
+   OD
+ OD
+RETURN ;from Main
+
+
