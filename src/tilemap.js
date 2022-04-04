@@ -52,7 +52,7 @@ const s_tileVertexShader = `#version 300 es
 const s_tileFragmentShader = `#version 300 es
   precision mediump float;
 
-  uniform sampler2D u_tilemap;
+  uniform highp usampler2D u_tilemap;
   uniform sampler2D u_tiles;
   uniform vec2 u_tilemapSize;
   uniform vec2 u_tilesetSize;
@@ -61,29 +61,27 @@ const s_tileFragmentShader = `#version 300 es
 
   out vec4 fragColor;
 
-  void main() {
-    vec2 tilemapCoord = floor(v_texcoord);
-    vec2 texcoord = fract(v_texcoord);
-    vec2 tileFoo = fract((tilemapCoord + vec2(0.5, 0.5)) / u_tilemapSize);
-    vec4 tile = floor(texture(u_tilemap, tileFoo) * 256.0);
+  const uint xFlip = 128u;
+  const uint yFlip = 64u;
+  const uint xySwap = 32u;
 
-    float flags = tile.w;
-    float xFlip = step(128.0, flags);
-    flags = flags - xFlip * 128.0;
-    float yFlip = step(64.0, flags);
-    flags = flags - yFlip * 64.0;
-    float xySwap = step(32.0, flags);
-    if (xFlip > 0.0) {
+  void main() {
+    ivec2 tilemapCoord = ivec2(floor(v_texcoord));
+    vec2 texcoord = fract(v_texcoord);
+    uvec4 tile = texelFetch(u_tilemap, tilemapCoord, 0);
+
+    uint flags = tile.w;
+    if ((flags & xFlip) != 0u) {
       texcoord = vec2(1.0 - texcoord.x, texcoord.y);
     }
-    if (yFlip > 0.0) {
+    if ((flags & yFlip) != 0u) {
       texcoord = vec2(texcoord.x, 1.0 - texcoord.y);
     }
-    if (xySwap > 0.0) {
+    if ((flags & xySwap) != 0u) {
       texcoord = texcoord.yx;
     }
 
-    vec2 tileCoord = (tile.xy + texcoord) / u_tilesetSize;
+    vec2 tileCoord = (vec2(tile.xy) + texcoord) / u_tilesetSize;
     vec4 color = texture(u_tiles, tileCoord);
     if (color.a <= 0.1) {
       discard;
@@ -193,6 +191,7 @@ export default class TileMap {
       width: options.mapTilesAcross,
       height: options.mapTilesDown,
       src: options.tilemap,
+      internalFormat: gl.RGBA8UI,
       minMag: gl.NEAREST,
     };
     this.tilemap = options.tilemap;
