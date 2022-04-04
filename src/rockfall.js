@@ -1,4 +1,6 @@
 /* eslint-env browser */
+import * as twgl from '../3rdParty/twgl-full.module.js';
+import TileMap from './tilemap.js';
 
 let map;
 let mapFlags;
@@ -6,9 +8,9 @@ let mapFlags;
 const kSymSpace           =  32;    // space
 const kSymBorder          =  97;    // border
 const kSymDirt            =  98;    // dirt
-const kSymDirtFace        =  99;    // Dirty E. Face
-const kSymDirtFaceRight   = 100;    // Dirty E. Face
-const kSymDirtFaceLeft    = 101;    // Dirty E. Face
+const kSymDirtFace        =  99;    // Dirt E. Face
+const kSymDirtFaceRight   = 100;    // Dirt E. Face
+const kSymDirtFaceLeft    = 101;    // Dirt E. Face
 const kSymButterfly       = 102;    // butterfly
 const kSymGuard           = 103;    // guardian
 const kSymDiamondExplode  = 104;    // diamond explosion
@@ -105,6 +107,78 @@ const symbolToCharMap = new Map([
   [kSymRock,            '🌑'],   // rock 🌑🌰🧅    // these are not available on Windows 10 -> 🪨
 ]);
 
+const gl = document.querySelector('#playField').getContext('webgl2');
+const rgb = (r, g, b) => `rgb(${r * 256 | 0}, ${g * 256 | 0}, ${b * 256 | 0})`;
+
+const tileSize = 32;
+const tilesAcross = 128;
+const tilesDown = 1;
+function makeTileTexture(gl) {
+  const ctx = document.createElement('canvas').getContext('2d');
+  ctx.canvas.style.border = '1px solid black';
+  ctx.canvas.width = tilesAcross * tileSize;
+  ctx.canvas.height = tilesDown * tileSize;
+  ctx.font = `${tileSize / 2}px monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for (let y = 0; y < tilesDown; ++y) {
+    for (let x = 0; x < tilesAcross; ++x) {
+      const xOff = x * tileSize;
+      const yOff = y * tileSize;
+      ctx.fillStyle = rgb(Math.random(), Math.random(), Math.random());
+      ctx.fillRect(xOff, yOff, tileSize, tileSize);
+      ctx.fillStyle = 'black';
+      ctx.fillText(x, xOff + tileSize / 2, yOff);
+      ctx.fillText(y, xOff + tileSize / 2, yOff + tileSize / 2);
+    }
+  }
+  ctx.font = `${tileSize}px monospace`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = 'black';
+  for (const [id, char] of symbolToCharMap) {
+    const x = id * tileSize;
+    const y = 0;
+    ctx.clearRect(x, y, tileSize, tileSize);
+    ctx.fillText(char, x, y + 3);
+  }
+  document.body.appendChild(ctx.canvas);
+  return twgl.createTexture(gl, {src: ctx.canvas});
+}
+
+const tilesetTexture = makeTileTexture(gl);
+const mapBuffer = new ArrayBuffer(mapArea * 4);
+const mapAsUint8 = new Uint8Array(mapBuffer);
+
+const tilemap = new TileMap(gl, {
+  mapTilesAcross: mapWidth,
+  mapTilesDown: mapHeight,
+  tilemap: mapAsUint8,
+  tileset: {
+    tilesAcross,
+    tilesDown,
+    tileWidth: tileSize,
+    tileHeight: tileSize,
+    texture: tilesetTexture,
+  }
+});
+
+const tileDrawOptions = {
+  x: 0,
+  y: 0,
+  width:  mapWidth  * tileSize,
+  height: mapHeight * tileSize,
+  canvasWidth: 0, //this.canvas.width,
+  canvasHeight: 0, //this.canvas.height,
+  scrollX: 0,
+  scrollY: 0,
+  rotation: 0,
+  scaleX: 1,
+  scaleY: 1,
+  originX: 0,
+  originY: 0,
+};
+
 const kCharPostMagicWall = kSymWall;
 const magicWallAnim = [
   '🟥',
@@ -147,7 +221,7 @@ function place(sym, stat, rep, many) {
 }
 
 function initWorld() {
-  map = new Uint8Array(mapArea);
+  map = new Uint32Array(mapBuffer);
   mapFlags = new Uint8Array(mapArea);
   map.fill(kSymDirt);
 
@@ -529,7 +603,7 @@ window.addEventListener('keyup', e => {
   keyState.set(e.code, false);
 });
 
-const ctx = document.querySelector('#playField').getContext('2d');
+const ctx = document.querySelector('#twoD').getContext('2d');
 function draw() {
   ctx.canvas.width = ctx.canvas.clientWidth * devicePixelRatio;
   ctx.canvas.height = ctx.canvas.clientHeight * devicePixelRatio;
@@ -611,6 +685,10 @@ function process(now) {
       }
     }
     draw();
+    tilemap.uploadTilemap(gl);
+    tileDrawOptions.canvasWidth = gl.canvas.width;
+    tileDrawOptions.canvasHeight = gl.canvas.height;
+    tilemap.draw(gl, tileDrawOptions);
   }
 
   requestAnimationFrame(process);
