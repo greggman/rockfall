@@ -115,7 +115,7 @@ const tilesAcross = 128;
 const tilesDown = 1;
 function makeTileTexture(gl) {
   const ctx = document.createElement('canvas').getContext('2d');
-  ctx.canvas.style.border = '1px solid black';
+  ctx.canvas.style.margin = '5px';
   ctx.canvas.width = tilesAcross * tileSize;
   ctx.canvas.height = tilesDown * tileSize;
   ctx.font = `${tileSize / 2}px monospace`;
@@ -142,8 +142,11 @@ function makeTileTexture(gl) {
     ctx.clearRect(x, y, tileSize, tileSize);
     ctx.fillText(char, x, y + 3);
   }
-  document.body.appendChild(ctx.canvas);
-  return twgl.createTexture(gl, {src: ctx.canvas});
+   document.body.appendChild(ctx.canvas);
+  return twgl.createTexture(gl, {
+    src: ctx.canvas,
+    minMag: gl.NEAREST,
+  });
 }
 
 const tilesetTexture = makeTileTexture(gl);
@@ -160,7 +163,7 @@ const tilemap = new TileMap(gl, {
     tileWidth: tileSize,
     tileHeight: tileSize,
     texture: tilesetTexture,
-  }
+  },
 });
 
 const tileDrawOptions = {
@@ -603,6 +606,7 @@ window.addEventListener('keyup', e => {
   keyState.set(e.code, false);
 });
 
+/*
 const ctx = document.querySelector('#twoD').getContext('2d');
 function draw() {
   ctx.canvas.width = ctx.canvas.clientWidth * devicePixelRatio;
@@ -636,6 +640,7 @@ function draw() {
   }
   ctx.restore();
 }
+*/
 
 const frameRate = 1 / 10;
 let then = 0;
@@ -684,7 +689,10 @@ function process(now) {
         player.dead = true;
       }
     }
-    draw();
+
+    // draw();
+    twgl.resizeCanvasToDisplaySize(gl.canvas);
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     tilemap.uploadTilemap(gl);
     tileDrawOptions.canvasWidth = gl.canvas.width;
     tileDrawOptions.canvasHeight = gl.canvas.height;
