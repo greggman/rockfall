@@ -63,14 +63,14 @@ const settings = {
   magicTime: 250,                   // how many ticks the magic walls stay active
   tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
   scrollRate: 0.1,                  // scroll speed
-  playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
-  playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
   diamondPoints: 100,               // points for collecting diamond
   eggPoints: 10,                    // points for collecting egg
   dirtPoints: 1,                    // points for digging dirt
   mapWidth: 80,                     // map width in tiles
   mapHeight: 25,                    // map height in tiles
   frameRate: 1 / 10,                // frame rate in seconds
+  playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
+  playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
 };
 for (const [k, v] of (new URLSearchParams(window.location.search).entries())) {
   if (settings[k] === undefined) {
