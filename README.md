@@ -153,13 +153,15 @@ be fun to make more types of things. Random simple ideas:
 * Enemies that path find
 * Water (can flow left/right and go down, maybe Diamonds float up on water)
 * Gas (can flow left/right and go up, maybe can light gas on fire)
-* Balloons (float up)
+* Balloons (float up, opposite of rocks)
 * Fire (spreads. Maybe need something burnable)
 * Bombs (make chain explosions)
 * Bomberman Bombs (bombs that fill space and eat just one edge of dirt)
+* Ice Rocks (rocks that when pushed continue left/right)
 * Diggers (enemies that dig dirt)
 * Diamond eaters (enemies that eat diamonds)
 * Diamond makers (enemies that eat rocks and hatch diamonds)
+* Rotation (the GPU renderer can draw at any angle so, turn 45 degrees and have rocks slide. Or turn 90, 180, 270, and down is a new direction)
 
 PRs and ideas welcome.
 
