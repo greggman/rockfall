@@ -33,6 +33,8 @@ Rocks, Eggs, and Diamonds will fall if there is space below them or if they are
 sitting on top of another rock, egg, or diamond and there is space for them to
 fall.
 
+Note: You can dig one tile without moving by holding shift.
+
 The levels are random so and there is no goal so it's just a proof of concept.
 A real game would require hand designed or algorithmically generated levels.
 
