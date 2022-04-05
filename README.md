@@ -38,6 +38,39 @@ Note: You can dig one tile without moving by holding shift.
 The levels are random so and there is no goal so it's just a proof of concept.
 A real game would require hand designed or algorithmically generated levels.
 
+## Settings
+
+These settings can be set with query parameters
+
+```
+amoebas: 1,                       // number of amoebas
+butterflies: 5,                   // number of butterflies
+diamonds: 10,                     // number of diamonds
+guards: 3,                        // number of guardians
+rocks: 280,                       // number of rocks
+walls: 10,                        // number of walls
+magicWalls: 2,                    // number of magic walls
+maxAmoebas: 100,                  // how many amoebas with it turns into eggs
+magicTime: 250,                   // how many ticks the magic walls stay active
+tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
+scrollRate: 0.1,                  // scroll speed
+diamondPoints: 100,               // points for collecting diamond
+eggPoints: 10,                    // points for collecting egg
+dirtPoints: 1,                    // points for digging dirt
+mapWidth: 80,                     // map width in tiles
+mapHeight: 25,                    // map height in tiles
+frameRate: 1 / 10,                // frame rate in seconds
+playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
+playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
+```
+
+Examples:
+
+* [larger level](https://greggman.github.io/rockfall/?mapWidth=200&mapHeight=200&rocks=8000&guards=80&butterflies=80&diamonds=100)
+* [tiny level](https://greggman.github.io/rockfall/?mapWidth=10&mapHeight=10&rocks=2)
+* [small tiles](https://greggman.github.io/rockfall/?mapWidth=100&mapHeight=100&tileSize=8&rocks=2000&guards=20&butterflies=20&diamonds=25)
+* [faster](https://greggman.github.io/rockfall/?frameRate=0.0167&amoebas=10&maxAmoebas=1000&butterflies=2)
+
 ## History
 
 In the early 1980s, a game,
