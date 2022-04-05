@@ -263,10 +263,6 @@ export default class TileMap {
     m4.rotationZ(options.rotation, this.rotationMat);
     const mat = this.texMatrix;
     m4.identity(mat);
-    //m4.multiply(mat, this.originMat, mat);
-    //m4.multiply(mat, this.scalingMat, mat);
-    //m4.multiply(mat, this.rotationMat, mat);
-    //m4.multiply(mat, this.translationMat, mat);
 
     m4.multiply(mat, this.translationMat, mat);
     m4.multiply(mat, this.rotationMat, mat);
