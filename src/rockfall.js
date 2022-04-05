@@ -50,29 +50,49 @@ const kAmoebaGrowthRate =  2;
 const kCWise      = -1;
 const kCCWise     =  1;
 
-const mapWidth = 80;
-const mapHeight = 25;
+// initial # of objects on screen
+const settings = {
+  amoebas: 1,                       // number of amoebas
+  butterflies: 5,                   // number of butterflies
+  diamonds: 10,                     // number of diamonds
+  guards: 3,                        // number of guardians
+  rocks: 280,                       // number of rocks
+  walls: 10,                        // number of walls
+  magicWalls: 2,                    // number of magic walls
+  maxAmoebas: 100,                  // how many amoebas with it turns into eggs
+  magicTime: 250,                   // how many ticks the magic walls stay active
+  tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
+  scrollRate: 0.1,                  // scroll speed
+  playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
+  playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
+  diamondPoints: 100,               // points for collecting diamond
+  eggPoints: 10,                    // points for collecting egg
+  dirtPoints: 1,                    // points for digging dirt
+  mapWidth: 80,                     // map width in tiles
+  mapHeight: 25,                    // map height in tiles
+  frameRate: 1 / 10,                // frame rate in seconds
+};
+for (const [k, v] of (new URLSearchParams(window.location.search).entries())) {
+  if (settings[k] === undefined) {
+    console.error(`unknown setting: ${k}`);
+    continue;
+  }
+  settings[k] = parseFloat(v);
+}
+
+const mapWidth = settings.mapWidth;
+const mapHeight = settings.mapHeight;
 const mapArea = mapWidth * mapHeight;
 
 let     amoebaGrowFlag  = 0;
 let     amoebaChangeSym = 0;
 const   numPlayers = 2;
 
-// initial # of objects on screen
-const  InitAmoebas = 1;       // amoeba
-const  InitButterflies  = 5;  // butterflies
-const  InitDiamonds  = 10;    // diamonds
-const  InitGuards = 3;        // Guards
-const  InitRocks  = 280;      // rocks
-const  InitWalls  = 10;       // walls
-const  InitMWalls = 2;        // magic walls.
-
 let  amoebaCount = 0;
-const  MaxAmoebas = 100;
 const  amoebaMorph = kSymEgg; // what the amoeba changes into if it grows to MaxAmoebas
 
 let  magicFlag = false;
-let  magicTime = 250;
+let  magicTime = settings.magicTime;
 
 const explosionStack = [];
 const players = [];
@@ -111,12 +131,11 @@ const gl = document.querySelector('#playField').getContext('webgl2');
 const rgb = (r, g, b) => `rgb(${r * 256 | 0}, ${g * 256 | 0}, ${b * 256 | 0})`;
 const lerp = (a, b, t) => a + (b - a) * t;
 
-const tileSize = 32;
+const tileSize = settings.tileSize;
 const tilesAcross = 128;
 const tilesDown = 1;
 function makeTileTexture(gl) {
   const ctx = document.createElement('canvas').getContext('2d');
-  ctx.canvas.style.margin = '5px';
   ctx.canvas.width = tilesAcross * tileSize;
   ctx.canvas.height = tilesDown * tileSize;
   ctx.font = `${tileSize / 2}px monospace`;
@@ -141,7 +160,7 @@ function makeTileTexture(gl) {
     const x = id * tileSize;
     const y = 0;
     ctx.clearRect(x, y, tileSize, tileSize);
-    ctx.fillText(char, x, y + 3);
+    ctx.fillText(char, x, y + tileSize / 10 | 0);
   }
   // document.body.appendChild(ctx.canvas);
   return twgl.createTexture(gl, {
@@ -178,12 +197,13 @@ function computeTargetScrollPosition(gl, scrollX, scrollY, playerPos) {
 
     const maxRight = mapWidthPixels - screenWidthPixels;
     const maxBottom = mapHeightPixels - screenHeightPixels;
-    const playerBoundsWidthPercent = 0.25;
-    const playerBoundsHeightPercent = 0.25;
-    const playerBoundsX = scrollX + screenWidthPixels * 0.5 - screenWidthPixels * playerBoundsWidthPercent * 0.5;
-    const playerBoundsY = scrollY + screenHeightPixels * 0.5 - screenHeightPixels * playerBoundsHeightPercent * 0.5;
-    const playerBoundsWidth = screenWidthPixels * playerBoundsWidthPercent;
-    const playerBoundsHeight = screenHeightPixels * playerBoundsHeightPercent;
+
+    // could use an invisible div for this then could use CSS to set
+    // so like border/margin etc.
+    const playerBoundsX = scrollX + screenWidthPixels * 0.5 - screenWidthPixels * settings.playerBoundsWidthPercent * 0.5;
+    const playerBoundsY = scrollY + screenHeightPixels * 0.5 - screenHeightPixels * settings.playerBoundsHeightPercent * 0.5;
+    const playerBoundsWidth = screenWidthPixels * settings.playerBoundsWidthPercent;
+    const playerBoundsHeight = screenHeightPixels * settings.playerBoundsHeightPercent;
     const playerBoundsRight = playerBoundsX + playerBoundsWidth;
     const playerBoundsBottom = playerBoundsY + playerBoundsHeight;
 
@@ -245,7 +265,7 @@ const tilemap = new TileMap(gl, {
 });
 
 twgl.resizeCanvasToDisplaySize(gl.canvas);
-let [scrollX, scrollY] = computeTargetScrollPosition(gl, 10000, 10000);
+let [scrollX, scrollY] = computeTargetScrollPosition(gl, 1000000, 1000000);
 
 const tileDrawOptions = {
   x: 0,
@@ -277,30 +297,12 @@ function random(max) {
   return Math.random() * max | 0;
 }
 
-function place(sym, stat, rep, many) {
-  let count = 0;
-  while (count < many) {
-
-    const r = random(mapHeight - 1) + 1;
-    const c = random(mapWidth  - 1) + 1;
-
-    const pos = r * mapWidth + c;
-    if (map[pos] === kSymDirt) {
-      count++;
-      map[pos] = sym;
-
-      if (map[pos + 1] === kSymDirt) {
-        map[pos + 1] = rep;
-      }
-
-      if (map[pos + mapWidth + 1] === kSymDirt) {
-        map[pos + mapWidth + 1] = rep;
-      }
-
-      if (map[pos + mapWidth] === kSymDirt) {
-        map [pos + mapWidth] = rep;
-      }
-    }
+function shuffle(array) {
+  for (let i = 0; i < array.length; ++i) {
+    const ndx = Math.random() * array.length | 0;
+    const t = array[i];
+    array[i] = array[ndx];
+    array[ndx] = t;
   }
 }
 
@@ -322,13 +324,46 @@ function initWorld() {
     map[pos] = kSymBorder;
   }
 
-  place(kSymDiamond,   0,     kSymDirt,  InitDiamonds);
-  place(kSymWall,      0,     kSymDirt,  InitWalls);
-  place(kSymRock,      0,     kSymDirt,  InitRocks);
-  place(kSymGuard,     kUp,   kSymSpace, InitGuards);
-  place(kSymButterfly, kDown, kSymSpace, InitButterflies);
-  place(kSymAmoeba,    0,     kSymDirt,  InitAmoebas);
-  place(kSymMagicWall, 0,     kSymDirt,  InitMWalls);
+  // This is a lot of memory but whatever
+  const available = [];
+  for (let y = 1; y < mapHeight - 1; ++y) {
+    for (let x = 1; x < mapWidth - 1; ++x) {
+      available.push(y * mapWidth + x);
+    }
+  }
+  shuffle(available);
+
+  function place(sym, stat, rep, many) {
+    let count = 0;
+    while (available.length && count < many) {
+      const pos = available.pop();
+      if (map[pos] === kSymDirt) {
+        count++;
+        map[pos] = sym;
+
+        if (map[pos + 1] === kSymDirt) {
+          map[pos + 1] = rep;
+        }
+
+        if (map[pos + mapWidth + 1] === kSymDirt) {
+          map[pos + mapWidth + 1] = rep;
+        }
+
+        if (map[pos + mapWidth] === kSymDirt) {
+          map [pos + mapWidth] = rep;
+        }
+      }
+    }
+  }
+
+
+  place(kSymDiamond,   0,     kSymDirt,  settings.diamonds);
+  place(kSymWall,      0,     kSymDirt,  settings.walls);
+  place(kSymRock,      0,     kSymDirt,  settings.rocks);
+  place(kSymGuard,     kUp,   kSymSpace, settings.guards);
+  place(kSymButterfly, kDown, kSymSpace, settings.butterflies);
+  place(kSymAmoeba,    0,     kSymDirt,  settings.amoebas);
+  place(kSymMagicWall, 0,     kSymDirt,  settings.magicWalls);
 
   //
   // Place the players in the upper left and upper right
@@ -562,7 +597,7 @@ function nextGen() {
 
   if (!amoebaGrowFlag) {
     amoebaChangeSym = kSymDiamond;
-  } else if (amoebaCount >= MaxAmoebas) {
+  } else if (amoebaCount >= settings.maxAmoebas) {
     amoebaChangeSym = amoebaMorph;
   }
 }
@@ -601,13 +636,13 @@ function dirtFace(playerNdx) {
   const c  = map[newPos];  // Chr at new position
 
   if (c === kSymDiamond) {
-    addScore(100, playerNdx);
+    addScore(settings.diamondPoints, playerNdx);
   }
   if (c <= kSymEgg && c >= kSymEggOpen) {
-    addScore(10, playerNdx);
+    addScore(settings.eggPoints, playerNdx);
   }
   if (c === kSymDirt) {
-    addScore(1, playerNdx);
+    addScore(settings.dirtPoints, playerNdx);
   }
 
   if (input & kFireBit) {  // Fire Button, should be using better routines.
@@ -666,7 +701,7 @@ function dirtFace(playerNdx) {
 function initGame() {
   explosionStack.length = 0;    // init explosion stack
 
-  magicTime = 400;
+  magicTime = settings.magicTme;
   magicFlag = false;
 
   directionMapOffset[0] = -mapWidth;
@@ -723,7 +758,6 @@ function draw() {
 }
 */
 
-const frameRate = 1 / 10;
 let then = 0;
 let delay = 0;
 function process(now) {
@@ -733,7 +767,7 @@ function process(now) {
 
   delay -= deltaTime;
   while (delay <= 0) {
-    delay += frameRate;
+    delay += settings.frameRate;
 
     players[0].input =
         (keyState.get('KeyW')      ? kUpBit    : 0) |
@@ -782,16 +816,15 @@ function process(now) {
   {
 
     const player = players[0];
-    const [targetX, targetY] = computeTargetScrollPosition(gl, scrollX, scrollY, player.pos); 
+    const [targetX, targetY] = computeTargetScrollPosition(gl, scrollX, scrollY, player.pos);
     const screenWidthPixels = gl.drawingBufferWidth;
     const screenHeightPixels = gl.drawingBufferHeight;
 
     tileDrawOptions.canvasWidth = screenWidthPixels;
     tileDrawOptions.canvasHeight = screenHeightPixels;
 
-    const scrollRate = 0.1;
-    scrollX = lerp(scrollX, targetX, scrollRate);
-    scrollY = lerp(scrollY, targetY, scrollRate);
+    scrollX = lerp(scrollX, targetX, settings.scrollRate);
+    scrollY = lerp(scrollY, targetY, settings.scrollRate);
 
     tileDrawOptions.x = scrollX < 0 ? -scrollX * tileSize * 0.5 : 0;
     tileDrawOptions.y = scrollY < 0 ? -scrollY * tileSize * 0.5 : 0;

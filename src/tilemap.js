@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import 'https://greggman.github.io/webgl-lint/webgl-lint.js';
+// import 'https://greggman.github.io/webgl-lint/webgl-lint.js';
 import * as twgl from '../3rdParty/twgl-full.module.js';
 
 const m4 = twgl.m4;
