@@ -2,17 +2,36 @@
 
 [Live Version](https://greggman.github.io/rockfall/)
 
-* Player 1: ASWD = move, left shift = Dig
-* Player 2: ⬆⬇⬅➡️ = move, right shift = Dig
+## Rules
 
-* Avoid Falling Rocks
-* Push Rocks Left/Right
-* Collect Diamonds or Eggs
-* Avoid Enemies
-* Drop Rocks on Butterflies for more Eggs
-* Drop Rocks on Magic Walls to turn it them into Diamonds
-* Surround Amoeba with rocks to turn into Diamonds
-* When Amoeba gets too big it turns into Eggs
+* 🙂 Player: A, S, D, W to move
+
+* 🟫 Dirt: Can be dug
+
+* ⬜️ Wall: Unmovable, un-diggable, but explodable
+
+* 🌑 Rock: Pushable left or right as long as no rocks are above the row.
+
+* 💎 Diamond: 100 points
+
+* 🦋 Butterfly: Turns left. If something falls on it or it touches an
+  amoeba 🦠 it explodes into 9 eggs. Deadly to player.
+
+* 🥚 Egg: Worth 10 points, Hatches into Butterfly
+
+* 👾 Guardian: Turns right. If something falls on it explodes into
+  space. Deadly to player.
+
+* 🦠 Amoeba: Grows. If it reaches 100 Amoeba they all turn to eggs. If it's
+  surrounded so it can't grow they all turn into diamonds.
+
+* 🏧 Magic Wall: The first time something drops on it it turns on. While on, any
+  rock or egg dropped on it will become a diamond. Any diamond dropped on it
+  will become a rock. Stops after a few seconds.
+
+Rocks, Eggs, and Diamonds will fall if there is space below them or if they are
+sitting on top of another rock, egg, or diamond and there is space for them to
+fall.
 
 The levels are random so and there is no goal so it's just a proof of concept.
 A real game would require hand designed or algorithmically generated levels.
@@ -46,38 +65,10 @@ After that I thought it would be fun to use the tilemap shader I wrote for
 
 [This is the result](https://greggman.github.io/rockfall/).
 
-## Rules
-
-* 🙂 Player: A, S, D, W to move
-
-* 🟫 Dirt: Can be dug
-
-* ⬜️ Wall: Unmovable, un-diggable, but explodable
-
-* 🌑 Rock: Pushable left or right as long as no rocks are above the row.
-
-* 💎 Diamond: 100 points
-
-* 🦋 Butterfly: Turns left. If something falls on it or it touches an
-  amoeba 🦠 it explodes into 9 diamonds. Deadly to player.
-
-* 🥚 Egg: Worth 10 points, Hatches into Butterfly
-
-* 👾 Guardian: Turns right. If something falls on it explodes into
-  space. Deadly to player.
-
-* 🦠 Amoeba: Grows. If it reaches 100 Amoeba they all turn to eggs. If it's
-  surrounded so it can't grow they all turn into diamonds.
-
-* 🏧 Magic Wall: The first time something drops on it it turns on. While on, any
-  rock or egg dropped on it will become a diamond. Any diamond dropped on it
-  will become a rock. Stops after a few seconds.
-
-Rocks, Eggs, and Diamonds will fall if there is space below them or if they are
-sitting on top of another rock, egg, or diamond and there is space for them to
-fall.
-
-The player will die if something falls on his head.
+Note: In the original, IIRC, Butterflies explode into diamonds, not eggs.
+It would probably be best to make a 3rd enemy that explodes into diamonds
+for the variety but in these random levels it's arguably more fun that butterflies
+explode into eggs so you can see lots of movement.
 
 ## Design
 
@@ -91,9 +82,9 @@ to the exit before the time limit.
 
 The first few levels were mostly just rocks, walls, and diamonds. Some levels
 had less than the required diamonds but had butterflies so if you dropped rocks
-on them they'd generate diamonds. Other levels, some eggs might be surrounded by
-walls so you need to lure guardians next to the walls and drop rocks on their
-heads to explode the walls.
+on them they'd generate diamonds. Other levels, some diamonds might be
+surrounded by walls so you need to lure guardians next to the walls and drop
+rocks on their heads to explode the walls.
 
 Another example was the magic wall. It turns rocks into diamonds
 but you can only use it once. So, you'd need to dig around and push as many
@@ -101,9 +92,9 @@ rocks as possible into position and also dig out space below the magic wall
 so that once you turned it on you could push all the rocks into the magic wall
 and have them all turn into diamonds.
 
-Yet another example was having the amoeba, at the bottom of some level and you'd
-need to find a way to surround it with rocks so that it turns into diamonds before
-it grew too big and turn into eggs.
+Yet another example was having the amoeba at the bottom of some level and you'd
+need to find a way to surround it with rocks so that it turned into diamonds before
+it grew too big and turned into eggs and then butterflies.
 
 Anyway, all of those are interesting puzzles to solve but they require a level
 designer. PRs welcome!
@@ -125,8 +116,10 @@ be fun to make more types of things. Random simple ideas:
 
 * Enemies that only go left/right or up/down
 * Enemies that path find
-* Water
+* Water (can flow left/right and go down, maybe Diamonds float up on water)
+* Gas (can flow left/right and go up, maybe can light gas on fire)
 * Balloons (float up)
+* Fire (spreads. Maybe need something burnable)
 * Bombs (make chain explosions)
 * Bomberman Bombs (bombs that fill space and eat just one edge of dirt)
 * Diggers (enemies that dig dirt)
