@@ -154,14 +154,20 @@ function makeTileTexture(gl) {
     }
   }
   ctx.font = `${tileSize}px monospace`;
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   ctx.fillStyle = 'black';
   for (const [id, char] of symbolToCharMap) {
     const x = id * tileSize;
     const y = 0;
     ctx.clearRect(x, y, tileSize, tileSize);
-    ctx.fillText(char, x, y + tileSize / 10 | 0);
+    // add a clipping path so characters don't bleed into neighboring tiles.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, tileSize, tileSize);
+    ctx.clip();
+    ctx.fillText(char, x + tileSize / 2, y + tileSize / 10 | 0);
+    ctx.restore();
   }
   // document.body.appendChild(ctx.canvas);
   return twgl.createTexture(gl, {
