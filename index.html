@@ -23,12 +23,35 @@
         display: block;
         background-color: black;
       }
+      #score {
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        font-family: monospace;
+        font-weight: bold;
+        color: white;
+        text-shadow: 0.25em 0.25em black;
+      }
+      #github {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+      }
+      #github a,
+      #github img {
+        cursor: pointer;
+      }
+      #github img {
+        width: 1em;
+      }
     </style>
   </head>
   <body>
     <div id="content">
       <canvas id="playField"></canvas>
+      <div id="score"></div>
     </div>
+    <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall"><img src="/resources/images/octocat-icon.svg"></a></div>
   </body>
   <script src="src/rockfall.js" type="module"></script>
 </html>

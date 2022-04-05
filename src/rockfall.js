@@ -128,6 +128,7 @@ const symbolToCharMap = new Map([
 ]);
 
 const gl = document.querySelector('#playField').getContext('webgl2');
+const scoreElem = document.querySelector('#score');
 const rgb = (r, g, b) => `rgb(${r * 256 | 0}, ${g * 256 | 0}, ${b * 256 | 0})`;
 const lerp = (a, b, t) => a + (b - a) * t;
 
@@ -385,6 +386,7 @@ function initWorld() {
       pushTurns: 0,  // # of turns rocks have been pushed
       pushDelay: 0,  // Rock Delay, number of times rock must be pushed.
     });
+    addScore(0, i);
     map[pos] = kSymDirtFace;
   }
 }
@@ -605,6 +607,7 @@ function nextGen() {
 function addScore(points, playerNdx) {
   // TODO: add some effect
   players[playerNdx].score += points;
+  scoreElem.textContent = players[0].score.toString().padStart(6, '0');
 }
 
 function dirtFace(playerNdx) {
