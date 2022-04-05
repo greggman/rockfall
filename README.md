@@ -112,7 +112,7 @@ Currently the level is just randomly generated.
 For this game to be fun really requires well designed levels. The original Atari
 game had 60 or so levels. Each level had themes, a required number of points to
 open the exit, and a time limit. In other words, if the level required 4000
-points then you'd need to collect 40 diamonds to open the exit and them make it
+points then you'd need to collect 40 diamonds to open the exit and then make it
 to the exit before the time limit. 
 
 The first few levels were mostly just rocks, walls, and diamonds. Some levels
@@ -151,7 +151,7 @@ be fun to make more types of things. Random simple ideas:
 
 * Enemies that only go left/right or up/down
 * Enemies that path find
-* Water (can flow left/right and go down, maybe Diamonds float up on water)
+* Water (can flow left/right and go down, maybe Diamonds float up in water, maybe rocks fall slower)
 * Gas (can flow left/right and go up, maybe can light gas on fire)
 * Balloons (float up, opposite of rocks)
 * Fire (spreads. Maybe need something burnable)
@@ -161,7 +161,8 @@ be fun to make more types of things. Random simple ideas:
 * Diggers (enemies that dig dirt)
 * Diamond eaters (enemies that eat diamonds)
 * Diamond makers (enemies that eat rocks and hatch diamonds)
-* Rotation (the GPU renderer can draw at any angle so, turn 45 degrees and have rocks slide. Or turn 90, 180, 270, and down is a new direction)
+* Rotation (the GPU renderer can draw at any angle so, turn 45 degrees and have rocks slide. Or turn 90, 180, 270, and down is a new direction.
+  this could be random, or time based, or there could be an object you touch to rotate or 4 objects to orient or drop a rock on etc...)
 
 PRs and ideas welcome.
 
