@@ -267,10 +267,11 @@ export default class TileMap {
     //m4.multiply(mat, this.scalingMat, mat);
     //m4.multiply(mat, this.rotationMat, mat);
     //m4.multiply(mat, this.translationMat, mat);
-    m4.multiply(mat, this.originMat, mat);
-    m4.multiply(mat, this.scalingMat, mat);
-    m4.multiply(mat, this.rotationMat, mat);
+
     m4.multiply(mat, this.translationMat, mat);
+    m4.multiply(mat, this.rotationMat, mat);
+    m4.multiply(mat, this.scalingMat, mat);
+    m4.multiply(mat, this.originMat, mat);
 
     this.matrix[ 0] =  2 * dispScaleX;
     this.matrix[ 5] = -2 * dispScaleY;
