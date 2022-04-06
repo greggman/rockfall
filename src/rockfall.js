@@ -2,6 +2,7 @@
 import * as twgl from '../3rdParty/twgl-full.module.js';
 import {
   lerp,
+  minMagnitude,
 } from './utils.js';
 import {
   kSymSpace,
@@ -79,7 +80,7 @@ async function main() {
     maxAmoebas: 100,                  // how many amoebas with it turns into eggs
     magicTime: 250,                   // how many ticks the magic walls stay active
     tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
-    scrollRate: 0.1,                  // scroll speed
+    scrollRate: 0.0125,               // scroll speed
     diamondPoints: 100,               // points for collecting diamond
     eggPoints: 10,                    // points for collecting egg
     dirtPoints: 1,                    // points for digging dirt
@@ -283,9 +284,9 @@ async function main() {
         }
       }
       if (py >= playerBoundsBottom) {
-        const off = py - playerBoundsRight;
+        const off = py - playerBoundsBottom;
         if (off > 0) {
-          targetY += off;
+          targetY += py - playerBoundsBottom;
         }
       }
 
@@ -765,8 +766,16 @@ async function main() {
       tileDrawOptions.canvasWidth = screenWidthPixels;
       tileDrawOptions.canvasHeight = screenHeightPixels;
 
-      scrollX = lerp(scrollX, targetX, settings.scrollRate);
-      scrollY = lerp(scrollY, targetY, settings.scrollRate);
+      const targetScrollX = lerp(scrollX, targetX, settings.scrollRate);
+      const targetScrollY = lerp(scrollY, targetY, settings.scrollRate);
+
+      const tilesPerTick = 1 / settings.frameRate;
+      const maxSpeed = tilesPerTick / 60;
+      const deltaX = minMagnitude(targetScrollX - scrollX, maxSpeed);
+      const deltaY = minMagnitude(targetScrollY - scrollY, maxSpeed);
+
+      scrollX += deltaX;
+      scrollY += deltaY;
 
       tileDrawOptions.x = scrollX < 0 ? -scrollX * tileSize * 0.5 : 0;
       tileDrawOptions.y = scrollY < 0 ? -scrollY * tileSize * 0.5 : 0;
