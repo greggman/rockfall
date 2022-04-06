@@ -42,27 +42,28 @@ A real game would require hand designed or algorithmically generated levels.
 
 These settings can be set with query parameters
 
-```
-amoebas: 1,                       // number of amoebas
-butterflies: 5,                   // number of butterflies
-diamonds: 10,                     // number of diamonds
-guards: 3,                        // number of guardians
-rocks: 280,                       // number of rocks
-walls: 10,                        // number of walls
-magicWalls: 2,                    // number of magic walls
-maxAmoebas: 100,                  // how many amoebas with it turns into eggs
-magicTime: 250,                   // how many ticks the magic walls stay active
-tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
-scrollRate: 0.1,                  // scroll speed
-diamondPoints: 100,               // points for collecting diamond
-eggPoints: 10,                    // points for collecting egg
-dirtPoints: 1,                    // points for digging dirt
-mapWidth: 80,                     // map width in tiles
-mapHeight: 25,                    // map height in tiles
-frameRate: 1 / 10,                // frame rate in seconds
-playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
-playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
-```
+| property      | default | description |
+| ------------- | ------: | ----------- |
+| amoebas       |       1 | number of amoebas |
+| butterflies   |       5 | number of butterflies |
+| diamonds      |      10 | number of diamonds |
+| guards        |       3 | number of guardians |
+| rocks         |     280 | number of rocks |
+| walls         |      10 | number of walls |
+| magicWalls    |       2 | number of magic walls |
+| maxAmoebas    |     100 | how many amoebas with it turns into eggs |
+| magicTime     |     250 | how many ticks the magic walls stay active |
+| tileSize      |      32 | size of tiles (note | you can also Cmd/Ctrl +/- in browser) |
+| scrollRate    |  0.0125 | scroll speed |
+| diamondPoints |     100 | points for collecting diamond |
+| eggPoints     |      10 | points for collecting egg |
+| dirtPoints    |       1 | points for digging dirt |
+| mapWidth      |      80 | map width in tiles |
+| mapHeight     |      25 | map height in tiles |
+| frameRate     |     0.1 | frame rate in seconds |
+| playerBoundsWidthPercent | 0.25 |  size of window to keep player inside |
+| playerBoundsHeightPercent | 0.25 | size of window to keep player inside |
+| level         |       0 | level to use |
 
 Examples:
 
@@ -70,6 +71,8 @@ Examples:
 * [tiny level](https://greggman.github.io/rockfall/?mapWidth=10&mapHeight=10&rocks=2)
 * [small tiles](https://greggman.github.io/rockfall/?mapWidth=100&mapHeight=100&tileSize=8&rocks=2000&guards=20&butterflies=20&diamonds=25)
 * [faster](https://greggman.github.io/rockfall/?frameRate=0.0167&amoebas=10&maxAmoebas=1000&butterflies=2)
+* [Magic Wall](https://greggman.github.io/rockfall/?level=1) (built with Tiled)
+* [Hatchery](https://greggman.github.io/rockfall/?level=2) (built with Tiled)
 
 ## History
 
@@ -133,6 +136,15 @@ it grew too big and turned into eggs and then butterflies.
 
 Anyway, all of those are interesting puzzles to solve but they require a level
 designer. PRs welcome!
+
+### Building levels
+
+You can build levels using [Tiled](https://www.mapeditor.org/).
+
+Download [the tiles png](https://github.com/greggman/rockfall/blob/main/tiled/rockfall-tiles.png) and [the .tsj file](https://raw.githubusercontent.com/greggman/rockfall/main/tiled/rockfall-tiles.tsj)(right click and pick "Save As")
+Save your map in .tmj format. Drag and Drop it on [the page](https://greggman.github.io/rockfall/).
+
+If it's good, send a pull request.
 
 ## Enhancements / Ideas
 

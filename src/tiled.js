@@ -3,13 +3,8 @@
 import {
   kSymBorder,
 } from './symbols.js';
-import {
-  basenameNoExt,
-} from './utils.js';
 
-export async function loadTiledLevel(url) {
-  const res = await fetch(url);
-  const data = await res.json();
+export function parseTiledLevel(data) {
   // add space for a border
   const mapWidth = data.width + 2;
   const mapHeight = data.height + 2;
@@ -27,13 +22,10 @@ export async function loadTiledLevel(url) {
   }
 
   return {
-    name: basenameNoExt(url),
-    level: {
-      mapWidth,
-      mapHeight,
-      mapBuffer,
-      map,
-      mapFlags,
-    },
+    mapWidth,
+    mapHeight,
+    mapBuffer,
+    map,
+    mapFlags,
   };
 }

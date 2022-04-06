@@ -17,3 +17,15 @@ export const basenameNoExt = s => {
   return period >= 0 ? base.substring(0, period) : base;
 };
 
+export function shuffleArray(array) {
+  for (let i = 0; i < array.length; ++i) {
+    const ndx = Math.random() * array.length | 0;
+    const t = array[i];
+    array[i] = array[ndx];
+    array[ndx] = t;
+  }
+}
+
+export function randInt(max) {
+  return Math.random() * max | 0;
+}
