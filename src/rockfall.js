@@ -1,7 +1,6 @@
 /* eslint-env browser */
 import * as twgl from '../3rdParty/twgl-full.module.js';
 import {
-  rgb,
   lerp,
 } from './utils.js';
 import {
@@ -30,6 +29,9 @@ import {
 import {
   loadTiledLevel,
 } from './tiled.js';
+import {
+  generateTileTexture,
+} from './tile-texture-generator.js';
 import TileMap from './tilemap.js';
 
 async function main() {
@@ -199,29 +201,7 @@ async function main() {
 
   const directionMapOffset = [];        // offset to map pos in direction
 
-  const symbolToCharMap = new Map([
-    [kSymSpace,           ' '],    // space
-    [kSymBorder,          '🟪'],   // border
-    [kSymDirt,            '🟫'],   // dirt
-    [kSymDirtFace,        '🙂'],   // Dirty E. Face
-    [kSymDirtFaceRight,   '👉'],   // Dirty E. Face
-    [kSymDirtFaceLeft,    '👈'],   // Dirty E. Face
-    [kSymButterfly,       '🦋'],   // butterfly
-    [kSymGuard,           '👾'],   // guardian
-    [kSymDiamondExplode,  '🔥'],   // diamond explosion
-    [kSymDiamondExplode2, '💥'],   // diamond explosion
-    [kSymSpaceExplode,    '🌩'],   // space explosion
-    [kSymSpaceExplode2,   '💨'],   // space explosion
-    [kSymAmoeba,          '🦠'],   // amoeba
-    [kSymMagicWall,       '🏧'],   // magic wall
-    [kSymEgg,             '🥚'],   // monster egg
-    [kSymEggWiggle,       '🍆'],   // egg wiggle
-    [kSymEggHatch,        '🐣'],   // egg hatch
-    [kSymEggOpen,         '🥥'],   // egg opening
-    [kSymWall,            '⬜️'],   // wall
-    [kSymDiamond,         '💎'],   // diamond
-    [kSymRock,            '🌑'],   // rock 🌑🌰🧅    // these are not available on Windows 10 -> 🪨
-  ]);
+
 
   const gl = document.querySelector('#playField').getContext('webgl2');
   const scoreElem = document.querySelector('#score');
@@ -232,42 +212,10 @@ async function main() {
   const tilesAcross = 32;
   const tilesDown = 32;
   function makeTileTexture(gl) {
-    const ctx = document.createElement('canvas').getContext('2d');
-    ctx.canvas.width = tilesAcross * tileSize;
-    ctx.canvas.height = tilesDown * tileSize;
-    ctx.font = `${tileSize / 2}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    for (let y = 0; y < tilesDown; ++y) {
-      for (let x = 0; x < tilesAcross; ++x) {
-        const xOff = x * tileSize;
-        const yOff = y * tileSize;
-        ctx.fillStyle = rgb(Math.random(), Math.random(), Math.random());
-        ctx.fillRect(xOff, yOff, tileSize, tileSize);
-        ctx.fillStyle = 'black';
-        ctx.fillText(x, xOff + tileSize / 2, yOff);
-        ctx.fillText(y, xOff + tileSize / 2, yOff + tileSize / 2);
-      }
-    }
-    ctx.font = `${tileSize}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = 'black';
-    for (const [id, char] of symbolToCharMap) {
-      const x = id * tileSize;
-      const y = 0;
-      ctx.clearRect(x, y, tileSize, tileSize);
-      // add a clipping path so characters don't bleed into neighboring tiles.
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(x, y, tileSize, tileSize);
-      ctx.clip();
-      ctx.fillText(char, x + tileSize / 2, y + tileSize / 10 | 0);
-      ctx.restore();
-    }
-    // document.body.appendChild(ctx.canvas);
+    const canvas = generateTileTexture(tilesAcross, tilesDown, tileSize);
+    // document.body.appendChild(canvas);
     return twgl.createTexture(gl, {
-      src: ctx.canvas,
+      src: canvas,
       minMag: gl.NEAREST,
     });
   }
@@ -384,16 +332,6 @@ async function main() {
     originX: 0,
     originY: 0,
   };
-
-  const kCharPostMagicWall = kSymWall;
-  const magicWallAnim = [
-    '🟥',
-    '🟧',
-    '🟨',
-    '🟩',
-    '🟦',
-    '🟪',
-  ];
 
   function random(max) {
     return Math.random() * max | 0;
@@ -768,42 +706,6 @@ async function main() {
     keyState.set(e.code, false);
   });
 
-  /*
-  const ctx = document.querySelector('#twoD').getContext('2d');
-  function draw() {
-    ctx.canvas.width = ctx.canvas.clientWidth * devicePixelRatio;
-    ctx.canvas.height = ctx.canvas.clientHeight * devicePixelRatio;
-    ctx.scale(devicePixelRatio, devicePixelRatio);
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.font = '16px monospace';
-    const tileSize = 16;
-    const width = mapWidth * tileSize;
-    const height = (mapHeight + numPlayers) * tileSize;
-    ctx.save();
-    ctx.translate((ctx.canvas.clientWidth - width) / 2 | 0 + 0.5, (ctx.canvas.clientHeight - height) / 2 | 0 + 0.5);
-
-    for (let y = 0; y < mapHeight; ++y) {
-      for (let x = 0; x < mapWidth; ++x) {
-        const xx = x * tileSize;
-        const yy = y * tileSize + tileSize;
-        const char = symbolToCharMap.get(map[y * mapWidth + x]) || '-';
-        ctx.fillText(char, xx, yy);
-      }
-    }
-
-    {
-      const y = mapHeight * tileSize + tileSize;
-      for (let i = 0; i < numPlayers; ++i) {
-        const player = players[i];
-        ctx.fillStyle = player.dead ? 'red' : 'white';
-        ctx.fillText(`Player ${i + 1}: ${player.score} ${player.dead ? '💀' : ''}`, 10, y + i * 16);
-      }
-    }
-    ctx.restore();
-  }
-  */
-
   let then = 0;
   let delay = 0;
   function process(now) {
@@ -832,11 +734,6 @@ async function main() {
       explode();
       if (magicFlag & magicTime > 0) {
         --magicTime;
-        symbolToCharMap.set(
-            kSymMagicWall,
-            magicTime
-                ? magicWallAnim[magicTime % magicWallAnim.length]
-                : kCharPostMagicWall);
       }
 
       for (let i = 0; i < numPlayers; i++) {

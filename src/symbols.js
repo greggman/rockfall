@@ -19,3 +19,27 @@ export const kSymEggOpen         = 0x0011;    // egg opening
 export const kSymWall            = 0x0012;    // wall
 export const kSymDiamond         = 0x0013;    // diamond
 export const kSymRock            = 0x0014;    // rock
+
+export const symbolToCharMap = new Map([
+  [kSymSpace,           ' '],    // space
+  [kSymBorder,          '🟪'],   // border
+  [kSymDirt,            '🟫'],   // dirt
+  [kSymDirtFace,        '🙂'],   // Dirty E. Face
+  [kSymDirtFaceRight,   '👉'],   // Dirty E. Face
+  [kSymDirtFaceLeft,    '👈'],   // Dirty E. Face
+  [kSymButterfly,       '🦋'],   // butterfly
+  [kSymGuard,           '👾'],   // guardian
+  [kSymDiamondExplode,  '🔥'],   // diamond explosion
+  [kSymDiamondExplode2, '💥'],   // diamond explosion
+  [kSymSpaceExplode,    '🌩'],   // space explosion
+  [kSymSpaceExplode2,   '💨'],   // space explosion
+  [kSymAmoeba,          '🦠'],   // amoeba
+  [kSymMagicWall,       '🏧'],   // magic wall
+  [kSymEgg,             '🥚'],   // monster egg
+  [kSymEggWiggle,       '🍆'],   // egg wiggle
+  [kSymEggHatch,        '🐣'],   // egg hatch
+  [kSymEggOpen,         '🥥'],   // egg opening
+  [kSymWall,            '⬜️'],   // wall
+  [kSymDiamond,         '💎'],   // diamond
+  [kSymRock,            '🌑'],   // rock 🌑🌰🧅    // these are not available on Windows 10 -> 🪨
+]);
