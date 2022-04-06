@@ -35,6 +35,7 @@ import {
 import {
   parseTiledLevel,
 } from './tiled.js';
+import levelPaths from './levels.js';
 import {
   randomLevel,
 } from './generate-level.js';
@@ -116,10 +117,7 @@ async function main() {
     };
   }
 
-  levels.push(...(await Promise.all([
-    'tiled/magic-wall.tmj',
-    'tiled/hatchery.tmj',
-  ].map(loadTiledLevel))));
+  levels.push(...(await Promise.all(levelPaths.map(loadTiledLevel))));
 
   async function loadLevel(file) {
     const data = JSON.parse(await file.text());
