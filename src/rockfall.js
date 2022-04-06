@@ -229,8 +229,8 @@ async function main() {
   loadingElem.style.display = 'none';
 
   const tileSize = settings.tileSize;
-  const tilesAcross = 128;
-  const tilesDown = 1;
+  const tilesAcross = 32;
+  const tilesDown = 32;
   function makeTileTexture(gl) {
     const ctx = document.createElement('canvas').getContext('2d');
     ctx.canvas.width = tilesAcross * tileSize;
