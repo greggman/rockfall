@@ -1,0 +1,14 @@
+{ "columns":128,
+ "image":"rockfall-tiles.png",
+ "imageheight":32,
+ "imagewidth":4096,
+ "margin":0,
+ "name":"rockfall-tiles",
+ "spacing":0,
+ "tilecount":128,
+ "tiledversion":"1.8.4",
+ "tileheight":32,
+ "tilewidth":32,
+ "type":"tileset",
+ "version":"1.8"
+}
