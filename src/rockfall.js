@@ -98,6 +98,7 @@ async function main() {
     mapWidth: 80,                     // map width in tiles
     mapHeight: 25,                    // map height in tiles
     frameRate: 1 / 10,                // frame rate in seconds
+    colorVariation: 1,                // color variation multiplier. Set to 0 for no variation.
     playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
     playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
   };
@@ -124,7 +125,7 @@ async function main() {
 
   function getColorForSym(sym) {
     const ranges = colorRanges.get(sym);
-    return ranges ? snorm32(...ranges.map(v => rand(-v, v)), 0) : 0;
+    return ranges ? snorm32(...ranges.map(v => rand(-v, v) * settings.colorVariation), 0) : 0;
   }
 
 
