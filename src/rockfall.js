@@ -5,11 +5,19 @@ import {
   kLeft,
 } from './directions.js';
 import {
-  basenameNoExt,
-  lerp,
-  minMagnitude,
-  randInt,
-} from './utils.js';
+  randomLevel,
+} from './generate-level.js';
+import {
+  kUpBit,
+  kDownBit,
+  kLeftBit,
+  kRightBit,
+  kFireBit,
+} from './input.js';
+import {
+  initKeyboard,
+} from './keyboard.js';
+import levelPaths from './levels.js';
 import {
   kSymSpace,
   kSymBorder,
@@ -33,16 +41,21 @@ import {
   kSymRock,
 } from './symbols.js';
 import {
-  parseTiledLevel,
-} from './tiled.js';
-import levelPaths from './levels.js';
-import {
-  randomLevel,
-} from './generate-level.js';
-import {
   generateTileTexture,
 } from './tile-texture-generator.js';
+import {
+  parseTiledLevel,
+} from './tiled.js';
 import TileMap from './tilemap.js';
+import {
+  initTouch,
+} from './touch.js';
+import {
+  basenameNoExt,
+  lerp,
+  minMagnitude,
+  randInt,
+} from './utils.js';
 
 async function main() {
   const levels = [];
@@ -59,13 +72,6 @@ async function main() {
   const kUnFall   = 191;    // Status value when FALLING
   const kEggTime  = 63;
   const kMoveBits = 3;
-
-  // input bits
-  const kUpBit    =  1;
-  const kDownBit  =  2;
-  const kLeftBit  =  4;
-  const kRightBit =  8;
-  const kFireBit  = 16;
 
   const kAmoebaGrowthRate =  2;
   const kCWise      = -1;
@@ -130,14 +136,8 @@ async function main() {
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
 
-  const keyState = new Map();
-  window.addEventListener('keydown', e => {
-    // console.log(e.code);
-    keyState.set(e.code, true);
-  });
-  window.addEventListener('keyup', e => {
-    keyState.set(e.code, false);
-  });
+  const getTouchBits = initTouch(window);
+  const getKeyBits = initKeyboard(window);
 
   const tileSize = settings.tileSize;
   const tilesAcross = 32;
@@ -640,23 +640,6 @@ async function main() {
     initGame();
     initWorld();
 
-    const playerKeysToBits = [
-      new Map([
-        [ 'KeyW'     , kUpBit    ],
-        [ 'KeyS'     , kDownBit  ],
-        [ 'KeyA'     , kLeftBit  ],
-        [ 'KeyD'     , kRightBit ],
-        [ 'ShiftLeft', kFireBit  ],
-      ]),
-      new Map([
-        [ 'ArrowUp'    , kUpBit    ],
-        [ 'ArrowDown'  , kDownBit  ],
-        [ 'ArrowLeft'  , kLeftBit  ],
-        [ 'ArrowRight' , kRightBit ],
-        [ 'ShiftRight' , kFireBit  ],
-      ]),
-    ];
-
     let then = 0;
     let delay = 0;
     function process(now) {
@@ -670,15 +653,9 @@ async function main() {
 
         for (let p = 0; p < numPlayers; ++p) {
           const player = players[p];
-          const keysToBits = playerKeysToBits[p];
-          let bits = 0;
-          if (keysToBits) {
-            for (const [key, bit] of keysToBits.entries()) {
-              bits |= keyState.get(key) ? bit : 0;
-            }
-          }
-          player.input = bits;
+          player.input = getKeyBits(p);
         }
+        players[0].input |= getTouchBits();
 
         nextGen();
         explode();
