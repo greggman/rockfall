@@ -26,6 +26,20 @@ export function shuffleArray(array) {
   }
 }
 
-export function randInt(max) {
-  return Math.random() * max | 0;
+export function randInt(min, max) {
+  return rand(min, max) | 0;
 }
+
+export function rand(min, max) {
+  if (max === undefined) {
+    max = min;
+    min = 0;
+  }
+  return min + Math.random() * (max - min);
+}
+
+export const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+export const clamp11 = v => clamp(v, -1, 1);
+export const snorm8 = v => clamp(((v + 1) * 128) - 128, -128, 127);
+const sn = v => (snorm8(v) + 256) & 0xFF;
+export const snorm32 = (r, g, b, a) => sn(r) | (sn(g) << 8) | (sn(b) << 16) | (sn(a) << 24);

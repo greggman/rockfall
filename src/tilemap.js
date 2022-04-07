@@ -53,6 +53,7 @@ const s_tileFragmentShader = `#version 300 es
   precision mediump float;
 
   uniform highp usampler2D u_tilemap;
+  uniform sampler2D u_tilemapColors;
   uniform sampler2D u_tiles;
   uniform vec2 u_tilemapSize;
   uniform vec2 u_tilesetSize;
@@ -60,6 +61,23 @@ const s_tileFragmentShader = `#version 300 es
   in vec2 v_texcoord;
 
   out vec4 fragColor;
+
+  vec3 rgb2hsv(vec3 c) {
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+  }
+
+  vec3 hsv2rgb(vec3 c) {
+    c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+  }
 
   const uint xFlip = 128u;
   const uint yFlip = 64u;
@@ -69,6 +87,7 @@ const s_tileFragmentShader = `#version 300 es
     ivec2 tilemapCoord = ivec2(floor(v_texcoord));
     vec2 texcoord = fract(v_texcoord);
     uvec4 tile = texelFetch(u_tilemap, tilemapCoord, 0);
+    vec4 tileColor = texelFetch(u_tilemapColors, tilemapCoord, 0);
 
     uint flags = tile.w;
     if ((flags & xFlip) != 0u) {
@@ -86,7 +105,9 @@ const s_tileFragmentShader = `#version 300 es
     if (color.a <= 0.1) {
       discard;
     }
-    fragColor = color;
+    vec3 hsv = rgb2hsv(color.rgb);
+    vec3 rgb = hsv2rgb(hsv + tileColor.rgb);
+    fragColor = vec4(rgb, color.a + tileColor.a);
   }
 `;
 
@@ -194,8 +215,17 @@ export default class TileMap {
       internalFormat: gl.RGBA8UI,
       minMag: gl.NEAREST,
     };
+    this.tilemapColorsTextureOptions = {
+      width: options.mapTilesAcross,
+      height: options.mapTilesDown,
+      src: options.tilemapColors,
+      internalFormat: gl.RGBA8_SNORM,
+      minMag: gl.NEAREST,
+    };
     this.tilemap = options.tilemap;
+    this.tilemapColors = options.tilemapColors;
     this.tilemapTexture = twgl.createTexture(gl, this.tilemapTextureOptions);
+    this.tilemapColorsTexture = twgl.createTexture(gl, this.tilemapColorsTextureOptions);
 
     setupTileModel(gl);
 
@@ -218,6 +248,7 @@ export default class TileMap {
       u_matrix: this.matrix,
       u_texMatrix: this.texMatrix,
       u_tilemap: this.tilemapTexture,
+      u_tilemapColors: this.tilemapColorsTexture,
       u_tiles: options.tileset.texture,
     };
 
@@ -230,6 +261,7 @@ export default class TileMap {
 
   uploadTilemap(gl) {
     twgl.setTextureFromArray(gl, this.tilemapTexture, this.tilemap, this.tilemapTextureOptions);
+    twgl.setTextureFromArray(gl, this.tilemapColorsTexture, this.tilemapColors, this.tilemapColorsTextureOptions);
   }
 
   /**

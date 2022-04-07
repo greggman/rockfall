@@ -54,7 +54,9 @@ import {
   basenameNoExt,
   lerp,
   minMagnitude,
+  rand,
   randInt,
+  snorm32,
 } from './utils.js';
 
 async function main() {
@@ -111,6 +113,20 @@ async function main() {
     name: 'Random',
     level: randomLevel(settings),
   });
+
+
+  const colorRanges = new Map([
+    [kSymDirt,      [0.02, 0.1, 0.1]],
+    [kSymButterfly, [0.1 , 0.0, 0.0]],
+    [kSymGuard,     [0.2 , 0.2, 0.2]],
+    [kSymRock,      [0.04, 0.1, 0.1]],
+  ]);
+
+  function getColorForSym(sym) {
+    const ranges = colorRanges.get(sym);
+    return ranges ? snorm32(...ranges.map(v => rand(-v, v)), 0) : 0;
+  }
+
 
   async function loadTiledLevel(url) {
     const res = await fetch(url);
@@ -173,6 +189,7 @@ async function main() {
     const mapHeight = level.mapHeight;
     const map = level.map.slice();
     const mapFlags = level.mapFlags.slice();
+    const mapColors = new Uint32Array(map.length);
 
     let     amoebaGrowFlag  = 0;
     let     amoebaChangeSym = 0;
@@ -268,11 +285,17 @@ async function main() {
 
     const tilesetTexture = makeTileTexture(gl);
     const mapAsUint8 = new Uint8Array(map.buffer);
+    const mapColorsAsInt8 = new Int8Array(mapColors.buffer);
+
+    for (let i = 0; i < mapColors.length; ++i) {
+      mapColors[i] = getColorForSym(map[i]);
+    }
 
     const tilemap = new TileMap(gl, {
       mapTilesAcross: mapWidth,
       mapTilesDown: mapHeight,
       tilemap: mapAsUint8,
+      tilemapColors: mapColorsAsInt8,
       tileset: {
         tilesAcross,
         tilesDown,
@@ -390,6 +413,7 @@ async function main() {
           map[pos] = kSymSpace;
           const newPos = pos + mapWidth;
           map[newPos] = minSym;
+          mapColors[newPos] = mapColors[pos];
           mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
         } else if ((mapFlags[pos] & kFall) && downSym === kSymMagicWall) {
           let sym = kSymSpace;
@@ -410,6 +434,7 @@ async function main() {
 
           if (sym !== kSymSpace) {
             map[newPos] = sym;
+            mapColors[newPos] = mapColors[pos];
             mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
           }
         } else {
@@ -417,11 +442,13 @@ async function main() {
             map[pos] = kSymSpace;
             const newPos = pos - 1;
             map[newPos] = minSym;
+            mapColors[newPos] = mapColors[pos];
             mapFlags[newPos] = mapFlags[pos] | kFall;
           } else if (rightDownSym === kSymSpace && rightSym === kSymSpace) {
             map[pos] = kSymSpace;
             const newPos = pos + 1;
             map[newPos] = minSym;
+            mapColors[newPos] = mapColors[pos];
             mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
           } else {
             mapFlags[pos] &= kUnFall;
@@ -447,6 +474,7 @@ async function main() {
             mapFlags[newPos] &= kUnmoved;
           }
           map[newPos] = sym;
+          mapColors[newPos] = mapColors[pos];
           return;
         } else if ((map[newPos] === kSymDirtFace ||
                     map[newPos] === kSymDirtFaceRight ||
@@ -490,14 +518,17 @@ async function main() {
 
     function doExplode(pos) {
       map[pos] += 1;
+      mapColors[pos] = 0;
     }
 
     function doDiamondExplode(pos) {
       map[pos] = kSymEgg;
+      mapColors[pos] = getColorForSym(kSymButterfly);
     }
 
     function doSpaceExplode(pos) {
       map[pos] = kSymSpace;
+      mapColors[pos] = 0;
     }
 
     const tileFnMap = new Map([
@@ -566,6 +597,7 @@ async function main() {
       }
 
       map[dirtFacePos] = dfSym;
+      mapColors[dirtFacePos] = 0;
 
       if (input === 0) {                    // nothing pressed
         map[dirtFacePos] = kSymDirtFace;
@@ -594,6 +626,7 @@ async function main() {
         map[dirtFacePos] = kSymSpace;
         dirtFacePos = newPos;
         map[dirtFacePos] = dfSym;
+        mapColors[dirtFacePos] = 0;
 
       } else if (map[newPos] === kSymRock && (newOffset !== -mapWidth)) {
 
@@ -615,6 +648,11 @@ async function main() {
               dirtFacePos = newPos;
               map[dirtFacePos] = dfSym;
               map[q] = kSymRock;
+              while (q !== dirtFacePos) {
+                mapColors[q] = mapColors[q - newOffset];
+                q -= newOffset;
+              }
+              mapColors[dirtFacePos] = 0;
             }
 
             player.pushDelay = 0;
