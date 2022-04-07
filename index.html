@@ -25,13 +25,19 @@
         display: block;
         background-color: black;
       }
-      #score {
+      #hud {
         position: absolute;
         left: 5px;
         top: 5px;
+        display: flex;
+        align-items: center;
+      }
+      #score {
+        padding-left: 0.5em;
         font-family: monospace;
         font-weight: bold;
         color: white;
+        font-size: large;
         text-shadow: 0.25em 0.25em black;
       }
       #github {
@@ -66,7 +72,10 @@
   <body>
     <div id="content">
       <canvas id="playField"></canvas>
-      <div id="score"></div>
+      <div id="hud">
+        <div id="restart">🔄</div>
+        <div id="score"></div>
+      </div>
     </div>
     <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall"><img src="resources/images/octocat-icon.svg"></a></div>
     <div id="loading"><div>loading...</div></div>

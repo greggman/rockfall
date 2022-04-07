@@ -134,9 +134,14 @@ async function main() {
   const gl = document.querySelector('#playField').getContext('webgl2', {premultipliedAlpha: false});
   const scoreElem = document.querySelector('#score');
   const loadingElem = document.querySelector('#loading');
+  const hudElem = document.querySelector('#hud');
+  hudElem.addEventListener('click', () => {
+    runLevel();
+  });
+
   loadingElem.style.display = 'none';
 
-  const getTouchBits = initTouch(window);
+  const getTouchBits = initTouch(gl.canvas);
   const getKeyBits = initKeyboard(window);
 
   const tileSize = settings.tileSize;
@@ -154,9 +159,16 @@ async function main() {
   const level = levels[settings.level].level;
   let processFn = () => {};
 
+  let currentLevel;
   startLevel(level);
 
   function startLevel(level) {
+    currentLevel = level;
+    runLevel();
+  }
+
+  function runLevel() {
+    const level = currentLevel;
     const mapWidth = level.mapWidth;
     const mapHeight = level.mapHeight;
     const map = level.map.slice();
