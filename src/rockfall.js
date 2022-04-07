@@ -104,6 +104,7 @@ async function main() {
     playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
     playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
     requiredScore: 800,               // required score
+    showTiles: false,                 // So we can save a new .png
   };
   for (const [k, v] of (new URLSearchParams(window.location.search).entries())) {
     if (settings[k] === undefined) {
@@ -159,6 +160,7 @@ async function main() {
   const goalElem = document.querySelector('#goal');
 
   hudElem.addEventListener('click', () => {
+    levels[0].level = randomLevel(settings);
     runLevel();
   });
 
@@ -172,7 +174,9 @@ async function main() {
   const tilesDown = 32;
   function makeTileTexture(gl) {
     const canvas = generateTileTexture(tilesAcross, tilesDown, tileSize);
-    // document.body.appendChild(canvas);
+    if (settings.showTiles) {
+      document.body.appendChild(canvas);
+    }
     return twgl.createTexture(gl, {
       src: canvas,
       minMag: gl.NEAREST,
@@ -666,16 +670,20 @@ async function main() {
       if (c === kSymDirt) {
         addScore(settings.dirtPoints, playerNdx);
       }
-      if (c === kSymOpenExit) {
-        finished = true;
-      }
 
       if (input & kFireBit) {  // Fire Button, should be using better routines.
         if (c === kSymDirt || c === kSymDiamond || (c >= kSymEgg && c <= kSymEggHatch)) {
           map[newPos] = kSymSpace;
         }
-      } else if (c === kSymDirt || c === kSymSpace || c === kSymDiamond || (c >= kSymEgg && c <= kSymEggHatch) || c === kSymEggOpen) {
+      } else if (c === kSymDirt ||
+                 c === kSymSpace ||
+                 c === kSymDiamond ||
+                 (c >= kSymEgg && c <= kSymEggHatch) ||
+                 c === kSymOpenExit) {
 
+        if (c === kSymOpenExit) {
+          finished = true;
+        }
         // move Dirt Face
         map[dirtFacePos] = kSymSpace;
         dirtFacePos = newPos;
