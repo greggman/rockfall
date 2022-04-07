@@ -33,6 +33,8 @@ Rocks, Eggs, and Diamonds will fall if there is space below them or if they are
 sitting on top of another rock, egg, or diamond and there is space for them to
 fall.
 
+You can restart by clicking in the top left corner.
+
 Note: You can dig one tile without moving by holding shift.
 
 The levels are random so and there is no goal so it's just a proof of concept.
@@ -51,7 +53,7 @@ These settings can be set with query parameters
 | rocks         |     280 | number of rocks |
 | walls         |      10 | number of walls |
 | magicWalls    |       2 | number of magic walls |
-| maxAmoebas    |     100 | how many amoebas with it turns into eggs |
+| maxAmoebas    |     100 | how many amoebas when it turns into eggs |
 | magicTime     |     250 | how many ticks the magic walls stay active |
 | tileSize      |      32 | size of tiles (note | you can also Cmd/Ctrl +/- in browser) |
 | scrollRate    |  0.0125 | scroll speed |
@@ -62,6 +64,7 @@ These settings can be set with query parameters
 | mapHeight     |      25 | map height in tiles |
 | frameRate     |     0.1 | frame rate in seconds |
 | colorVariation |      1 | color variation multiplier. Set to 0 for no variation |
+| requiredScore |     800 | score needed to open exits |
 | playerBoundsWidthPercent | 0.25 |  size of window to keep player inside |
 | playerBoundsHeightPercent | 0.25 | size of window to keep player inside |
 | level         |       0 | level to use (see [here](https://github.com/greggman/rockfall/blob/main/src/levels.js)) |
@@ -144,6 +147,9 @@ You can build levels using [Tiled](https://www.mapeditor.org/).
 
 Download [the tiles png](https://github.com/greggman/rockfall/blob/main/tiled/rockfall-tiles.png) and [the .tsj file](https://raw.githubusercontent.com/greggman/rockfall/main/tiled/rockfall-tiles.tsj)(right click and pick "Save As")
 Save your map in .tmj format. Drag and Drop it on [the page](https://greggman.github.io/rockfall/).
+
+You can set a required score by adding a *custom map property*. Pick Map->Map Properties.
+Then under "Custom Properties" pick `+`. Property name = "requiredScore", type = "int"
 
 If it's good, send a pull request.
 

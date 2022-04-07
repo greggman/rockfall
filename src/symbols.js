@@ -19,6 +19,8 @@ export const kSymEggOpen         = 0x0011;    // egg opening
 export const kSymWall            = 0x0012;    // wall
 export const kSymDiamond         = 0x0013;    // diamond
 export const kSymRock            = 0x0014;    // rock
+export const kSymExit            = 0x0015;    // exit
+export const kSymOpenExit        = 0x0016;    // open exit
 
 export const symbolToCharMap = new Map([
   [kSymSpace,           ' '],    // space
@@ -42,4 +44,6 @@ export const symbolToCharMap = new Map([
   [kSymWall,            '⬜️'],   // wall
   [kSymDiamond,         '💎'],   // diamond
   [kSymRock,            '🌑'],   // rock 🌑🌰🧅    // these are not available on Windows 10 -> 🪨
+  [kSymExit,            '🧧'],   // exit
+  [kSymOpenExit,        '🔳'],   // open exit
 ]);

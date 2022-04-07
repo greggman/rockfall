@@ -39,6 +39,8 @@ import {
   kSymEggOpen,
   kSymDiamond,
   kSymRock,
+  kSymExit,
+  kSymOpenExit,
 } from './symbols.js';
 import {
   generateTileTexture,
@@ -101,6 +103,7 @@ async function main() {
     colorVariation: 1,                // color variation multiplier. Set to 0 for no variation.
     playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
     playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
+    requiredScore: 800,               // required score
   };
   for (const [k, v] of (new URLSearchParams(window.location.search).entries())) {
     if (settings[k] === undefined) {
@@ -133,6 +136,7 @@ async function main() {
     const res = await fetch(url);
     const data = await res.json();
     const level = parseTiledLevel(data);
+    level.requiredScore = level.requiredScore || settings.requiredScore;
     return {
       name: basenameNoExt(url),
       level,
@@ -152,6 +156,8 @@ async function main() {
   const loadingElem = document.querySelector('#loading');
   const hudElem = document.querySelector('#hud');
   const nameElem = document.querySelector('#name');
+  const goalElem = document.querySelector('#goal');
+
   hudElem.addEventListener('click', () => {
     runLevel();
   });
@@ -191,10 +197,49 @@ async function main() {
     const map = level.map.slice();
     const mapFlags = level.mapFlags.slice();
     const mapColors = new Uint32Array(map.length);
+    const requiredScore = level.requiredScore;
+    let finished = false;
+    goalElem.textContent = requiredScore;
+
+    const playerStartPositions = [
+      mapWidth + 1,
+      mapWidth * 2 - 2,
+    ];
+    const exits = [];
+
+    // find starting position
+    {
+      const starts = [];
+      for (let i = 0; i < map.length; ++i) {
+        switch (map[i]) {
+          case kSymDirtFace:
+          case kSymDirtFaceLeft:
+          case kSymDirtFaceRight:
+            starts.push(i);
+            break;
+          case kSymExit:
+            exits.push(i);
+            break;
+        }
+      }
+      if (starts.length) {
+        const ndx = randInt(starts.length);
+        playerStartPositions[0] = starts[ndx];
+        starts.splice(ndx, 1);
+        for (const pos of starts) {
+          map[pos] = kSymDirt;
+        }
+      }
+      if (!exits.length) {
+        const pos = mapWidth * mapHeight - mapWidth - 1;
+        map[pos] = kSymExit;
+        exits.push(pos);
+      }
+    }
 
     let     amoebaGrowFlag  = 0;
     let     amoebaChangeSym = 0;
-    const   numPlayers = 2;
+    const   numPlayers = 1;
 
     let  amoebaCount = 0;
     const  amoebaMorph = kSymEgg; // what the amoeba changes into if it grows to MaxAmoebas
@@ -327,14 +372,6 @@ async function main() {
 
     function initWorld() {
       //
-      // Place the players in the upper left and upper right
-      //
-      const playerStartPositions = [
-        mapWidth + 1,
-        mapWidth * 2 - 2,
-      ];
-
-      //
       // Draw and init both players
       //
       for (let i = 0; i < numPlayers; i++) {
@@ -395,6 +432,7 @@ async function main() {
         } while (dir !== oldDir);
       } else {
         map[pos] = amoebaChangeSym;
+        mapColors[pos] = getColorForSym(amoebaChangeSym);
         mapFlags[pos] = 0;
       }
     }
@@ -509,6 +547,7 @@ async function main() {
         map[pos] = kSymEggHatch;
       } else if (age >= kAgeHatch) {
         map[pos] = kSymButterfly;
+        mapColors[pos] = getColorForSym(kSymButterfly);
       }
 
       const sym = map[pos];
@@ -574,11 +613,22 @@ async function main() {
 
     function addScore(points, playerNdx) {
       // TODO: add some effect
-      players[playerNdx].score += points;
+      const player = players[playerNdx];
+      const oldScore = player.score;
+      player.score += points;
+      if (oldScore < requiredScore && player.score >= requiredScore) {
+        for (const pos of exits) {
+          map[pos] = kSymOpenExit;
+          mapColors[pos] = getColorForSym(kSymOpenExit);
+        }
+      }
       scoreElem.textContent = players[0].score.toString().padStart(6, '0');
     }
 
     function dirtFace(playerNdx) {
+      if (finished) {
+        return;
+      }
       const player = players[playerNdx];
       const input = player.input;
       let dirtFacePos = player.pos;
@@ -616,12 +666,15 @@ async function main() {
       if (c === kSymDirt) {
         addScore(settings.dirtPoints, playerNdx);
       }
+      if (c === kSymOpenExit) {
+        finished = true;
+      }
 
       if (input & kFireBit) {  // Fire Button, should be using better routines.
         if (c === kSymDirt || c === kSymDiamond || (c >= kSymEgg && c <= kSymEggHatch)) {
           map[newPos] = kSymSpace;
         }
-      } else if (c === kSymDirt || c === kSymSpace || c === kSymDiamond || (c >= kSymEgg && c <= kSymEggHatch)) {
+      } else if (c === kSymDirt || c === kSymSpace || c === kSymDiamond || (c >= kSymEgg && c <= kSymEggHatch) || c === kSymEggOpen) {
 
         // move Dirt Face
         map[dirtFacePos] = kSymSpace;

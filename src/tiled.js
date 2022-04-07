@@ -21,11 +21,18 @@ export function parseTiledLevel(data) {
     map.set(tiles.slice(y * data.width, (y + 1) * data.width), (y + 1) * mapWidth + 1);
   }
 
+  const custom = {};
+  for (const prop of data.properties || []) {
+    const {name, value} = prop;
+    custom[name] = value;
+  }
+
   return {
     mapWidth,
     mapHeight,
     mapBuffer,
     map,
     mapFlags,
+    requiredScore: custom.requiredScore,
   };
 }

@@ -87,5 +87,6 @@ export function randomLevel(settings) {
     mapBuffer,
     map,
     mapFlags,
+    requiredScore: settings.requiredScore,
   };
 }
