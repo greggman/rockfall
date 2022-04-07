@@ -60,7 +60,6 @@ import {
 async function main() {
   const levels = [];
 
-
   const kAgeWiggle = 50;    // time till egg wiggles
   const kAgeCrack  = 58;    // time till egg cracks
   const kAgeHatch  = 61;
@@ -128,13 +127,14 @@ async function main() {
   async function loadLevel(file) {
     const data = JSON.parse(await file.text());
     const level = parseTiledLevel(data);
-    startLevel(level);
+    startLevel({level, name: basenameNoExt(file.name)});
   }
 
   const gl = document.querySelector('#playField').getContext('webgl2', {premultipliedAlpha: false});
   const scoreElem = document.querySelector('#score');
   const loadingElem = document.querySelector('#loading');
   const hudElem = document.querySelector('#hud');
+  const nameElem = document.querySelector('#name');
   hudElem.addEventListener('click', () => {
     runLevel();
   });
@@ -156,14 +156,14 @@ async function main() {
     });
   }
 
-  const level = levels[settings.level].level;
   let processFn = () => {};
 
   let currentLevel;
-  startLevel(level);
+  startLevel(levels[settings.level]);
 
-  function startLevel(level) {
+  function startLevel({level, name}) {
     currentLevel = level;
+    nameElem.textContent = name;
     runLevel();
   }
 
