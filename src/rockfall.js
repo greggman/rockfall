@@ -640,6 +640,23 @@ async function main() {
     initGame();
     initWorld();
 
+    const playerKeysToBits = [
+      new Map([
+        [ 'KeyW'     , kUpBit    ],
+        [ 'KeyS'     , kDownBit  ],
+        [ 'KeyA'     , kLeftBit  ],
+        [ 'KeyD'     , kRightBit ],
+        [ 'ShiftLeft', kFireBit  ],
+      ]),
+      new Map([
+        [ 'ArrowUp'    , kUpBit    ],
+        [ 'ArrowDown'  , kDownBit  ],
+        [ 'ArrowLeft'  , kLeftBit  ],
+        [ 'ArrowRight' , kRightBit ],
+        [ 'ShiftRight' , kFireBit  ],
+      ]),
+    ];
+
     let then = 0;
     let delay = 0;
     function process(now) {
@@ -651,18 +668,17 @@ async function main() {
       while (delay <= 0) {
         delay += settings.frameRate;
 
-        players[0].input =
-            (keyState.get('KeyW')      ? kUpBit    : 0) |
-            (keyState.get('KeyS')      ? kDownBit  : 0) |
-            (keyState.get('KeyA')      ? kLeftBit  : 0) |
-            (keyState.get('KeyD')      ? kRightBit : 0) |
-            (keyState.get('ShiftLeft') ? kFireBit  : 0);
-        players[1].input =
-            (keyState.get('ArrowUp')    ? kUpBit    : 0) |
-            (keyState.get('ArrowDown')  ? kDownBit  : 0) |
-            (keyState.get('ArrowLeft')  ? kLeftBit  : 0) |
-            (keyState.get('ArrowRight') ? kRightBit : 0) |
-            (keyState.get('ShiftRight') ? kFireBit  : 0);
+        for (let p = 0; p < numPlayers; ++p) {
+          const player = players[p];
+          const keysToBits = playerKeysToBits[p];
+          let bits = 0;
+          if (keysToBits) {
+            for (const [key, bit] of keysToBits.entries()) {
+              bits |= keyState.get(key) ? bit : 0;
+            }
+          }
+          player.input = bits;
+        }
 
         nextGen();
         explode();
