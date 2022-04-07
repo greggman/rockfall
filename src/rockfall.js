@@ -125,7 +125,7 @@ async function main() {
     startLevel(level);
   }
 
-  const gl = document.querySelector('#playField').getContext('webgl2');
+  const gl = document.querySelector('#playField').getContext('webgl2', {premultipliedAlpha: false});
   const scoreElem = document.querySelector('#score');
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
