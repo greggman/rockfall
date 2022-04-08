@@ -56,6 +56,7 @@ import {
   basenameNoExt,
   lerp,
   minMagnitude,
+  mixArray,
   rand,
   randInt,
   snorm32,
@@ -248,6 +249,16 @@ async function main() {
 
     let     amoebaGrowFlag  = 0;
     let     amoebaChangeSym = 0;
+    let     flashTime = 0;
+    let     flashDuration = 30;
+    let     flashColor;
+
+    const flashScreen = function(duration, color) {
+      flashTime = duration;
+      flashDuration = duration;
+      flashColor = color;
+    };
+
     const   numPlayers = 1;
 
     let  amoebaCount = 0;
@@ -626,6 +637,7 @@ async function main() {
       const oldScore = player.score;
       player.score += points;
       if (oldScore < requiredScore && player.score >= requiredScore) {
+        flashScreen(60, [1, 1, 0, 1]);
         for (const pos of exits) {
           map[pos] = kSymOpenExit;
           mapColors[pos] = getColorForSym(kSymOpenExit);
@@ -797,6 +809,10 @@ async function main() {
 
       twgl.resizeCanvasToDisplaySize(gl.canvas);
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      gl.clearColor(...(flashTime > 0
+         ? mixArray([0, 0, 0, 0], flashColor, flashTime-- / flashDuration)
+         : [0, 0, 0, 0]));
+      gl.clear(gl.COLOR_BUFFER_BIT);
 
       tilemap.uploadTilemap(gl);
 

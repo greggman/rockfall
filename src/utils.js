@@ -1,6 +1,7 @@
 
 export const rgb = (r, g, b) => `rgb(${r * 256 | 0}, ${g * 256 | 0}, ${b * 256 | 0})`;
 export const lerp = (a, b, t) => a + (b - a) * t;
+export const mixArray = (a, b, t) => a.map((v, i) => lerp(v, b[i], t));
 
 export function minMagnitude(v, min) {
   return Math.sign(v) * Math.min(Math.abs(v), min);
