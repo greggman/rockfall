@@ -119,9 +119,11 @@ async function main() {
     level: randomLevel(settings),
   });
 
-
+  // Per symbol, how much to adjust hue, saturation, value.
+  // a single number will by -v/+v, An array of 2 numbers
+  // specifies min,max
   const colorRanges = new Map([
-    [kSymDirt,      [0.02, 0.1, 0.1]],
+    [kSymDirt,      [0.02, [-0.1, -0.2], [0.1, 0.2]]],
     [kSymButterfly, [0.1 , 0.0, 0.0]],
     [kSymGuard,     [0.2 , 0.2, 0.2]],
     [kSymRock,      [0.04, 0.1, 0.1]],
@@ -129,7 +131,10 @@ async function main() {
 
   function getColorForSym(sym) {
     const ranges = colorRanges.get(sym);
-    return ranges ? snorm32(...ranges.map(v => rand(-v, v) * settings.colorVariation), 0) : 0;
+    return ranges ? snorm32(...ranges.map(v => {
+      const [min, max] = Array.isArray(v) ? v : [-v, v];
+      return rand(min, max) * settings.colorVariation;
+    }), 0) : 0;
   }
 
 
