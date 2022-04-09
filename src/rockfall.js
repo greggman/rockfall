@@ -132,6 +132,7 @@ async function main() {
     [kSymButterfly, [0.1 , 0.0, 0.0]],
     [kSymGuard,     [0.2 , 0.2, 0.2]],
     [kSymRock,      [0.04, 0.1, 0.1]],
+    [kSymAmoeba,    [0.1,  0.1, 0.1]],
   ]);
 
   function getColorForSym(sym) {
@@ -141,7 +142,6 @@ async function main() {
       return rand(min, max) * settings.colorVariation;
     }), 0) : 0;
   }
-
 
   async function loadTiledLevel(url) {
     const res = await fetch(url);
@@ -294,6 +294,14 @@ async function main() {
     ];
     const exits = [];
 
+    function setTile(pos, sym, color, flags) {
+      map[pos] = sym;
+      mapColors[pos] = color === undefined ? getColorForSym(sym) : color;
+      if (flags !== undefined) {
+        mapFlags[pos] = flags;
+      }
+    }
+
     // find starting position
     {
       const starts = [];
@@ -430,6 +438,7 @@ async function main() {
     const mapAsUint8 = new Uint8Array(map.buffer);
     const mapColorsAsInt8 = new Int8Array(mapColors.buffer);
 
+    // colorize map
     for (let i = 0; i < mapColors.length; ++i) {
       mapColors[i] = getColorForSym(map[i]);
     }
@@ -493,7 +502,7 @@ async function main() {
         for (let y = 0; y < 3; y++) {
           for (let i = pos; i <= pos + 2; i++) {
             if (map[i] !== kSymBorder) {
-              map[i] = sym;
+              setTile(i, sym);
             }
           }
           pos += mapWidth;
@@ -522,7 +531,7 @@ async function main() {
               if (dir === kUp || dir === kLeft) {
                 mapFlags[newPos] &= kUnmoved;
               }
-              map[newPos] = kSymAmoeba;
+              setTile(newPos, kSymAmoeba);
               playSound('grow');
               return;
             }
@@ -530,9 +539,7 @@ async function main() {
           dir = (dir + 1) & kMoveBits;
         } while (dir !== oldDir);
       } else {
-        map[pos] = amoebaChangeSym;
-        mapColors[pos] = getColorForSym(amoebaChangeSym);
-        mapFlags[pos] = 0;
+        setTile(pos, amoebaChangeSym, undefined, randInt(4));
       }
     }
 
@@ -550,9 +557,7 @@ async function main() {
         if (downSym === kSymSpace) {
           map[pos] = kSymSpace;
           const newPos = pos + mapWidth;
-          map[newPos] = minSym;
-          mapColors[newPos] = mapColors[pos];
-          mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
+          setTile(newPos, minSym, mapColors[pos], mapFlags[pos] | kFall | kMoved);
           if (map[newPos + mapWidth] !== kSymSpace) {
             switch (minSym) {
               case kSymRock:
@@ -587,23 +592,17 @@ async function main() {
           map[pos] = kSymSpace;
 
           if (sym !== kSymSpace) {
-            map[newPos] = sym;
-            mapColors[newPos] = mapColors[pos];
-            mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
+            setTile(newPos, sym, mapColors[pos], mapFlags[pos] | kFall | kMoved);
           }
         } else {
           if (leftDownSym === kSymSpace && leftSym === kSymSpace) {
             map[pos] = kSymSpace;
             const newPos = pos - 1;
-            map[newPos] = minSym;
-            mapColors[newPos] = mapColors[pos];
-            mapFlags[newPos] = mapFlags[pos] | kFall;
+            setTile(newPos, minSym, mapColors[pos], mapFlags[pos] | kFall);
           } else if (rightDownSym === kSymSpace && rightSym === kSymSpace) {
             map[pos] = kSymSpace;
             const newPos = pos + 1;
-            map[newPos] = minSym;
-            mapColors[newPos] = mapColors[pos];
-            mapFlags[newPos] = mapFlags[pos] | kFall | kMoved;
+            setTile(newPos, minSym, mapColors[pos], mapFlags[pos] | kFall | kMoved);
           } else {
             mapFlags[pos] &= kUnFall;
           }
@@ -627,8 +626,7 @@ async function main() {
           if (dir === kUp || dir === kLeft) {
             mapFlags[newPos] &= kUnmoved;
           }
-          map[newPos] = sym;
-          mapColors[newPos] = mapColors[pos];
+          setTile(newPos, sym, mapColors[pos]);
           return;
         } else if ((map[newPos] === kSymDirtFace ||
                     map[newPos] === kSymDirtFaceRight ||
@@ -663,8 +661,7 @@ async function main() {
         map[pos] = kSymEggHatch;
         playSound('hatch', rand(0, 0.1));
       } else if (age >= kAgeHatch) {
-        map[pos] = kSymButterfly;
-        mapColors[pos] = getColorForSym(kSymButterfly);
+        setTile(pos, kSymButterfly, getColorForSym(kSymButterfly));
         playSound('hatch', rand(0, 0.1));
       }
 
@@ -680,13 +677,11 @@ async function main() {
     }
 
     function doDiamondExplode(pos) {
-      map[pos] = kSymEgg;
-      mapColors[pos] = getColorForSym(kSymButterfly);
+      setTile(pos, kSymEgg);
     }
 
     function doSpaceExplode(pos) {
-      map[pos] = kSymSpace;
-      mapColors[pos] = 0;
+      setTile(pos, kSymSpace);
     }
 
     // remove this! we should use tile animation for this
@@ -749,8 +744,7 @@ async function main() {
         flashScreen(60, [1, 1, 0, 1]);
         playSound('open');
         for (const pos of exits) {
-          map[pos] = kSymOpenExit;
-          mapColors[pos] = getColorForSym(kSymOpenExit);
+          setTile(pos, kSymOpenExit);
         }
       }
       scoreElem.textContent = players[0].score.toString().padStart(6, '0');
@@ -765,21 +759,20 @@ async function main() {
       let dirtFacePos = player.pos;
       let newOffset = 0;
       let dfSym = kSymDirtFaceRight;
-      if (input & kRightBit) {
-         newOffset =     1; dfSym = kSymDirtFaceRight;
-      }
-      if (input & kLeftBit) {
-         newOffset =    -1; dfSym = kSymDirtFaceLeft;
-      }
       if (input & kDownBit) {
          newOffset =  mapWidth;
       }
       if (input & kUpBit) {
          newOffset = -mapWidth;
       }
+      if (input & kRightBit) {
+         newOffset =     1; dfSym = kSymDirtFaceRight;
+      }
+      if (input & kLeftBit) {
+         newOffset =    -1; dfSym = kSymDirtFaceLeft;
+      }
 
-      map[dirtFacePos] = dfSym;
-      mapColors[dirtFacePos] = 0;
+      setTile(dirtFacePos, dfSym);
 
       if (input === 0) {                    // nothing pressed
         map[dirtFacePos] = kSymDirtFace;
@@ -803,7 +796,7 @@ async function main() {
 
       if (input & kFireBit) {  // Fire Button, should be using better routines.
         if (c === kSymDirt || c === kSymDiamond || (c >= kSymEgg && c <= kSymEggHatch)) {
-          map[newPos] = kSymSpace;
+          setTile(newPos, kSymSpace);
         }
       } else if (c === kSymDirt ||
                  c === kSymSpace ||
@@ -816,10 +809,9 @@ async function main() {
           playSound('beamMeUp');
         }
         // move Dirt Face
-        map[dirtFacePos] = kSymSpace;
+        setTile(dirtFacePos, kSymSpace);
         dirtFacePos = newPos;
-        map[dirtFacePos] = dfSym;
-        mapColors[dirtFacePos] = 0;
+        setTile(dirtFacePos, dfSym);
 
       } else if (map[newPos] === kSymRock && (newOffset !== -mapWidth)) {
 
@@ -837,7 +829,7 @@ async function main() {
             } while (map[q] === kSymRock && q !== 0);
 
             if (q !== 0 && map[q] === kSymSpace) {
-              map[dirtFacePos] = kSymSpace;
+              setTile(dirtFacePos, kSymSpace);
               dirtFacePos = newPos;
               map[dirtFacePos] = dfSym;
               map[q] = kSymRock;
