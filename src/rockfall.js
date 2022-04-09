@@ -658,14 +658,14 @@ async function main() {
       const age = mapFlags[pos] & kEggTime;
       if (age === kAgeWiggle) {
         map[pos] = kSymEggWiggle;
-        playSound('hatch');
+        playSound('hatch', rand(0, 0.1));
       } else if (age === kAgeCrack) {
         map[pos] = kSymEggHatch;
-        playSound('hatch');
+        playSound('hatch', rand(0, 0.1));
       } else if (age >= kAgeHatch) {
         map[pos] = kSymButterfly;
         mapColors[pos] = getColorForSym(kSymButterfly);
-        playSound('hatch');
+        playSound('hatch', rand(0, 0.1));
       }
 
       const sym = map[pos];
