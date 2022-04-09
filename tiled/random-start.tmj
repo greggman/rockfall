@@ -38,9 +38,9 @@
  "orientation":"orthogonal",
  "properties":[
         {
-         "name":"requiredScore",
+         "name":"requiredCount",
          "type":"int",
-         "value":123
+         "value":2
         }],
  "renderorder":"right-down",
  "tiledversion":"1.8.4",
