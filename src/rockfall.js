@@ -240,16 +240,19 @@ async function main() {
   }
 
   const gl = document.querySelector('#playField').getContext('webgl2', {premultipliedAlpha: false});
+  const restartElem = document.querySelector('#restart');
   const scoreElem = document.querySelector('#score');
   const loadingElem = document.querySelector('#loading');
-  const hudElem = document.querySelector('#hud');
   const nameElem = document.querySelector('#name');
   const goalElem = document.querySelector('#goal');
 
-  hudElem.addEventListener('click', () => {
+  const restart = () => {
     levels[0].level = randomLevel(settings);
     startLevel(levels[settings.level]);
-  });
+  };
+
+  restartElem.addEventListener('click', restart);
+  scoreElem.addEventListener('click', restart);
 
   loadingElem.style.display = 'none';
 
@@ -276,9 +279,25 @@ async function main() {
   let currentLevel;
   startLevel(levels[settings.level]);
 
-  function startLevel({level, name}) {
+  {
+    const selectElem = document.createElement('select');
+    nameElem.appendChild(selectElem);
+    for (let i = 0; i < levels.length; ++i) {
+      const level = levels[i];
+      const elem = document.createElement('option');
+      elem.textContent = level.name;
+      if (i === settings.level) {
+        elem.selected = true;
+      }
+      selectElem.appendChild(elem);
+    }
+    selectElem.addEventListener('change', () => {
+      startLevel(levels[selectElem.selectedIndex]);
+    });
+  }
+
+  function startLevel({level}) {
     currentLevel = level;
-    nameElem.textContent = name;
     runLevel();
   }
 
