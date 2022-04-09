@@ -50,7 +50,7 @@ You can add custom properties to set level settings.
 
    ![](imgs/making-levels/custom-props-01.png)
 
-3. Specify the name and make sure the type is `int`
+3. Specify the name and make sure the type is `int` or `string` (see below)
 
    ![](imgs/making-levels/custom-props-02.png)
 
@@ -60,17 +60,17 @@ You can add custom properties to set level settings.
 
 ### Valid properties
 
-| property      | default | description |
-| ------------- | ------: | ----------- |
-| magicTime     |     250 | how many ticks the magic walls stay active |
-| diamondPoints |     100 | points for collecting diamond |
-| eggPoints     |      10 | points for collecting egg |
-| dirtPoints    |       1 | points for digging dirt |
-| requiredCount |      15 | count (eggs + diamonds) needed to open exits |
-| timeLimit     |    1500 | time limit in seconds |
-| author        |         | your name |
-| license       |         | default CC-BY ([Creative Commons](https://creativecommons.org/share-your-work/) Only Please) |
-| name          |         | default is filename |
+| property      | default | type   | description |
+| ------------- | ------: | :----: | ----------- |
+| magicTime     |     250 | int    | how many ticks the magic walls stay active |
+| diamondPoints |     100 | int    | points for collecting diamond |
+| eggPoints     |      10 | int    | points for collecting egg |
+| dirtPoints    |       1 | int    | points for digging dirt |
+| requiredCount |      15 | int    | count (eggs + diamonds) needed to open exits |
+| timeLimit     |    1500 | int    | time limit in seconds |
+| author        |         | string | your name |
+| license       |         | string | default CC-BY ([Creative Commons](https://creativecommons.org/share-your-work/) Only Please) |
+| name          |         | string | default is filename |
 
 Note: author, license, and name need to be type `string`
 
