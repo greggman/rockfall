@@ -189,6 +189,8 @@ async function main() {
     beamMeUp:          { jsfx: ['square',0.0000,0.4000,0.0000,0.3480,0.0000,0.4040,20.0000,550.0000,2400.0000,0.2420,0.0000,0.6560,37.2982,0.0003,0.0000,0.0000,0.0000,0.3500,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000], },
     stunned:           { jsfx: ['saw',0.0000,0.4000,0.0000,0.2520,0.0000,0.4220,20.0000,638.0000,2400.0000,0.0720,0.0000,0.2100,10.5198,0.0003,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000]   , },
     mellowStunned:     { jsfx: ['saw',0.0000,0.4000,0.0000,0.0660,0.0000,0.3380,20.0000,455.0000,2400.0000,0.0760,0.0000,0.3150,11.0477,0.0003,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000]   , },
+    amoebaToEggs:      { jsfx: ['square',0.0000,0.4000,0.0000,0.3120,0.0000,0.4940,20.0000,533.0000,2400.0000,0.0640,0.0000,0.6000,31.9233,0.0003,0.0000,0.0000,0.0000,0.5000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000] , },
+    amoebaToDiamonds:  { jsfx: ['square',0.0000,0.4000,0.0000,0.2160,0.0000,0.4120,20.0000,608.0000,2400.0000,0.2240,0.0000,0.5820,15.5108,0.0003,0.0000,0.0000,0.0000,0.3315,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000] , },
 
     s01: { jsfx: ['sine',0.0000,0.4000,0.5980,1.7220,2.3190,1.8360,1254.0000,1938.0000,788.0000,-0.9560,-0.4620,0.9680,11.3836,0.3513,0.4760,0.6620,0.1460,0.3025,0.7360,0.5592,0.8640,-0.6040,0.5090,0.2000,0.2840,0.0790,0.4660]      , },
     s02: { jsfx: ['square',0.0000,0.4000,0.1940,1.6020,0.5730,0.6580,2322.0000,2045.0000,2119.0000,-0.9500,-0.8140,0.0820,7.0645,0.0133,0.0500,0.8700,0.5680,0.4215,-0.2820,0.6608,-0.7340,0.6680,0.4040,-0.3500,0.7630,0.7930,0.7620]  , },
@@ -217,16 +219,25 @@ async function main() {
     playSound = (...args) => {
       return audioManager.playSound(...args);
     };
-    if (settings.testSounds) {
-      const ids = [...Object.keys(sounds)];
-      let ndx = 0;
-      window.addEventListener('keydown', () => {
-        console.log(ids[ndx]);
-        playSound(ids[ndx]);
-        ndx = (ndx + 1) % ids.length;
-      }, 2000);
-    }
   });
+
+  if (settings.testSounds) {
+    const parent = document.createElement('div');
+    parent.style.position = 'absolute';
+    parent.style.left = '0';
+    parent.style.top = '0';
+    document.body.appendChild(parent);
+    for (const id of Object.keys(sounds)) {
+      const elem = document.createElement('button');
+      elem.type = 'button';
+      elem.textContent = id;
+      elem.addEventListener('click', () => {
+        console.log(id);
+        playSound(id);
+      });
+      parent.appendChild(elem);
+    }
+  }
 
   const gl = document.querySelector('#playField').getContext('webgl2', {premultipliedAlpha: false});
   const scoreElem = document.querySelector('#score');
@@ -728,10 +739,14 @@ async function main() {
         }
       }
 
-      if (!amoebaGrowFlag) {
-        amoebaChangeSym = kSymDiamond;
-      } else if (amoebaCount >= settings.maxAmoebas) {
-        amoebaChangeSym = amoebaMorph;
+      if (!amoebaChangeSym) {
+        if (!amoebaGrowFlag) {
+          amoebaChangeSym = kSymDiamond;
+          playSound('amoebaToDiamonds');
+        } else if (amoebaCount >= settings.maxAmoebas) {
+          amoebaChangeSym = amoebaMorph;
+          playSound('amoebaToEggs');
+        }
       }
     }
 
