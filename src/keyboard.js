@@ -25,10 +25,11 @@ const playerKeysToBits = [
 ];
 
 export function initKeyboard(target) {
-  const keyState = new Map();
+  const keyState = new Map();     // its state now
+  const latchedState = new Map(); // was pressed since last time read
   target.addEventListener('keydown', e => {
-    // console.log(e.code);
     keyState.set(e.code, true);
+    latchedState.set(e.code, true);
   });
   target.addEventListener('keyup', e => {
     keyState.set(e.code, false);
@@ -39,7 +40,8 @@ export function initKeyboard(target) {
     let bits = 0;
     if (keysToBits) {
       for (const [key, bit] of keysToBits.entries()) {
-        bits |= keyState.get(key) ? bit : 0;
+        bits |= (keyState.get(key) | latchedState.get(key)) ? bit : 0;
+        latchedState.set(key, false);
       }
     }
     return bits;
