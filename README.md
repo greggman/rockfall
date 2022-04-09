@@ -48,7 +48,7 @@ These settings can be set with query parameters
 | ------------- | ------: | ----------- |
 | amoebas       |       1 | number of amoebas |
 | butterflies   |       5 | number of butterflies |
-| diamonds      |      10 | number of diamonds |
+| diamonds      |      15 | number of diamonds |
 | guards        |       3 | number of guardians |
 | rocks         |     280 | number of rocks |
 | walls         |      10 | number of walls |
@@ -64,7 +64,7 @@ These settings can be set with query parameters
 | mapHeight     |      25 | map height in tiles |
 | frameRate     |     0.1 | frame rate in seconds |
 | colorVariation |      1 | color variation multiplier. Set to 0 for no variation |
-| requiredScore |     800 | score needed to open exits |
+| requiredCount |      15 | count (eggs + diamonds) needed to open exits |
 | timeLimit     |    1500 | time limit in seconds |
 | playerBoundsWidthPercent | 0.25 |  size of window to keep player inside |
 | playerBoundsHeightPercent | 0.25 | size of window to keep player inside |
@@ -150,7 +150,7 @@ Download [the tiles png](https://github.com/greggman/rockfall/blob/main/tiled/ro
 Save your map in .tmj format. Drag and Drop it on [the page](https://greggman.github.io/rockfall/).
 
 You can set a required score by adding a *custom map property*. Pick Map->Map Properties.
-Then under "Custom Properties" pick `+`. Property name = "requiredScore", type = "int"
+Then under "Custom Properties" pick `+`. Property name = "requiredCount", type = "int"
 
 If it's good, send a pull request.
 

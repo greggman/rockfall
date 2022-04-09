@@ -98,7 +98,7 @@ async function main() {
     level: 0,                         // level to use
     amoebas: 1,                       // number of amoebas
     butterflies: 5,                   // number of butterflies
-    diamonds: 10,                     // number of diamonds
+    diamonds: 15,                     // number of diamonds
     guards: 3,                        // number of guardians
     rocks: 280,                       // number of rocks
     walls: 10,                        // number of walls
@@ -108,7 +108,7 @@ async function main() {
     tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
     scrollRate: 0.0125,               // scroll speed
     diamondPoints: 100,               // points for collecting diamond
-    eggPoints: 10,                    // points for collecting egg
+    eggPoints: 10 ,                   // points for collecting egg
     dirtPoints: 1,                    // points for digging dirt
     mapWidth: 80,                     // map width in tiles
     mapHeight: 25,                    // map height in tiles
@@ -117,7 +117,7 @@ async function main() {
     colorVariation: 1,                // color variation multiplier. Set to 0 for no variation.
     playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
     playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
-    requiredScore: 800,               // required score
+    requiredCount: 15,                // required count (eggs + diamonds)
     showTiles: false,                 // So we can save a new .png
     testSounds: false,                // Test the sounds
   };
@@ -165,6 +165,7 @@ async function main() {
   }
 
   levels.push(...(await Promise.all(levelPaths.map(loadTiledLevel))));
+  settings.level = Math.min(levels.length - 1, settings.level);
 
   async function loadLevel(file) {
     const data = JSON.parse(await file.text());
@@ -263,6 +264,7 @@ async function main() {
   const loadingElem = document.querySelector('#loading');
   const nameElem = document.querySelector('#name');
   const goalElem = document.querySelector('#goal');
+  const timeElem = document.querySelector('#time');
 
   const restart = () => {
     levels[0].level = randomLevel(settings);
@@ -273,8 +275,11 @@ async function main() {
   scoreElem.addEventListener('click', restart);
 
   loadingElem.style.display = 'none';
-  splashElem.addEventListener('click', () => {
+  const hideSplash = () => {
     splashElem.style.display = 'none';
+  };
+  splashElem.addEventListener('click', () => {
+    hideSplash();
     restart();
   });
 
@@ -347,8 +352,15 @@ async function main() {
     };
     applyQuerySettings(settings);
 
-    const requiredScore = settings.requiredScore || 1;
-    goalElem.textContent = requiredScore;
+    goalElem.classList.remove('exit-open');
+    timeElem.style.color = '';
+    const timeLimitTicks = Math.ceil(settings.timeLimit / settings.frameRate);
+    const requiredCount = settings.requiredCount || 1;
+
+    const numCountDigits = (Math.log10(requiredCount) | 0) + 1;
+    const updateGoal = (count) => {
+      goalElem.textContent = `${count.toString().padStart(numCountDigits, '0')}/${requiredCount.toString().padStart(numCountDigits, '0')}`;
+    };
 
     if (magicSound) {
       magicSound.stop();
@@ -553,6 +565,7 @@ async function main() {
           pos,
           dead: false,
           score: 0,
+          count: 0,      // items collection
           pushTurns: 0,  // # of turns rocks have been pushed
           pushDelay: 0,  // Rock Delay, number of times rock must be pushed.
         });
@@ -779,6 +792,10 @@ async function main() {
 
     function nextGen() {
       ++ticks;
+      if (!finished && !players[0].dead) {
+        timeElem.textContent = Math.ceil(Math.max(0, timeLimitTicks - ticks) * settings.frameRate).toString().padStart(4, '0');
+      }
+
       amoebaCount = 0;
       amoebaGrowFlag   = false;
 
@@ -809,23 +826,37 @@ async function main() {
     function addScore(points, playerNdx) {
       // TODO: add some effect
       const player = players[playerNdx];
-      const oldScore = player.score;
       player.score += points;
-      if (oldScore < requiredScore && player.score >= requiredScore) {
+      scoreElem.textContent = players[0].score.toString().padStart(6, '0');
+    }
+
+    function addCount(playerNdx) {
+      const player = players[playerNdx];
+      const oldCount = player.count;
+      ++player.count;
+      if (oldCount < requiredCount && player.count >= requiredCount) {
         flashScreen(60, [1, 1, 0, 1]);
+        goalElem.classList.add('exit-open');
         playSound('open');
         for (const pos of exits) {
           setTile(pos, kSymOpenExit);
         }
       }
-      scoreElem.textContent = players[0].score.toString().padStart(6, '0');
+      updateGoal(player.count);
     }
 
     function dirtFace(playerNdx) {
       if (finished) {
         return;
       }
+
       const player = players[playerNdx];
+      if (ticks === timeLimitTicks) {
+        addExplosion(kSymSpace, player.pos);
+        playSound('explode');
+        return;
+      }
+
       const input = player.input;
       let dirtFacePos = player.pos;
       let newOffset = 0;
@@ -855,10 +886,12 @@ async function main() {
       if (c === kSymDiamond) {
         playSound('coin');
         addScore(settings.diamondPoints, playerNdx);
+        addCount(playerNdx);
       }
       if (c >= kSymEgg && c <= kSymEggOpen) {
         playSound('eggCollect');
         addScore(settings.eggPoints, playerNdx);
+        addCount(playerNdx);
       }
       if (c === kSymDirt) {
         playSound('step');
@@ -945,6 +978,7 @@ async function main() {
 
     initGame();
     initWorld();
+    updateGoal(players[0].count);
 
     let then = 0;
     let delay = 0;
@@ -986,6 +1020,15 @@ async function main() {
         }
 
         // draw();
+      }
+
+      {
+        const timeLeft = Math.ceil(Math.max(0, timeLimitTicks - ticks) * settings.frameRate)
+        if (!finished && !players[0].dead && timeLeft > 0 && timeLeft < 30) {
+          const v = timeLeft / 30;
+          const b = now * lerp(2, 8, Math.pow(1 - v, 8)) % 1;
+          timeElem.style.color = b > 0.5 ? 'red' : 'white';
+        }
       }
 
       twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -1056,6 +1099,7 @@ async function main() {
     const file = getFirstFile(ev);
     if (file) {
       loadLevel(file);
+      hideSplash();
     }
   }
 
@@ -1076,6 +1120,10 @@ async function main() {
   dropElem.addEventListener('dragover', dragoverHandler);
   dropElem.addEventListener('dragenter', dragenterHandler);
   dropElem.addEventListener('dragleave', dragleaveHandler);
+  splashElem.addEventListener('drop', dropHandler);
+  splashElem.addEventListener('dragover', dragoverHandler);
+  splashElem.addEventListener('dragenter', dragenterHandler);
+  splashElem.addEventListener('dragleave', dragleaveHandler);
 }
 
 main();

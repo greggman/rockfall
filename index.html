@@ -89,6 +89,7 @@
         color: white;
         font-family: sans-serif;
         font-weight: bold;
+        font-size: 36pt;
       }
       #splash {
         font-size: 24pt;
@@ -124,6 +125,17 @@
         margin: 0;
         outline: none;
       }
+      .exit-open {
+        animation: exit-open 0.2s alternate infinite;
+      }
+      @keyframes exit-open {
+        0% {
+          color: green;
+        }
+        100% {
+          color: greenyellow;
+        }
+      }
     </style>
   </head>
   <body>
@@ -132,6 +144,7 @@
       <div id="top">
         <div id="hud">
           <div id="restart">🔄</div>
+          <div id="time"></div>
           <div id="score"></div>
           <div><span>goal:</span><span id="goal"></span></div>
           <div id="name"></div>
