@@ -8,17 +8,17 @@
 
 4. Run Tiled and click Open File
 
-   ![](imgs/making-levels/step-01-open-file.png)
+   <img src="imgs/making-levels/step-01-open-file.png" width="852">
 
 5. Select the `rockfall-files.tsj` file
 
-   ![](imgs/making-levels/step-02-load-tiles.png)
+   <img src="imgs/making-levels/step-02-load-tiles.png" width="800">
 
 6. From the menus pick File->New->New Map...
 
    Then choose your map size
 
-   ![](imgs/making-levels/step-03-new-map.png)
+   <img src="imgs/making-levels/step-03-new-map.png" width="418">
 
 7. Create your map. 
 
@@ -26,19 +26,19 @@
    2. Click tile from the tileset
    3. Draw on the map
 
-   ![](imgs/making-levels/step-04-edit-map.png)
+   <img src="imgs/making-levels/step-04-edit-map.png" width="852">
 
 8. From the menus pick File->Save
 
    Make sure you choose the `.tmj JSON` format
 
-   ![](imgs/making-levels/step-05-save-map.png)
+   <img src="imgs/making-levels/step-05-save-map.png" width="800">
 
 9. Go to [the Rockfall WebSite](https://greggman.github.io/rockfall)
 
    Drag and Drop the `.tmj` file onto the game.
 
-   ![](imgs/making-levels/step-05-run-level.png)
+   <img src="imgs/making-levels/step-05-run-level.png" width="1106">
 
 ## Custom Properties
 
@@ -48,15 +48,15 @@ You can add custom properties to set level settings.
 
 2. Click the [+] icon under Custom Properties
 
-   ![](imgs/making-levels/custom-props-01.png)
+   <img src="imgs/making-levels/custom-props-01.png" width="852">
 
 3. Specify the name and make sure the type is `int` or `string` (see below)
 
-   ![](imgs/making-levels/custom-props-02.png)
+   <img src="imgs/making-levels/custom-props-02.png" width="298">
 
 4. Click the property to edit
 
-   ![](imgs/making-levels/custom-props-03.png)
+   <img src="imgs/making-levels/custom-props-03.png" width="852">
 
 ### Valid properties
 
