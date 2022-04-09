@@ -41,6 +41,11 @@
          "name":"requiredCount",
          "type":"int",
          "value":2
+        }, 
+        {
+         "name":"timeLimit",
+         "type":"int",
+         "value":15
         }],
  "renderorder":"right-down",
  "tiledversion":"1.8.4",
