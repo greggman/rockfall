@@ -297,7 +297,13 @@ async function main() {
       selectElem.appendChild(elem);
     }
     selectElem.addEventListener('change', () => {
-      startLevel(levels[selectElem.selectedIndex]);
+      const url = new URL(window.location);
+      const params = new URLSearchParams(url.search);
+      const ndx = selectElem.selectedIndex;
+      params.set('level', ndx);
+      url.search = params.toString();
+      window.history.replaceState({}, '', url.toString());
+      startLevel(levels[ndx]);
     });
   }
 
@@ -596,13 +602,13 @@ async function main() {
           if (map[newPos + mapWidth] !== kSymSpace) {
             switch (minSym) {
               case kSymRock:
-                playSound('rock');
+                playSound('rock', rand(0.1));
                 break;
               case kSymDiamond:
-                playSound('diamond');
+                playSound('diamond', rand(0.1));
                 break;
               case kSymEgg:
-                playSound('eggFall');
+                playSound('eggFall', rand(0.1));
                 break;
             }
           }
