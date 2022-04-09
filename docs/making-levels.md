@@ -38,7 +38,7 @@
 
    Drag and Drop the `.tmj` file onto the game.
 
-   <img src="imgs/making-levels/step-05-run-level.png" width="1106">
+   <img src="imgs/making-levels/step-06-run-level.png" width="1106">
 
 ## Custom Properties
 

@@ -2,6 +2,10 @@
 
 [Live Version](https://greggman.github.io/rockfall/)
 
+## Make your own levels and contribute them here!
+
+[See instructions here](https://greggman.github.io/rockfall/docs/making-levels.html).
+
 ## Rules
 
 * 🙂 Player: A, S, D, W to move
@@ -33,11 +37,12 @@ Rocks, Eggs, and Diamonds will fall if there is space below them or if they are
 sitting on top of another rock, egg, or diamond and there is space for them to
 fall.
 
-You can restart by clicking in the top left corner.
+You can restart by clicking in the top left corner or select another level
+by clicking the name.
 
 Note: You can dig one tile without moving by holding shift.
 
-The levels are random so and there is no goal so it's just a proof of concept.
+The levels are random so and there is no real goal so it's just a proof of concept.
 A real game would require hand designed or algorithmically generated levels.
 
 ## Settings
@@ -94,7 +99,7 @@ a 16k cartridge!
 In any case, John got something working. [The code](https://github.com/greggman/rockfall/blob/master/ROCK4.ACT) was not all that big. As such, over the years I've ported it
 several times. I [ported it to C](https://github.com/greggman/rockfall/blob/master/rockfall.c) at some point. According to the comments that was 1992.
 
-I once ported it to Z80 for the original GameBoy when I was first learning how it works.
+I once ported it to Z80 assembly for the original GameBoy when I was first learning how it works.
 I ported it to Java for some feature phone around 2003-2004 to bring to a job interview
 at Namco Japan for their mobile division.
 
@@ -115,12 +120,12 @@ explode into eggs so you can see lots of movement.
 
 ## Design
 
-Currently the level is just randomly generated.
+Currently the first level is just randomly generated.
 
 For this game to be fun really requires well designed levels. The original Atari
-game had 60 or so levels. Each level had themes, a required number of points to
-open the exit, and a time limit. In other words, if the level required 4000
-points then you'd need to collect 40 diamonds to open the exit and then make it
+game had 60 or so levels. Each level had themes, a required number of items to
+open the exit, and a time limit. In other words, if the level required 40
+items then you'd need to collect 40 diamonds or eggs to open the exit and then make it
 to the exit before the time limit. 
 
 The first few levels were mostly just rocks, walls, and diamonds. Some levels
@@ -144,15 +149,7 @@ designer. PRs welcome!
 
 ### Building levels
 
-You can build levels using [Tiled](https://www.mapeditor.org/).
-
-Download [the tiles png](https://github.com/greggman/rockfall/blob/main/tiled/rockfall-tiles.png) and [the .tsj file](https://raw.githubusercontent.com/greggman/rockfall/main/tiled/rockfall-tiles.tsj)(right click and pick "Save As")
-Save your map in .tmj format. Drag and Drop it on [the page](https://greggman.github.io/rockfall/).
-
-You can set a required score by adding a *custom map property*. Pick Map->Map Properties.
-Then under "Custom Properties" pick `+`. Property name = "requiredCount", type = "int"
-
-If it's good, send a pull request.
+[See instructions here](https://greggman.github.io/rockfall/docs/making-levels.html).
 
 ## Enhancements / Ideas
 
@@ -184,6 +181,12 @@ be fun to make more types of things. Random simple ideas:
 * Rotation (the GPU renderer can draw at any angle so, turn 45 degrees and have rocks slide. Or turn 90, 180, 270, and down is a new direction.
   this could be random, or time based, or there could be an object you touch to rotate or 4 objects to orient or drop a rock on etc...)
 
+To be honest I think an actual shipping game would be best with a few core features
+and then iterating on puzzles using those limited features. Otherwise the player
+isn't given a change to master each feature. Still, experimenting could help find
+the most interesting features and then you could choose the top 6-10 and build levels
+from those
+
 PRs and ideas welcome.
 
 ## Legal
@@ -196,4 +199,10 @@ runs. In any case though, use at your own risk.
 
 ## LICENSE
 
-MIT
+The game is MIT, the levels are licensed by their respective creators. The license
+and the creator detailed in the level file itself. If there is no license in the level
+file then they are [CC-BY](https://creativecommons.org/licenses/by/4.0/).
+
+To be clear, you have my permission to publish a commercial game based on this code but make sure
+to provide attribution as required and make sure
+you only include levels that have a compatible license. ([CC-BY](https://creativecommons.org/licenses/by/4.0), [CC-BY-ND](https://creativecommons.org/licenses/by-nd/4.0), [CC0](https://creativecommons.org/share-your-work/public-domain/cc0/))
