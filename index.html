@@ -19,6 +19,9 @@
       * {
         box-sizing: inherit;
       }
+      a {
+        color: red;
+      }
       #content {
         display: flex;
         height: 100%;
@@ -72,6 +75,7 @@
       #github img {
         width: 1em;
       }
+      #splash,
       #loading {
         position: absolute;
         left: 0;
@@ -85,7 +89,31 @@
         color: white;
         font-family: sans-serif;
         font-weight: bold;
-        font-size: 36pt;
+      }
+      #splash {
+        font-size: 24pt;
+      }
+      #splash * {
+        margin-block: 0.50em;
+      }
+      #splash>div {
+        background-color: rgba(50, 50, 248, 0.824);
+        border-radius: 1em;
+        max-width: 800px;
+        padding: 1em;
+      }
+      #splash button {
+        background: rgba(255, 255, 255, 0.3);
+        border: none;
+        padding: 1em;
+        border-radius: 1em;
+        font-size: 24pt;
+        font-weight: bold;
+        color: white;
+        width: 100%;
+      }
+      #splash button:hover {
+        background: rgba(255, 255, 255, 0.6);
       }
       select,
       select:focus {
@@ -109,6 +137,14 @@
           <div id="name"></div>
         </div>
         <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall"><img src="resources/images/octocat-icon.svg"></a></div>
+      </div>
+    </div>
+    <div id="splash">
+      <div>
+        <h1>RockFall</h1>
+        <h2>A game where rocks fall!</h2>
+        <p>Make your own levels and add them to this game! <a target="_blank" href="https://github.com/greggman/rockfall">More Info</a></p>
+        <button type="button">Start</button>
       </div>
     </div>
     <div id="loading"><div>loading...</div></div>

@@ -242,6 +242,7 @@ async function main() {
   const gl = document.querySelector('#playField').getContext('webgl2', {premultipliedAlpha: false});
   const restartElem = document.querySelector('#restart');
   const scoreElem = document.querySelector('#score');
+  const splashElem = document.querySelector('#splash');
   const loadingElem = document.querySelector('#loading');
   const nameElem = document.querySelector('#name');
   const goalElem = document.querySelector('#goal');
@@ -255,6 +256,10 @@ async function main() {
   scoreElem.addEventListener('click', restart);
 
   loadingElem.style.display = 'none';
+  splashElem.addEventListener('click', () => {
+    splashElem.style.display = 'none';
+    restart();
+  });
 
   const getTouchBits = initTouch(gl.canvas);
   const getKeyBits = initKeyboard(window);
