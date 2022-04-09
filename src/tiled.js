@@ -3,8 +3,9 @@
 import {
   kSymBorder,
 } from './symbols.js';
+import { basenameNoExt } from './utils.js';
 
-export function parseTiledLevel(data) {
+export function parseTiledLevel(data, url) {
   // add space for a border
   const mapWidth = data.width + 2;
   const mapHeight = data.height + 2;
@@ -21,10 +22,10 @@ export function parseTiledLevel(data) {
     map.set(tiles.slice(y * data.width, (y + 1) * data.width), (y + 1) * mapWidth + 1);
   }
 
-  const custom = {};
+  const settings = {name: basenameNoExt(url)};
   for (const prop of data.properties || []) {
     const {name, value} = prop;
-    custom[name] = value;
+    settings[name] = value;
   }
 
   return {
@@ -33,6 +34,6 @@ export function parseTiledLevel(data) {
     mapBuffer,
     map,
     mapFlags,
-    requiredScore: custom.requiredScore,
+    settings,
   };
 }

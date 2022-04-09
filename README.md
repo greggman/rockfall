@@ -65,6 +65,7 @@ These settings can be set with query parameters
 | frameRate     |     0.1 | frame rate in seconds |
 | colorVariation |      1 | color variation multiplier. Set to 0 for no variation |
 | requiredScore |     800 | score needed to open exits |
+| timeLimit     |    1500 | time limit in seconds |
 | playerBoundsWidthPercent | 0.25 |  size of window to keep player inside |
 | playerBoundsHeightPercent | 0.25 | size of window to keep player inside |
 | level         |       0 | level to use (see [here](https://github.com/greggman/rockfall/blob/main/src/levels.js)) |

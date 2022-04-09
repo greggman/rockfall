@@ -56,7 +56,6 @@ import {
   initTouch,
 } from './touch.js';
 import {
-  basenameNoExt,
   lerp,
   minMagnitude,
   mixArray,
@@ -84,6 +83,16 @@ async function main() {
   const kCWise      = -1;
   const kCCWise     =  1;
 
+  function applyQuerySettings(settings) {
+    for (const [k, v] of (new URLSearchParams(window.location.search).entries())) {
+      if (settings[k] === undefined) {
+        console.error(`unknown setting: ${k}`);
+        continue;
+      }
+      settings[k] = parseFloat(v);
+    }
+  }
+
   // initial # of objects on screen
   const settings = {
     level: 0,                         // level to use
@@ -104,6 +113,7 @@ async function main() {
     mapWidth: 80,                     // map width in tiles
     mapHeight: 25,                    // map height in tiles
     frameRate: 1 / 10,                // frame rate in seconds
+    timeLimit: 1500,                  // time limit in seconds
     colorVariation: 1,                // color variation multiplier. Set to 0 for no variation.
     playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
     playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
@@ -111,13 +121,8 @@ async function main() {
     showTiles: false,                 // So we can save a new .png
     testSounds: false,                // Test the sounds
   };
-  for (const [k, v] of (new URLSearchParams(window.location.search).entries())) {
-    if (settings[k] === undefined) {
-      console.error(`unknown setting: ${k}`);
-      continue;
-    }
-    settings[k] = parseFloat(v);
-  }
+  const g_settings = settings;
+  applyQuerySettings(settings);
 
   levels.push({
     name: 'Random',
@@ -143,23 +148,35 @@ async function main() {
     }), 0) : 0;
   }
 
+  function prepTiledLevel(data, url) {
+    const level = parseTiledLevel(data, url);
+    const {name, author, license} = level.settings;
+    const fullName = `${name}(${license ? `${license}` : 'CC-BY'})${author ? ` by: ${author}` : ''}`;
+    return {
+      name: fullName,
+      level,
+    };
+  }
+
   async function loadTiledLevel(url) {
     const res = await fetch(url);
     const data = await res.json();
-    const level = parseTiledLevel(data);
-    level.requiredScore = level.requiredScore || settings.requiredScore;
-    return {
-      name: basenameNoExt(url),
-      level,
-    };
+    return prepTiledLevel(data, url);
   }
 
   levels.push(...(await Promise.all(levelPaths.map(loadTiledLevel))));
 
   async function loadLevel(file) {
     const data = JSON.parse(await file.text());
-    const level = parseTiledLevel(data);
-    startLevel({level, name: basenameNoExt(file.name)});
+    const level = prepTiledLevel(data, file.name);
+    const ndx = levels.findIndex(l => l.name === level.name);
+    if (ndx >= 0) {
+      levels.splice(ndx, 1);
+    }
+    levels.push(level);
+    settings.level = levels.length - 1;
+    updateLevelSelection();
+    restart();
   }
 
   /* eslint-disable quotes */
@@ -167,7 +184,7 @@ async function main() {
   const sounds = {
     placeBomb:         { jsfx: ['sine',0.0000,0.4000,0.0000,0.1260,0.0840,0.0720,110.0000,548.0000,2400.0000,-0.7300,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.2700,0.2000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.1730,0.0000]      , },
     eggCollect:        { jsfx: ["synth",3.0000,0.7020,0.0000,0.1760,0.0000,0.0240,20.0000,1377.0000,2400.0000,0.4240,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.1000,0.0000], }, //['square',0.0000,0.7770,0.0000,0.0480,0.5280,0.2220,20.0000,1558.0000,2400.0000,0.4560,0.0120,0.0000,0.0100,0.0003,0.0000,0.4980,0.2770,0.0000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000], },
-    dhatch:             { jsfx: ["sine",3.0000,0.7020,0.0000,0.1300,0.0000,0.2920,110.0000,1610.0000,2400.0000,-0.8080,0.0000,0.3270,27.0284,0.5671,0.0600,0.0000,0.0000,0.5000,-0.5740,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.2490,0.0000], },
+    oldHatch:          { jsfx: ["sine",3.0000,0.7020,0.0000,0.1300,0.0000,0.2920,110.0000,1610.0000,2400.0000,-0.8080,0.0000,0.3270,27.0284,0.5671,0.0600,0.0000,0.0000,0.5000,-0.5740,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.2490,0.0000], },
     step:              { jsfx: ["noise",0.0000,0.3450,0.0000,0.0380,0.0000,0.0300,708.0000,93.0000,20.0000,-0.8720,-0.3140,0.0520,1.7376,0.0003,-0.9180,0.6320,0.8690,0.2460,0.0000,0.0000,-0.9180,-0.8500,1.0000,-1.0000,0.0000,0.2710,0.0000], },
     rock:              { jsfx: ["square",14.0000,0.3450,0.0000,0.1580,0.1440,0.0180,20.0000,349.0000,588.0000,-0.9180,-0.4520,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.5000,-0.1720,0.0000,-0.5740,0.0920,1.0000,0.0000,0.0000,0.0000,0.0000], },
     diamond:           { jsfx: ["square",14.0000,0.3450,0.0000,0.0100,0.3450,0.1400,20.0000,1368.0000,2400.0000,0.0000,0.0000,0.0000,0.0100,0.0003,0.0000,0.2640,0.1160,0.0000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000], },
@@ -278,14 +295,9 @@ async function main() {
     });
   }
 
-  let processFn = () => {};
-
-  let magicSound;
-  let currentLevel;
-  startLevel(levels[settings.level]);
-
-  {
+  function updateLevelSelection() {
     const selectElem = document.createElement('select');
+    nameElem.innerHTML = '';
     nameElem.appendChild(selectElem);
     for (let i = 0; i < levels.length; ++i) {
       const level = levels[i];
@@ -306,6 +318,13 @@ async function main() {
       startLevel(levels[ndx]);
     });
   }
+  updateLevelSelection();
+
+  let processFn = () => {};
+
+  let magicSound;
+  let currentLevel;
+  startLevel(levels[settings.level]);
 
   function startLevel({level}) {
     currentLevel = level;
@@ -319,9 +338,16 @@ async function main() {
     const map = level.map.slice();
     const mapFlags = level.mapFlags.slice();
     const mapColors = new Uint32Array(map.length);
-    const requiredScore = level.requiredScore;
     let finished = false;
     let ticks = 0;
+
+    const settings = {
+      ...g_settings,
+      ...level.settings,
+    };
+    applyQuerySettings(settings);
+
+    const requiredScore = settings.requiredScore || 1;
     goalElem.textContent = requiredScore;
 
     if (magicSound) {
