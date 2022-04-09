@@ -1,0 +1,81 @@
+# How to make a level for Rockfall
+
+1. Download and install [Tiled](https://www.mapeditor.org)
+
+2. Download [rockfall-tiles.png](https://raw.githubusercontent.com/greggman/rockfall/main/tiled/rockfall-tiles.png) (⬅ right click this link and pick Save As..)
+
+3. Download [rockfall-tiles.tsj](https://raw.githubusercontent.com/greggman/rockfall/main/tiled/rockfall-tiles.tsj)  (⬅ right click this link and pick Save As..)
+
+4. Run Tiled and click Open File
+
+   ![](imgs/making-levels/step-01-open-file.png)
+
+5. Select the `rockfall-files.tsj` file
+
+   ![](imgs/making-levels/step-02-load-tiles.png)
+
+6. From the menus pick File->New->New Map...
+
+   Then choose your map size
+
+   ![](imgs/making-levels/step-03-new-map.png)
+
+7. Create your map. 
+
+   1. Select the Stamp Tool
+   2. Click tile from the tileset
+   3. Draw on the map
+
+   ![](imgs/making-levels/step-04-edit-map.png)
+
+8. From the menus pick File->Save
+
+   Make sure you choose the `.tmj JSON` format
+
+   ![](imgs/making-levels/step-05-save-map.png)
+
+9. Go to [the Rockfall WebSite](https://greggman.github.io/rockfall)
+
+   Drag and Drop the `.tmj` file onto the game.
+
+   ![](imgs/making-levels/step-05-run-level.png)
+
+## Custom Properties
+
+You can add custom properties to set level settings.
+
+1. From the menus pick Map->Map Properties...
+
+2. Click the [+] icon under Custom Properties
+
+   ![](imgs/making-levels/custom-props-01.png)
+
+3. Specify the name and make sure the type is `int`
+
+   ![](imgs/making-levels/custom-props-02.png)
+
+4. Click the property to edit
+
+   ![](imgs/making-levels/custom-props-03.png)
+
+### Valid properties
+
+| property      | default | description |
+| ------------- | ------: | ----------- |
+| magicTime     |     250 | how many ticks the magic walls stay active |
+| diamondPoints |     100 | points for collecting diamond |
+| eggPoints     |      10 | points for collecting egg |
+| dirtPoints    |       1 | points for digging dirt |
+| requiredCount |      15 | count (eggs + diamonds) needed to open exits |
+| timeLimit     |    1500 | time limit in seconds |
+| author        |         | your name |
+| license       |         | default CC-BY ([Creative Commons](https://creativecommons.org/share-your-work/) Only Please) |
+| name          |         | default is filename |
+
+Note: author, license, and name need to be type `string`
+
+# Please consider submitting your level to this repo
+
+If you know github then you can create a pull request. Otherwise,
+[go to this issue](https://github.com/greggman/rockfall/issues/21)
+and drag-&-drop your `.tmj` file
