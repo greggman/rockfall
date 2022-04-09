@@ -206,3 +206,5 @@ file then they are [CC-BY](https://creativecommons.org/licenses/by/4.0/).
 To be clear, you have my permission to publish a commercial game based on this code but make sure
 to provide attribution as required and make sure
 you only include levels that have a compatible license. ([CC-BY](https://creativecommons.org/licenses/by/4.0), [CC-BY-ND](https://creativecommons.org/licenses/by-nd/4.0), [CC0](https://creativecommons.org/share-your-work/public-domain/cc0/))
+
+Also, I'd love to know about it!

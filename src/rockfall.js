@@ -320,6 +320,7 @@ async function main() {
       params.set('level', ndx);
       url.search = params.toString();
       window.history.replaceState({}, '', url.toString());
+      settings.level = ndx;
       startLevel(levels[ndx]);
     });
   }
@@ -1023,7 +1024,7 @@ async function main() {
       }
 
       {
-        const timeLeft = Math.ceil(Math.max(0, timeLimitTicks - ticks) * settings.frameRate)
+        const timeLeft = Math.ceil(Math.max(0, timeLimitTicks - ticks) * settings.frameRate);
         if (!finished && !players[0].dead && timeLeft > 0 && timeLeft < 30) {
           const v = timeLeft / 30;
           const b = now * lerp(2, 8, Math.pow(1 - v, 8)) % 1;
