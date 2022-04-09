@@ -1,5 +1,6 @@
 /* eslint-env browser */
 
+import { kLeft } from './directions.js';
 import {
   kUpBit,
   kDownBit,
@@ -7,8 +8,12 @@ import {
   kRightBit,
 } from './input.js';
 
+const kLRBits = kLeftBit | kRightBit;
+const kUDBits = kUpBit | kDownBit;
+
 export function initTouch(target) {
   let touchBits = 0;
+  let latchBits = 0;
 
   const minTouchDistance = 4;
   let startX;
@@ -59,6 +64,15 @@ export function initTouch(target) {
       startX = lastX;
       startY = lastY;
     }
+    latchBits |= touchBits;
+    // remove opposites.
+    // I'm sure there's simpler way but
+    const lrBits = touchBits & kLRBits;
+    const udBits = touchBits & kUDBits;
+    const clearBits = (lrBits ? (lrBits ^ kLRBits) : 0) |
+                      (udBits ? (udBits & kUDBits) : 0);
+    latchBits &= 0xFFFF ^ clearBits;
+
     lastX = newX;
     lastY = newY;
   }
@@ -73,6 +87,8 @@ export function initTouch(target) {
   target.addEventListener('touchend', handleTouchEnd, {passive: false});
 
   return () => {
-    return touchBits;
+    const bits = touchBits | latchBits;
+    latchBits = 0;
+    return bits;
   };
 }
