@@ -996,6 +996,7 @@ async function main() {
           const player = players[p];
           player.input = getKeyBits(p);
         }
+        players[0].input |= getKeyBits(1);
         players[0].input |= getTouchBits();
 
         nextGen();
