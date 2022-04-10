@@ -97,13 +97,15 @@
         width: 1em;
       }
       #splash,
-      #loading {
+      #loading,
+      #end {
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         background: rgba(0, 0, 0, 0.8);
@@ -115,6 +117,11 @@
       #splash {
         font-size: 24pt;
       }
+      #end {
+        align-items: stretch;
+        text-align: center;
+        background: none;
+      }
       #splash * {
         margin-block: 0.50em;
       }
@@ -124,8 +131,8 @@
         max-width: 800px;
         padding: 1em;
       }
-      #splash button {
-        background: rgba(255, 255, 255, 0.3);
+      #splash button,
+      #end button {
         border: none;
         padding: 1em;
         border-radius: 1em;
@@ -134,8 +141,20 @@
         color: white;
         width: 100%;
       }
+      #splash button {
+        background: rgba(255, 255, 255, 0.3);
+      }
       #splash button:hover {
         background: rgba(255, 255, 255, 0.6);
+      }
+      #end button {
+        background: rgba(0, 0, 0, 0.6);
+        margin-top: 1em;
+        width: 80%;
+        max-width: 400px;
+      }
+      #end button:hover {
+        background: rgba(100, 0, 150, 0.6);
       }
       select,
       select:focus {
@@ -182,6 +201,12 @@
         <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall"><span>?</span><img src="resources/images/octocat-icon.svg"></a></div>
       </div>
     </div>
+    <!--
+    <div id="end">
+      <div><button type="button">Restart</button></div>
+      <div><button type="button">Randomize</button></div>
+    </div>
+    -->
     <div id="splash">
       <div>
         <h1>RockFall</h1>

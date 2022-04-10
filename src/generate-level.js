@@ -16,9 +16,13 @@ import {
 } from './symbols.js';
 import {
   shuffleArray,
+  PseudoRandomNumberGenerator,
 } from './utils.js';
 
 export function randomLevel(settings) {
+  const r = new PseudoRandomNumberGenerator(settings.seed);
+  const randFn = r.random.bind(r);
+
   const mapWidth = settings.mapWidth;
   const mapHeight = settings.mapHeight;
   const mapArea = mapWidth * mapHeight;
@@ -48,7 +52,7 @@ export function randomLevel(settings) {
       available.push(y * mapWidth + x);
     }
   }
-  shuffleArray(available);
+  shuffleArray(available, randFn);
 
   function place(sym, stat, rep, many) {
     let count = 0;

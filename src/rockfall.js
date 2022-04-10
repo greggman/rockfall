@@ -97,6 +97,7 @@ async function main() {
   // initial # of objects on screen
   const settings = {
     level: 0,                         // level to use
+    seed: randInt(0x7FFFFFF),         // seed for random level
     amoebas: 1,                       // number of amoebas
     butterflies: 5,                   // number of butterflies
     diamonds: 15,                     // number of diamonds
@@ -281,8 +282,22 @@ async function main() {
 
   const restart = () => {
     levels[0].level = randomLevel(settings);
-    startLevel(levels[settings.level]);
+    setLevel(settings.level);
   };
+
+  function setLevel(ndx) {
+    const url = new URL(window.location);
+    const params = new URLSearchParams(url.search);
+    params.set('level', ndx);
+    params.delete('seed');
+    if (ndx === 0) {
+      params.set('seed', settings.seed);
+    }
+    url.search = params.toString();
+    window.history.replaceState({}, '', url.toString());
+    settings.level = ndx;
+    startLevel(levels[ndx]);
+  }
 
   restartElem.addEventListener('click', restart);
   scoreElem.addEventListener('click', restart);
@@ -331,14 +346,7 @@ async function main() {
       selectElem.appendChild(elem);
     }
     selectElem.addEventListener('change', () => {
-      const url = new URL(window.location);
-      const params = new URLSearchParams(url.search);
-      const ndx = selectElem.selectedIndex;
-      params.set('level', ndx);
-      url.search = params.toString();
-      window.history.replaceState({}, '', url.toString());
-      settings.level = ndx;
-      startLevel(levels[ndx]);
+      setLevel(selectElem.selectedIndex);
     });
   }
   updateLevelSelection();
@@ -347,7 +355,7 @@ async function main() {
 
   let magicSound;
   let currentLevel;
-  startLevel(levels[settings.level]);
+  setLevel(settings.level);
 
   function startLevel({level}) {
     currentLevel = level;

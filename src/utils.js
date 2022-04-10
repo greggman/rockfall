@@ -18,9 +18,9 @@ export const basenameNoExt = s => {
   return period >= 0 ? base.substring(0, period) : base;
 };
 
-export function shuffleArray(array) {
+export function shuffleArray(array, randFn = Math.random) {
   for (let i = 0; i < array.length; ++i) {
-    const ndx = Math.random() * array.length | 0;
+    const ndx = randFn() * array.length | 0;
     const t = array[i];
     array[i] = array[ndx];
     array[ndx] = t;
@@ -44,3 +44,28 @@ export const clamp11 = v => clamp(v, -1, 1);
 export const snorm8 = v => clamp(((v + 1) * 128) - 128, -128, 127);
 const sn = v => (snorm8(v) + 256) & 0xFF;
 export const snorm32 = (r, g, b, a) => sn(r) | (sn(g) << 8) | (sn(b) << 16) | (sn(a) << 24);
+
+const RANDOM_RANGE = Math.pow(2, 32);
+export class PseudoRandomNumberGenerator {
+  constructor(seed = 0) {
+    this.reset(seed);
+  }
+  reset(seed = 0) {
+    this.seed = Math.abs(seed | 0);
+  }
+  random() {
+    return (this.seed =
+          (134775813 * this.seed + 1) %
+          RANDOM_RANGE) / RANDOM_RANGE;
+  }
+  rand(min, max) {
+    if (max === undefined) {
+      max = min;
+      min = 0;
+    }
+    return this.random() * (max - min) + min;
+  }
+  randInt(min, max) {
+    return this.rand(min, max) | 0;
+  }
+}
