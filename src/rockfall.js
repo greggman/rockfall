@@ -237,6 +237,11 @@ async function main() {
     setLevel(settings.level);
   };
 
+  const restartAndRandomize = () => {
+    randomizeLevel0();
+    restart();
+  };
+
   function setLevel(ndx) {
     const url = new URL(window.location);
     const params = new URLSearchParams(url.search);
@@ -255,9 +260,9 @@ async function main() {
     startLevel(levels[ndx]);
   }
 
-  restartElem.addEventListener('click', restart);
-  scoreElem.addEventListener('click', restart);
-  timeElem.addEventListener('click', restart);
+  restartElem.addEventListener('click', restartAndRandomize);
+  scoreElem.addEventListener('click', restartAndRandomize);
+  timeElem.addEventListener('click', restartAndRandomize);
   dieElem.addEventListener('click', () => killPlayerFn());
 
   loadingElem.style.display = 'none';
