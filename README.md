@@ -1,5 +1,7 @@
 # RockFall
 
+<img src="docs/imgs/screenshot.png">
+
 [Live Version](https://greggman.github.io/rockfall/)
 
 ## Make your own levels and contribute them here!
