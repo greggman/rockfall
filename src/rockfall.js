@@ -273,6 +273,7 @@ async function main() {
 
   restartElem.addEventListener('click', restart);
   scoreElem.addEventListener('click', restart);
+  timeElem.addEventListener('click', restart);
 
   loadingElem.style.display = 'none';
   const hideSplash = () => {
