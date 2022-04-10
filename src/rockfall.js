@@ -1060,8 +1060,9 @@ async function main() {
       twgl.resizeCanvasToDisplaySize(gl.canvas);
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
       gl.clearColor(...(flashTime > 0
-         ? mixArray([0, 0, 0, 0], flashColor, flashTime-- / flashDuration)
-         : [0, 0, 0, 0]));
+         ? mixArray([0, 0, 0, 1], flashColor, flashTime-- / flashDuration)
+         : [0, 0, 0, 1]));
+      //gl.colorMask(true, true, true, false);
       gl.clear(gl.COLOR_BUFFER_BIT);
 
       tilemap.uploadTilemap(gl);
@@ -1106,6 +1107,11 @@ lerpRateX: ${lerpRateX}
 lerpRateY: ${lerpRateY}`;
         }
       }
+
+      //gl.clearColor(0, 0, 0, 1);
+      //gl.colorMask(false, false, false, true);
+      //gl.clear(gl.COLOR_BUFFER_BIT);
+
     }
 
     processFn = process;
