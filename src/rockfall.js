@@ -268,6 +268,10 @@ async function main() {
   const nameElem = document.querySelector('#name');
   const goalElem = document.querySelector('#goal');
   const timeElem = document.querySelector('#time');
+  const dieElem = document.querySelector('#die');
+
+  let processFn = () => {};
+  let killPlayerFn = () => {};
 
   let ctx;
   let debugElem;
@@ -302,6 +306,7 @@ async function main() {
   restartElem.addEventListener('click', restart);
   scoreElem.addEventListener('click', restart);
   timeElem.addEventListener('click', restart);
+  dieElem.addEventListener('click', () => killPlayerFn());
 
   loadingElem.style.display = 'none';
   const hideSplash = () => {
@@ -351,8 +356,6 @@ async function main() {
   }
   updateLevelSelection();
 
-  let processFn = () => {};
-
   let magicSound;
   let currentLevel;
   setLevel(settings.level);
@@ -370,6 +373,7 @@ async function main() {
     const mapFlags = level.mapFlags.slice();
     const mapColors = new Uint32Array(map.length);
     let finished = false;
+    let killPlayer = false;
     let ticks = 0;
 
     const settings = {
@@ -870,7 +874,7 @@ async function main() {
       }
 
       const player = players[playerNdx];
-      if (ticks === timeLimitTicks) {
+      if (ticks === timeLimitTicks || killPlayer) {
         addExplosion(kSymSpace, player.pos - mapWidth - 1);
         playSound('explode');
         return;
@@ -1128,6 +1132,9 @@ lerpRateY: ${lerpRateY}`;
 
     processFn = process;
 
+    killPlayerFn = () => {
+      killPlayer = true;
+    };
   }
 
   function process(now) {
