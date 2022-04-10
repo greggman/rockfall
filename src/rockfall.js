@@ -124,6 +124,7 @@ async function main() {
     endDuration: 3,                   // time until reset after level ends
     showTiles: false,                 // So we can save a new .png
     testSounds: false,                // Test the sounds
+    genTiles: false,                  // Gen tiles instead of loading png
     debug: false,
   };
   function randomizeLevel0() {
@@ -277,6 +278,12 @@ async function main() {
   const tilesAcross = 32;
   const tilesDown = 32;
   function makeTileTexture(gl) {
+    if (!settings.genTiles && settings.tileSize === 32) {
+      return twgl.createTexture(gl, {
+        src: 'tiled/rockfall-tiles.png',
+        minMag: gl.NEAREST,
+      });
+    }
     const canvas = generateTileTexture(tilesAcross, tilesDown, tileSize);
     if (settings.showTiles) {
       document.body.appendChild(canvas);
