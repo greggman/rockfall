@@ -54,11 +54,25 @@ export const sounds = {
 };
 /* eslint-enable quotes */
 /* eslint-enable optional-comma-spacing/optional-comma-spacing */
+const dummy = {
+  stop() {
+    //
+  },
+};
 
 let playSoundFn = () => {};
 const audioManager = new AudioManager(sounds);
 audioManager.on('started', () => {
   playSoundFn = (...args) => {
+    const [name] = args;
+    const sound = sounds[name];
+    if (sound) {
+      const currentTime = (performance.now() | 0);
+      if (currentTime - sound.lastTime < 50) {
+        return dummy;
+      }
+      sound.lastTime = currentTime;
+    }
     return audioManager.playSound(...args);
   };
 });
