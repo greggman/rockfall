@@ -69,7 +69,7 @@ export function initTouch(target) {
     const lrBits = touchBits & kLRBits;
     const udBits = touchBits & kUDBits;
     const clearBits = (lrBits ? (lrBits ^ kLRBits) : 0) |
-                      (udBits ? (udBits & kUDBits) : 0);
+                      (udBits ? (udBits ^ kUDBits) : 0);
     latchBits &= 0xFFFF ^ clearBits;
 
     lastX = newX;
@@ -86,7 +86,7 @@ export function initTouch(target) {
   target.addEventListener('touchend', handleTouchEnd, {passive: false});
 
   return () => {
-    const bits = touchBits | latchBits;
+    const bits = /*touchBits |*/ latchBits;
     latchBits = 0;
     return bits;
   };
