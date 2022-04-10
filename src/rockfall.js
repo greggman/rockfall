@@ -249,6 +249,7 @@ async function main() {
     window.history.replaceState({}, '', url.toString());
     settings.level = ndx;
     if (ndx === 0) {
+      console.log(settings.seed);
       levels[0].level = randomLevel(settings);
     }
     startLevel(levels[ndx]);
@@ -1050,7 +1051,7 @@ async function main() {
           const ndx = finished
               ? (settings.level + 1) % levels.length
               : settings.level;
-          if (ndx === 0) {
+          if (ndx === 0 && finished) {
             randomizeLevel0();
           }
           setLevel(ndx);
