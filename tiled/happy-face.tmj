@@ -60,7 +60,7 @@
         {
          "name":"timeLimit",
          "type":"int",
-         "value":30
+         "value":6
         }],
  "renderorder":"right-down",
  "tiledversion":"1.8.4",
