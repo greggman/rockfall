@@ -14,7 +14,7 @@ export function initTouch(target) {
   let touchBits = 0;
   let latchBits = 0;
 
-  const minTouchDistance = 4;
+  const minTouchDistance = 8;
   let startX;
   let startY;
   let lastX;
@@ -63,14 +63,16 @@ export function initTouch(target) {
       startX = lastX;
       startY = lastY;
     }
-    latchBits |= touchBits;
-    // remove opposites.
-    // I'm sure there's simpler way but
-    const lrBits = touchBits & kLRBits;
-    const udBits = touchBits & kUDBits;
-    const clearBits = (lrBits ? (lrBits ^ kLRBits) : 0) |
-                      (udBits ? (udBits ^ kUDBits) : 0);
-    latchBits &= 0xFFFF ^ clearBits;
+    if (touchBits) {
+      latchBits = touchBits;
+    }
+//    // remove opposites.
+//    // I'm sure there's simpler way but
+//    const lrBits = touchBits & kLRBits;
+//    const udBits = touchBits & kUDBits;
+//    const clearBits = (lrBits ? (lrBits ^ kLRBits) : 0) |
+//                      (udBits ? (udBits ^ kUDBits) : 0);
+//    latchBits &= 0xFFFF ^ clearBits;
 
     lastX = newX;
     lastY = newY;
