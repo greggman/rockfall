@@ -853,7 +853,7 @@ async function main() {
 
       const player = players[playerNdx];
       if (ticks === timeLimitTicks) {
-        addExplosion(kSymSpace, player.pos);
+        addExplosion(kSymSpace, player.pos - mapWidth - 1);
         playSound('explode');
         return;
       }
