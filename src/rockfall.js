@@ -279,10 +279,13 @@ async function main() {
   const hideSplash = () => {
     splashElem.style.display = 'none';
   };
-  splashElem.addEventListener('click', () => {
+  function hideSplashOnUseGesture() {
+    window.removeEventListener('keydown', hideSplashOnUseGesture, {once: true});
     hideSplash();
     restart();
-  });
+  }
+  splashElem.addEventListener('click', hideSplashOnUseGesture);
+  window.addEventListener('keydown', hideSplashOnUseGesture, {once: true});
 
   const getTouchBits = initTouch(gl.canvas);
   const getKeyBits = initKeyboard(window);
