@@ -10,7 +10,7 @@
 
 ## Rules
 
-* 🙂 Player: A, S, D, W or ⬅️, ➡️, ⬆️,⬇️ to move
+* 🙂 Player: A, S, D, W or ⬅️, ➡️, ⬆️, ⬇️ to move
 
 * 🟫 Dirt: Can be dug
 
