@@ -56,6 +56,7 @@ import {
   initTouch,
 } from './touch.js';
 import {
+  clamp,
   lerp,
   minMagnitude,
   mixArray,
@@ -115,11 +116,12 @@ async function main() {
     frameRate: 1 / 10,                // frame rate in seconds
     timeLimit: 1500,                  // time limit in seconds
     colorVariation: 1,                // color variation multiplier. Set to 0 for no variation.
-    playerBoundsWidthPercent: 0.25,   // size of window to keep player inside
-    playerBoundsHeightPercent: 0.25,  // size of window to keep player inside
+    playerBoundsWidthPercent: 0.125,  // size of window to keep player inside
+    playerBoundsHeightPercent: 0.125, // size of window to keep player inside
     requiredCount: 15,                // required count (eggs + diamonds)
     showTiles: false,                 // So we can save a new .png
     testSounds: false,                // Test the sounds
+    debug: false,
   };
   const g_settings = settings;
   applyQuerySettings(settings);
@@ -265,6 +267,17 @@ async function main() {
   const nameElem = document.querySelector('#name');
   const goalElem = document.querySelector('#goal');
   const timeElem = document.querySelector('#time');
+
+  let ctx;
+  let debugElem;
+  if (settings.debug) {
+    ctx = document.createElement('canvas').getContext('2d');
+    ctx.canvas.className = 'debug';
+    document.body.appendChild(ctx.canvas);
+    debugElem = document.createElement('pre');
+    debugElem.className = 'debug';
+    document.body.appendChild(debugElem);
+  }
 
   const restart = () => {
     levels[0].level = randomLevel(settings);
@@ -461,61 +474,73 @@ async function main() {
         |                            |
         +----------------------------+
     */
-    function computeTargetScrollPosition(gl, scrollX, scrollY, playerPos) {
-        const mapWidthPixels = mapWidth * tileSize;
-        const mapHeightPixels = mapHeight * tileSize;
-        const screenWidthPixels = gl.drawingBufferWidth;
-        const screenHeightPixels = gl.drawingBufferHeight;
+    function computeTargetScrollPosition(gl, scrollTileX, scrollTileY, playerPos) {
+      const mapWidthPixels = mapWidth * tileSize;
+      const mapHeightPixels = mapHeight * tileSize;
+      const screenWidthPixels = gl.drawingBufferWidth;
+      const screenHeightPixels = gl.drawingBufferHeight;
 
-        const maxRight = mapWidthPixels - screenWidthPixels;
-        const maxBottom = mapHeightPixels - screenHeightPixels;
+      const maxRight = mapWidthPixels - screenWidthPixels;
+      const maxBottom = mapHeightPixels - screenHeightPixels;
 
-        // could use an invisible div for this then could use CSS to set
-        // so like border/margin etc.
-        const playerBoundsX = scrollX + screenWidthPixels * 0.5 - screenWidthPixels * settings.playerBoundsWidthPercent * 0.5;
-        const playerBoundsY = scrollY + screenHeightPixels * 0.5 - screenHeightPixels * settings.playerBoundsHeightPercent * 0.5;
-        const playerBoundsWidth = screenWidthPixels * settings.playerBoundsWidthPercent;
-        const playerBoundsHeight = screenHeightPixels * settings.playerBoundsHeightPercent;
-        const playerBoundsRight = playerBoundsX + playerBoundsWidth;
-        const playerBoundsBottom = playerBoundsY + playerBoundsHeight;
+      // could use an invisible div for this then could use CSS to set
+      // so like border/margin etc.
+      const playerBoundsX = scrollTileX * tileSize + screenWidthPixels * 0.5 - screenWidthPixels * settings.playerBoundsWidthPercent * 0.5;
+      const playerBoundsY = scrollTileY * tileSize + screenHeightPixels * 0.5 - screenHeightPixels * settings.playerBoundsHeightPercent * 0.5;
+      const playerBoundsWidth = screenWidthPixels * settings.playerBoundsWidthPercent;
+      const playerBoundsHeight = screenHeightPixels * settings.playerBoundsHeightPercent;
+      const playerBoundsRight = playerBoundsX + playerBoundsWidth;
+      const playerBoundsBottom = playerBoundsY + playerBoundsHeight;
 
-        const px = (playerPos % mapWidth) * tileSize;
-        const py = (playerPos / mapWidth | 0) * tileSize;
+      const px = (playerPos % mapWidth + 0.5) * tileSize;
+      const py = ((playerPos / mapWidth | 0) + 0.5) * tileSize;
 
-        let targetX = scrollX;
-        let targetY = scrollY;
+      let targetX = scrollTileX * tileSize;
+      let targetY = scrollTileY * tileSize;
 
-        if (px < playerBoundsX) {
-          const off = playerBoundsX - px;
-          if (off > 0) {
-            targetX -= off;
-          }
-        }
-        if (py < playerBoundsY) {
-          const off = playerBoundsY - py;
-          if (off > 0) {
-            targetY -= off;
-          }
-        }
-        if (px >= playerBoundsRight) {
-          const off = px - playerBoundsRight;
-          if (off > 0) {
-            targetX += px - playerBoundsRight;
-          }
-        }
-        if (py >= playerBoundsBottom) {
-          const off = py - playerBoundsBottom;
-          if (off > 0) {
-            targetY += py - playerBoundsBottom;
-          }
-        }
+      const newPx = clamp(px, playerBoundsX, playerBoundsRight);
+      const newPy = clamp(py, playerBoundsY, playerBoundsBottom);
 
-        targetX = Math.min(Math.max(0, targetX), maxRight);
-        targetY = Math.min(Math.max(0, targetY), maxBottom);
-        targetX /= tileSize;
-        targetY /= tileSize;
+      const deltaX = px - newPx;
+      const deltaY = py - newPy;
 
-        return [targetX, targetY];
+      targetX += deltaX;
+      targetY += deltaY;
+
+      targetX = Math.min(Math.max(0, targetX), maxRight);
+      targetY = Math.min(Math.max(0, targetY), maxBottom);
+
+      if (ctx) {
+        ctx.save();
+        ctx.translate(-scrollTileX * tileSize, -scrollTileY * tileSize);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        ctx.fillRect(
+            playerBoundsX,
+            playerBoundsY,
+            playerBoundsWidth,
+            playerBoundsHeight);
+        ctx.fillStyle = 'red';
+        ctx.fillRect(px - 3, py - 3, 6, 6);
+        ctx.fillStyle = 'yellow';
+        ctx.fillRect(newPx - 3, newPy - 3, 6, 6);
+        ctx.restore();
+
+
+        ctx.save();
+        const {width, height} = ctx.canvas;
+        ctx.translate(width / 2, height / 2);
+        ctx.strokeStyle = 'lightgreen';
+        ctx.fillStyle = 'lightgreen';
+        ctx.fillRect(-2, -2, 4, 4);
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.lineTo(0, 0);
+        ctx.lineTo(px - newPx, py - newPy);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      return [targetX / tileSize, targetY / tileSize];
     }
 
     const tilesetTexture = makeTileTexture(gl);
@@ -540,25 +565,6 @@ async function main() {
         texture: tilesetTexture,
       },
     });
-
-    twgl.resizeCanvasToDisplaySize(gl.canvas);
-    let [scrollX, scrollY] = computeTargetScrollPosition(gl, 1000000, 1000000);
-
-    const tileDrawOptions = {
-      x: 0,
-      y: 0,
-      width:  mapWidth  * tileSize,
-      height: mapHeight * tileSize,
-      canvasWidth: 0, //this.canvas.width,
-      canvasHeight: 0, //this.canvas.height,
-      scrollX,
-      scrollY,
-      rotation: 0,
-      scaleX: 1,
-      scaleY: 1,
-      originX: 0,
-      originY: 0,
-    };
 
     function initWorld() {
       //
@@ -985,6 +991,25 @@ async function main() {
     initWorld();
     updateGoal(players[0].count);
 
+    twgl.resizeCanvasToDisplaySize(gl.canvas);
+    let [scrollTileX, scrollTileY] = computeTargetScrollPosition(gl, 1000000, 1000000, players[0].pos);
+
+    const tileDrawOptions = {
+      x: 0,
+      y: 0,
+      width:  mapWidth  * tileSize,
+      height: mapHeight * tileSize,
+      canvasWidth: 0, //this.canvas.width,
+      canvasHeight: 0, //this.canvas.height,
+      scrollX: scrollTileX,
+      scrollY: scrollTileY,
+      rotation: 0,
+      scaleX: 1,
+      scaleY: 1,
+      originX: 0,
+      originY: 0,
+    };
+
     let then = 0;
     let delay = 0;
     function process(now) {
@@ -1037,6 +1062,12 @@ async function main() {
         }
       }
 
+      if (ctx) {
+        twgl.resizeCanvasToDisplaySize(ctx.canvas);
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        debugElem.textContent = '';
+      }
+
       twgl.resizeCanvasToDisplaySize(gl.canvas);
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
       gl.clearColor(...(flashTime > 0
@@ -1048,30 +1079,42 @@ async function main() {
 
       {
         const player = players[0];
-        const [targetX, targetY] = computeTargetScrollPosition(gl, scrollX, scrollY, player.pos);
+        const [targetTileX, targetTileY] = computeTargetScrollPosition(gl, scrollTileX, scrollTileY, player.pos);
         const screenWidthPixels = gl.drawingBufferWidth;
         const screenHeightPixels = gl.drawingBufferHeight;
 
         tileDrawOptions.canvasWidth = screenWidthPixels;
         tileDrawOptions.canvasHeight = screenHeightPixels;
 
-        const targetScrollX = lerp(scrollX, targetX, settings.scrollRate);
-        const targetScrollY = lerp(scrollY, targetY, settings.scrollRate);
+        const absDeltaScrollX = Math.min(Math.abs(scrollTileX - targetTileX), 6);
+        const absDeltaScrollY = Math.min(Math.abs(scrollTileY - targetTileY), 6);
+
+        const lerpRateX = lerp(settings.scrollRate, 0.1, Math.pow(absDeltaScrollX / 6, 2));
+        const lerpRateY = lerp(settings.scrollRate, 0.1, Math.pow(absDeltaScrollY / 6, 2));
+
+        const targetScrollX = lerp(scrollTileX, targetTileX, lerpRateX);
+        const targetScrollY = lerp(scrollTileY, targetTileY, lerpRateY);
 
         const tilesPerTick = 1 / settings.frameRate;
         const maxSpeed = tilesPerTick / 60;
-        const deltaX = minMagnitude(targetScrollX - scrollX, maxSpeed);
-        const deltaY = minMagnitude(targetScrollY - scrollY, maxSpeed);
+        const deltaTileX = minMagnitude(targetScrollX - scrollTileX, maxSpeed);
+        const deltaTileY = minMagnitude(targetScrollY - scrollTileY, maxSpeed);
 
-        scrollX += deltaX;
-        scrollY += deltaY;
+        scrollTileX += deltaTileX;
+        scrollTileY += deltaTileY;
 
-        tileDrawOptions.x = scrollX < 0 ? -scrollX * tileSize * 0.5 : 0;
-        tileDrawOptions.y = scrollY < 0 ? -scrollY * tileSize * 0.5 : 0;
+        tileDrawOptions.x = scrollTileX < 0 ? -scrollTileX * tileSize * 0.5 : 0;
+        tileDrawOptions.y = scrollTileY < 0 ? -scrollTileY * tileSize * 0.5 : 0;
 
-        tileDrawOptions.scrollX = (Math.max(0, scrollX) * tileSize | 0) / tileSize;
-        tileDrawOptions.scrollY = (Math.max(0, scrollY) * tileSize | 0) / tileSize;
+        tileDrawOptions.scrollX = (Math.max(0, scrollTileX) * tileSize | 0) / tileSize;
+        tileDrawOptions.scrollY = (Math.max(0, scrollTileY) * tileSize | 0) / tileSize;
         tilemap.draw(gl, tileDrawOptions);
+        if (debugElem) {
+          debugElem.textContent = `\n\n
+targetTileX,Y: ${targetTileX}, ${targetTileY}
+lerpRateX: ${lerpRateX}
+lerpRateY: ${lerpRateY}`;
+        }
       }
     }
 
