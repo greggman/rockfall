@@ -1,6 +1,5 @@
 /* eslint-env browser */
 
-import { kLeft } from './directions.js';
 import {
   kUpBit,
   kDownBit,

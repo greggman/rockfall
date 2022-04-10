@@ -230,7 +230,7 @@ export class AudioManager {
       }
     };
 
-    AudioTagJSFX.prototype.play = function(opt_when, opt_loop) {
+    AudioTagJSFX.prototype.play = function(/*opt_when, opt_loop*/) {
       this.playNdx = (this.playNdx + 1) % this.samples;
       const a = this.audio[this.playNdx];
       const b = new Audio();
@@ -269,7 +269,7 @@ export class AudioManager {
       }
     }
 
-    AudioTagSound.prototype.play = function(opt_when, opt_loop) {
+    AudioTagSound.prototype.play = function(/*opt_when, opt_loop*/) {
       if (this.waiting_on_load > 0) {
         console.log(this.name, ' not loaded');
         return;
@@ -286,11 +286,11 @@ export class AudioManager {
       b.load();
     };
 
-    const handleError = function(filename, audio) {
-      return function(e) {
-        console.error('can\'t load ', filename);
-      };
-    };
+    // const handleError = function(filename/*, audio*/) {
+    //   return function(e) {
+    //     console.error('can\'t load ', filename);
+    //   };
+    // };
 
     this.playSound = function(name, opt_when, opt_loop) {
       if (!g_canPlay) {
@@ -316,7 +316,7 @@ export class AudioManager {
       if (this.needUserGesture()) {
         let count = 0;
         const elem = window;
-        const that = this;
+        // const that = this;
         const eventNames = ['touchstart', 'mousedown', 'keydown'];
         const playSoundToStartAudio = function() {
           ++count;

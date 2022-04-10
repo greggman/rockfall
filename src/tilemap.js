@@ -103,6 +103,7 @@ const s_tileFragmentShader = `#version 300 es
     vec2 tileCoord = (vec2(tile.xy) + texcoord) / u_tilesetSize;
     vec4 color = texture(u_tiles, tileCoord);
     if (color.a <= 0.1) {
+      // fragColor = vec4(1,0,0,1); return;
       discard;
     }
     vec3 hsv = rgb2hsv(color.rgb);
@@ -301,6 +302,7 @@ export default class TileMap {
     m4.multiply(mat, this.scalingMat, mat);
     m4.multiply(mat, this.originMat, mat);
 
+    m4.identity(this.matrix);
     this.matrix[ 0] =  2 * dispScaleX;
     this.matrix[ 5] = -2 * dispScaleY;
     this.matrix[12] = -1 + 2 * options.x / options.canvasWidth;

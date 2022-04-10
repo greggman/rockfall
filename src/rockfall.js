@@ -98,7 +98,7 @@ async function main() {
   // initial # of objects on screen
   const settings = {
     level: 0,                         // level to use
-    seed: randInt(0x7FFFFFF),         // seed for random level
+    seed: 0,                          // seed for random level
     amoebas: 1,                       // number of amoebas
     butterflies: 5,                   // number of butterflies
     diamonds: 15,                     // number of diamonds
@@ -121,10 +121,16 @@ async function main() {
     playerBoundsWidthPercent: 0.125,  // size of window to keep player inside
     playerBoundsHeightPercent: 0.125, // size of window to keep player inside
     requiredCount: 15,                // required count (eggs + diamonds)
+    endDuration: 3,                   // time until reset after level ends
     showTiles: false,                 // So we can save a new .png
     testSounds: false,                // Test the sounds
     debug: false,
   };
+  function randomizeLevel0() {
+    settings.seed = randInt(0x7FFFFFFF);
+  }
+  randomizeLevel0();
+
   const g_settings = settings;
   applyQuerySettings(settings);
 
@@ -184,7 +190,6 @@ async function main() {
     restart();
   }
 
-
   if (settings.testSounds) {
     const parent = document.createElement('div');
     parent.style.position = 'absolute';
@@ -228,7 +233,6 @@ async function main() {
   }
 
   const restart = () => {
-    levels[0].level = randomLevel(settings);
     setLevel(settings.level);
   };
 
@@ -243,6 +247,9 @@ async function main() {
     url.search = params.toString();
     window.history.replaceState({}, '', url.toString());
     settings.level = ndx;
+    if (ndx === 0) {
+      levels[0].level = randomLevel(settings);
+    }
     startLevel(levels[ndx]);
   }
 
@@ -294,7 +301,11 @@ async function main() {
       selectElem.appendChild(elem);
     }
     selectElem.addEventListener('change', () => {
-      setLevel(selectElem.selectedIndex);
+      const ndx = selectElem.selectedIndex;
+      if (ndx === 0) {
+        randomizeLevel0();
+      }
+      setLevel(ndx);
     });
   }
   updateLevelSelection();
@@ -305,6 +316,7 @@ async function main() {
 
   function startLevel({level}) {
     currentLevel = level;
+    updateLevelSelection();
     runLevel();
   }
 
@@ -318,6 +330,7 @@ async function main() {
     let finished = false;
     let killPlayer = false;
     let ticks = 0;
+    let endTimer = 0;
 
     const settings = {
       ...g_settings,
@@ -945,6 +958,7 @@ async function main() {
     initGame();
     initWorld();
     updateGoal(players[0].count);
+    playSound('start');
 
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     let [scrollTileX, scrollTileY] = computeTargetScrollPosition(gl, 1000000, 1000000, players[0].pos);
@@ -1000,7 +1014,7 @@ async function main() {
               map[newPos] <= kSymDirtFaceLeft &&
               player.dead === false) {
             dirtFace(i);
-          } else {
+          } else if (!player.dead) {
             player.dead = true;
           }
         }
@@ -1021,6 +1035,19 @@ async function main() {
         twgl.resizeCanvasToDisplaySize(ctx.canvas);
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         debugElem.textContent = '';
+      }
+
+      if (finished || players[0].dead) {
+        endTimer += deltaTime;
+        if (endTimer >= settings.endDuration) {
+          const ndx = finished
+              ? (settings.level + 1) % levels.length
+              : settings.level;
+          if (ndx === 0) {
+            randomizeLevel0();
+          }
+          setLevel(ndx);
+        }
       }
 
       twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -1063,6 +1090,7 @@ async function main() {
 
         tileDrawOptions.scrollX = (Math.max(0, scrollTileX) * tileSize | 0) / tileSize;
         tileDrawOptions.scrollY = (Math.max(0, scrollTileY) * tileSize | 0) / tileSize;
+
         tilemap.draw(gl, tileDrawOptions);
         if (debugElem) {
           debugElem.textContent = `\n\n
