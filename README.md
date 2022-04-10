@@ -44,7 +44,9 @@ by clicking the name.
 
 Note: You can dig one tile without moving by holding shift.
 
-The levels are random so and there is no real goal so it's just a proof of concept.
+The first level is random so and there is no real theme so it's just a proof of concept. In fact given it's random it's possible it's impossible to complete.
+If so click the 🔄 icon to generate a new level.
+
 A real game would require hand designed or algorithmically generated levels.
 
 ## Settings
