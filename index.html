@@ -5,6 +5,21 @@
     <meta http-equiv="Content-Language" content="en">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+    <meta property="og:title" content="Rockfall" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://greggman.github.io/rockfall/docs/imgs/screenshot.png" />
+    <meta property="og:description" content="Rockfall, a game where rocks fall" />
+    <meta property="og:url" content="https://greggman.github.io/rockfall/" />
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@greggman">
+    <meta name="twitter:creator" content="@greggman">
+    <meta name="twitter:domain" content="greggman.github.io">
+    <meta name="twitter:title" content="Rockfall">
+    <meta name="twitter:url" content="https://greggman.github.io/rockfall/">
+    <meta name="twitter:description" content="Rockfall, a game where rocks fall">
+    <meta name="twitter:image:src" content="https://greggman.github.io/rockfall/docs/imgs/screenshot.png">
+
     <link href="resources/images/rockfall-icon.png" rel="shortcut icon" type="image/png">
 
     <title>RockFall</title>
@@ -15,6 +30,7 @@
         background: black;
         color: white;
         box-sizing: border-box;
+        font-family: monospace;
       }
       * {
         box-sizing: inherit;
@@ -67,9 +83,14 @@
         overflow: hidden;
         min-width: 0;
       }
+      #github a {
+        display: flex;
+        font-weight: bold;
+      }
       #github a,
       #github img {
         cursor: pointer;
+        text-decoration: none;
         vertical-align: text-bottom;
       }
       #github img {
@@ -149,7 +170,7 @@
           <div><span>goal:</span><span id="goal"></span></div>
           <div id="name"></div>
         </div>
-        <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall"><img src="resources/images/octocat-icon.svg"></a></div>
+        <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall"><span>?</span><img src="resources/images/octocat-icon.svg"></a></div>
       </div>
     </div>
     <div id="splash">
