@@ -45,7 +45,6 @@ export function randomLevel(settings) {
     map[pos] = kSymBorder;
   }
 
-  // This is a lot of memory but whatever
   const available = [];
   for (let y = 1; y < mapHeight - 1; ++y) {
     for (let x = 1; x < mapWidth - 1; ++x) {
@@ -54,7 +53,7 @@ export function randomLevel(settings) {
   }
   shuffleArray(available, randFn);
 
-  function place(sym, stat, rep, many) {
+  function place(sym, stat, rep, many, offset = 1) {
     let count = 0;
     while (available.length && count < many) {
       const pos = available.pop();
@@ -62,16 +61,16 @@ export function randomLevel(settings) {
         count++;
         map[pos] = sym;
 
-        if (map[pos + 1] === kSymDirt) {
-          map[pos + 1] = rep;
-        }
-
-        if (map[pos + mapWidth + 1] === kSymDirt) {
-          map[pos + mapWidth + 1] = rep;
-        }
-
-        if (map[pos + mapWidth] === kSymDirt) {
-          map [pos + mapWidth] = rep;
+        const offsets = [
+          offset,
+          mapWidth,
+          mapWidth + offset,
+        ];
+        for (const off of offsets) {
+          const newPos = pos + off;
+          if (map[newPos] === kSymDirt) {
+            map[newPos] = rep;
+          }
         }
       }
     }
@@ -80,7 +79,7 @@ export function randomLevel(settings) {
   place(kSymDiamond,   0,     kSymDirt,  settings.diamonds);
   place(kSymWall,      0,     kSymDirt,  settings.walls);
   place(kSymRock,      0,     kSymDirt,  settings.rocks);
-  place(kSymGuard,     kUp,   kSymSpace, settings.guards);
+  place(kSymGuard,     kUp,   kSymSpace, settings.guards, -1);
   place(kSymButterfly, kDown, kSymSpace, settings.butterflies);
   place(kSymAmoeba,    0,     kSymDirt,  settings.amoebas);
   place(kSymMagicWall, 0,     kSymDirt,  settings.magicWalls);
