@@ -1,4 +1,4 @@
-
+/* eslint-env browser */
 export const rgb = (r, g, b) => `rgb(${r * 256 | 0}, ${g * 256 | 0}, ${b * 256 | 0})`;
 export const lerp = (a, b, t) => a + (b - a) * t;
 export const mixArray = (a, b, t) => a.map((v, i) => lerp(v, b[i], t));
@@ -17,6 +17,43 @@ export const basenameNoExt = s => {
   const period = base.lastIndexOf('.');
   return period >= 0 ? base.substring(0, period) : base;
 };
+
+export function parseBool(s) {
+  if (s[0] === 'f' || s[0] === 'F') {
+    return false; // assume false
+  }
+  const v = parseFloat(s);
+  return Number.isNaN(v)
+     ? true
+     : v !== 0;
+}
+
+export function parseAsMatchingType(oldV, s) {
+  switch (typeof oldV) {
+    case 'boolean':
+      return parseBool(s);
+    case 'number': {
+       const v = parseFloat(s);
+       if (Number.isNaN(v)) {
+         throw Error(`'${s} is not a number`);
+       }
+       return v;
+    }
+    default: // string
+      return s;
+  }
+}
+
+export function applyQuerySettings(settings) {
+  for (const [k, v] of (new URLSearchParams(window.location.search).entries())) {
+    const oldV = settings[k];
+    if (oldV === undefined) {
+      console.error(`unknown setting: ${k}`);
+      continue;
+    }
+    settings[k] = parseAsMatchingType(oldV, v);
+  }
+}
 
 export function shuffleArray(array, randFn = Math.random) {
   for (let i = 0; i < array.length; ++i) {

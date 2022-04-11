@@ -57,6 +57,7 @@ import {
   initTouch,
 } from './touch.js';
 import {
+  applyQuerySettings,
   clamp,
   lerp,
   minMagnitude,
@@ -85,16 +86,6 @@ async function main() {
   const kCWise      = -1;
   const kCCWise     =  1;
 
-  function applyQuerySettings(settings) {
-    for (const [k, v] of (new URLSearchParams(window.location.search).entries())) {
-      if (settings[k] === undefined) {
-        console.error(`unknown setting: ${k}`);
-        continue;
-      }
-      settings[k] = parseFloat(v);
-    }
-  }
-
   // initial # of objects on screen
   const settings = {
     level: 0,                         // level to use
@@ -122,6 +113,10 @@ async function main() {
     playerBoundsHeightPercent: 0.125, // size of window to keep player inside
     requiredCount: 15,                // required count (eggs + diamonds)
     endDuration: 3,                   // time until reset after level ends
+    canPushWithRocksAbove: true,      // can push with rocks above.
+    maxPushRocks: 100000,             // max rocks that can be pushed
+    pushTurnsPerRock: 1,              // turns per rock to push (set to 0 for same speed regardless of number of rocks)
+    minRockPushTurns: 1,              // number of turns until you can start pushing rocks (set to 0 for instant)
     showTiles: false,                 // So we can save a new .png
     testSounds: false,                // Test the sounds
     genTiles: false,                  // Gen tiles instead of loading png
@@ -911,14 +906,38 @@ async function main() {
       } else if (map[newPos] === kSymRock && (newOffset !== -mapWidth)) {
 
         // push rocks
+        if (player.pushDelay !== newOffset) {
+          // start pushing rocks
+          // 0 start 0 per = 0,0,0
+          // 0 start 1 per = 0,1,2
+          // 1 start 1 per = 1,2,3
+          // 1 start 0 per = 1,1,1
+          // 2 start 1 per = 2,3,4
+          // 1 start 2 per = 1,3,5
+
+          player.pushTurns = 0;
+          let numRocks = 0;
+          let q = newPos;
+          do {
+            q += newOffset;
+            ++numRocks;
+          } while (map[q] === kSymRock && (settings.canPushWithRocksAbove || map[q - mapWidth] !== kSymRock));
+          player.pushTurns = settings.minRockPushTurns + (numRocks - 1) * settings.pushTurnsPerRock;
+
+          if (map[q] !== kSymSpace || numRocks > settings.maxPushRocks) {
+            player.pushDelay = 0;  // can't push
+          } else {
+            player.pushDelay = newOffset;  // can push
+          }
+        }
         if (player.pushDelay === newOffset) {
           player.pushTurns--;
-          if (player.pushTurns === 0) {
+          if (player.pushTurns < 0) {
            // move rock
             let q = newPos;
             do {
               q += newOffset;
-              if (map[q - mapWidth] === kSymRock) {
+              if (!settings.canPushWithRocksAbove && map[q - mapWidth] === kSymRock) {
                 q = 0;
               }
             } while (map[q] === kSymRock && q !== 0);
@@ -936,19 +955,6 @@ async function main() {
             }
 
             player.pushDelay = 0;
-          }
-        } else { // start pushing rocks
-          player.pushTurns = 0;
-          let q = newPos;
-          do {
-            q += newOffset;
-            player.pushTurns++;
-          } while (map[q] === kSymRock && map[q - mapWidth] !== kSymRock);
-
-          if (map[q] !== kSymSpace) {
-            player.pushDelay = 0;  // can't push
-          } else {
-            player.pushDelay = newOffset;  // can push
           }
         }
       }

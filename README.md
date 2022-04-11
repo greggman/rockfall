@@ -16,7 +16,7 @@
 
 * ⬜️ Wall: Unmovable, un-diggable, but explodable
 
-* 🌑 Rock: Pushable left or right as long as no rocks are above the row.
+* 🌑 Rock: Pushable left or right.
 
 * 💎 Diamond: 100 points
 
@@ -75,8 +75,12 @@ These settings can be set with query parameters
 | colorVariation |      1 | color variation multiplier. Set to 0 for no variation |
 | requiredCount |      15 | count (eggs + diamonds) needed to open exits |
 | timeLimit     |    1500 | time limit in seconds |
-| playerBoundsWidthPercent | 0.25 |  size of window to keep player inside |
-| playerBoundsHeightPercent | 0.25 | size of window to keep player inside |
+| maxPushRocks  |  100000 | max rocks that can be pushed |
+| pushTurnsPerRock |    1 | turns per rock to push (set to 0 for same speed regardless of number of rocks) |
+| minRockPushTurns |    1 | number of turns until you can start pushing rocks (set to 0 for instant) |
+| canPushWithRocksAbove | true | can push with rocks above |
+| playerBoundsWidthPercent | 0.125 |  size of window to keep player inside |
+| playerBoundsHeightPercent | 0.125 | size of window to keep player inside |
 | level         |       0 | level to use (see [here](https://github.com/greggman/rockfall/blob/main/src/levels.js)) |
 
 Examples:
@@ -120,7 +124,9 @@ After that I thought it would be fun to use the tilemap shader I wrote for
 Note: In the original, IIRC, Butterflies explode into diamonds, not eggs.
 It would probably be best to make a 3rd enemy that explodes into diamonds
 for the variety but in these random levels it's arguably more fun that butterflies
-explode into eggs so you can see lots of movement.
+explode into eggs so you can see lots of movement. Also in the original
+you can only push a single rock. If 2 or more rocks are in a row they can not
+be pushed.
 
 ## Design
 
