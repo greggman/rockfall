@@ -45,7 +45,11 @@ by clicking the name.
 Note: You can dig one tile without moving by holding shift.
 
 The first level is random so and there is no real theme so it's just a proof of concept. In fact given it's random it's possible it's impossible to complete.
-If so click the 🔄 icon to generate a new level.
+If so click the 🔄 icon to generate a new level. If you get stuck you can
+kill yourself by clicking the ☠️ icon. Note that having the entrance blocked
+means you can't do the level but having the exit blocked may mean you can
+challenge yourself to lure some enemies over there and drop rocks on them
+to mine a way into the exit 😛
 
 A real game would require hand designed or algorithmically generated levels.
 
