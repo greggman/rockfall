@@ -129,21 +129,17 @@ export class AudioManager {
     options = options || {};
     const g_eventEmitter = new EventTarget();
     let g_context;
-    let g_audioMgr;
     const g_soundBank = {};
     let g_canPlay = false;
     let g_canPlayOgg;
     let g_canPlayMp3;
     let g_canPlayWav;
-    let g_canPlayAif;
     let G_createFromFileFn;
     let G_createFromJSFXFn;
 
     const changeExt = function(filename, ext) {
       return filename.substring(0, filename.length - 3) + ext;
     };
-
-    this.needUserGesture = () => true;
 
     this.on = g_eventEmitter.addEventListener.bind(g_eventEmitter);
     this.addListener = this.on;
@@ -218,74 +214,6 @@ export class AudioManager {
 
     WebAudioSound.prototype = new WebAudioBuffer();
 
-    const AudioTagJSFX = function(name, data, samples, opt_callback) {
-      this.samples = samples || 1;
-      this.audio = {};
-      this.playNdx = 0;
-      for (let i = 0; i < samples; ++i) {
-        this.audio[i] = jsfxlib.createWave(data);
-      }
-      if (opt_callback) {
-        setTimeout(opt_callback, 0);
-      }
-    };
-
-    AudioTagJSFX.prototype.play = function(/*opt_when, opt_loop*/) {
-      this.playNdx = (this.playNdx + 1) % this.samples;
-      const a = this.audio[this.playNdx];
-      const b = new Audio();
-      b.src = a.src;
-      // TODO: use when
-      b.addEventListener('canplaythrough', function() {
-        b.play();
-        }, false);
-      b.load();
-    };
-
-    function AudioTagSound(name, filename, samples, opt_callback) {
-      this.waiting_on_load = samples;
-      this.samples = samples || 1;
-      this.name = name;
-      this.play_idx = 0;
-      this.audio = {};
-      for (let i = 0; i < samples; i++) {
-        const audio = new Audio();
-        const that = this;
-        const checkCallback = function(err) {
-          that.waiting_on_load--;
-          if (opt_callback) {
-            opt_callback(err);
-          }
-        };
-        audio.addEventListener('canplaythrough', function() {
-          checkCallback(false);
-        }, false);
-        audio.src = filename;
-        audio.onerror = function() {
-          checkCallback(true);
-        };
-        audio.load();
-        this.audio[i] = audio;
-      }
-    }
-
-    AudioTagSound.prototype.play = function(/*opt_when, opt_loop*/) {
-      if (this.waiting_on_load > 0) {
-        console.log(this.name, ' not loaded');
-        return;
-      }
-      this.play_idx = (this.play_idx + 1) % this.samples;
-      const a = this.audio[this.play_idx];
-      // console.log(this.name, ":", this.play_idx, ":", a.src);
-      const b = new Audio();
-      b.src = a.src;
-      // TODO: use when
-      b.addEventListener('canplaythrough', function() {
-        b.play();
-        }, false);
-      b.load();
-    };
-
     // const handleError = function(filename/*, audio*/) {
     //   return function(e) {
     //     console.error('can\'t load ', filename);
@@ -308,52 +236,39 @@ export class AudioManager {
       return g_context ? g_context.currentTime : Date.now() * 0.001;
     };
 
-    // on iOS and possibly other devices you can't play any
-    // sounds in the browser unless you first play a sound
-    // in response to a user gesture. So, make something
-    // to respond to a user gesture.
-    const setupGesture = function() {
-      if (this.needUserGesture()) {
-        let count = 0;
-        const elem = window;
-        // const that = this;
-        const eventNames = ['touchstart', 'mousedown', 'keydown'];
-        const playSoundToStartAudio = function() {
-          ++count;
-          if (count < 3) {
-            // just playing any sound does not seem to work.
-            const source = g_context.createOscillator();
-            const gain = g_context.createGain();
-            source.frequency.value = 1;
-            source.connect(gain);
-            gain.gain.value = 0;
-            gain.connect(g_context.destination);
-            if (source.start) {
-              source.start(0);
-            } else {
-              source.noteOn(0);
-            }
-            setTimeout(function() {
-              source.disconnect();
-            }, 100);
+    const playSoundToStartAudio = (function() {
+      let count = 0;
+      return function() {
+        ++count;
+        if (count < 3) {
+          // just playing any sound does not seem to work.
+          const source = g_context.createOscillator();
+          const gain = g_context.createGain();
+          source.frequency.value = 1;
+          source.connect(gain);
+          gain.gain.value = 0;
+          gain.connect(g_context.destination);
+          if (source.start) {
+            source.start(0);
+          } else {
+            source.noteOn(0);
           }
-          if (count === 3) {
-            for (let ii = 0; ii < eventNames.length; ++ii) {
-              elem.removeEventListener(eventNames[ii], playSoundToStartAudio, false);
-            }
-            g_eventEmitter.dispatchEvent(new CustomEvent('started'));
-          }
-        };
-
-        for (let ii = 0; ii < eventNames.length; ++ii) {
-          elem.addEventListener(eventNames[ii], playSoundToStartAudio, false);
+          setTimeout(function() {
+            source.disconnect();
+            playSoundToStartAudio();
+          }, 100);
         }
-      }
-    }.bind(this);
+        if (count === 3) {
+          g_eventEmitter.dispatchEvent(new CustomEvent('started'));
+        }
+      };
+    }());
 
     this.loadSound = function(soundName, filename, samples, opt_callback) {
       const ext = filename.substring(filename.length - 3);
       if (ext === 'ogg' && !g_canPlayOgg) {
+        filename = changeExt(filename, 'mp3');
+      } else if (ext === 'wav' && !g_canPlayWav) {
         filename = changeExt(filename, 'mp3');
       } else if (ext === 'mp3' && !g_canPlayMp3) {
         filename = changeExt(filename, 'ogg');
@@ -399,7 +314,6 @@ export class AudioManager {
       g_canPlayOgg = a.canPlayType('audio/ogg');
       g_canPlayMp3 = a.canPlayType('audio/mp3');
       g_canPlayWav = a.canPlayType('audio/wav');
-      g_canPlayAif = a.canPlayType('audio/aif') || a.canPlayType('audio/aiff');
       g_canPlay = g_canPlayOgg || g_canPlayMp3;
       if (!g_canPlay) {
         return;
@@ -416,9 +330,11 @@ export class AudioManager {
         G_createFromFileFn = WebAudioSound;
         G_createFromJSFXFn = WebAudioJSFX;
       } else {
-        console.log('Using Audio Tag');
-        G_createFromFileFn = AudioTagSound;
-        G_createFromJSFXFn = AudioTagJSFX;
+        console.error('No WebAudio API');
+      }
+
+      if (WebAudioAPI) {
+        playSoundToStartAudio();
       }
 
       let soundsPending = 1;
@@ -446,9 +362,6 @@ export class AudioManager {
       // disable sounds by passing none in.
       setTimeout(soundsLoaded, 0);
 
-      if (WebAudioAPI) {
-        setupGesture();
-      }
     }.bind(this);
     this.init(sounds);
 

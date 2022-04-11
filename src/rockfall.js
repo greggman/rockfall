@@ -5,6 +5,9 @@ import {
   kLeft,
 } from './directions.js';
 import {
+  GamepadManager,
+} from './gamepad.js';
+import {
   randomLevel,
 } from './generate-level.js';
 import {
@@ -19,6 +22,7 @@ import {
 } from './keyboard.js';
 import levelPaths from './levels.js';
 import {
+  init as initSounds,
   sounds,
   playSound,
 } from './sounds.js';
@@ -69,6 +73,7 @@ import {
 
 async function main() {
   const levels = [];
+  const gamepadManager = new GamepadManager();
 
   const kAgeWiggle = 50;    // time till egg wiggles
   const kAgeCrack  = 58;    // time till egg cracks
@@ -261,6 +266,7 @@ async function main() {
 
   loadingElem.style.display = 'none';
   const hideSplash = () => {
+    initSounds();
     splashElem.style.display = 'none';
   };
   function hideSplashOnUseGesture() {
@@ -1004,6 +1010,8 @@ async function main() {
       const deltaTime = Math.min(now - then, 0.1);
       then = now;
 
+      gamepadManager.process();
+
       delay -= deltaTime;
       while (delay <= 0) {
         delay += settings.frameRate;
@@ -1014,6 +1022,7 @@ async function main() {
         }
         players[0].input |= getKeyBits(1);
         players[0].input |= getTouchBits();
+        players[0].input |= gamepadManager.getBits(0);
 
         nextGen();
         explode();

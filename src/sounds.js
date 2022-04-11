@@ -65,21 +65,24 @@ const dummy = {
 };
 
 let playSoundFn = () => {};
-const audioManager = new AudioManager(sounds);
-audioManager.on('started', () => {
-  playSoundFn = (...args) => {
-    const [name] = args;
-    const sound = sounds[name];
-    if (sound) {
-      const currentTime = (performance.now() | 0);
-      if (currentTime - sound.lastTime < 50) {
-        return dummy;
+
+export function init() {
+  const audioManager = new AudioManager(sounds);
+  audioManager.on('started', () => {
+    playSoundFn = (...args) => {
+      const [name] = args;
+      const sound = sounds[name];
+      if (sound) {
+        const currentTime = (performance.now() | 0);
+        if (currentTime - sound.lastTime < 50) {
+          return dummy;
+        }
+        sound.lastTime = currentTime;
       }
-      sound.lastTime = currentTime;
-    }
-    return audioManager.playSound(...args);
-  };
-});
+      return audioManager.playSound(...args);
+    };
+  });
+}
 
 export function playSound(...args) {
   return playSoundFn(...args);
