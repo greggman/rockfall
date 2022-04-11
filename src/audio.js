@@ -320,7 +320,6 @@ export class AudioManager {
       }
 
       if (WebAudioAPI) {
-        console.log('Using Web Audio API');
         g_context = new WebAudioAPI();
 
         if (!g_context.createGain) {
