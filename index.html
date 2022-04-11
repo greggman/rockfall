@@ -185,6 +185,22 @@
           color: greenyellow;
         }
       }
+      @media (max-width: 500px) {
+        #splash {
+          font-size: 16pt;
+        }
+        #splash button,
+        #end button {
+          border: none;
+          padding: 1em;
+          border-radius: 1em;
+          font-size: 16pt;
+          font-weight: bold;
+          color: white;
+          width: 100%;
+        }
+
+      }
     </style>
   </head>
   <body>
@@ -199,7 +215,7 @@
           <div id="die">☠️</div>
           <div id="name"></div>
         </div>
-        <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall"><span>?</span><img src="resources/images/octocat-icon.svg"></a></div>
+        <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall#rules"><span>?</span><img src="resources/images/octocat-icon.svg"></a></div>
       </div>
     </div>
     <!--
@@ -211,9 +227,12 @@
     <div id="splash">
       <div>
         <h1>RockFall</h1>
-        <h2>A game where rocks fall!</h2>
-        <p>Make your own levels and add them to this game! <a target="_blank" href="https://greggman.github.io/rockfall/docs/making-levels.html">More Info</a></p>
+        <p>A game where rocks fall!</p>
+        <p>
+        Collect diamonds and eggs
+        to open the exit 🧧. [<a href="https://github.com/greggman/rockfall#rules">details here</a>]</p>
         <button type="button">Start</button>
+        <p><a target="_blank" href="https://greggman.github.io/rockfall/docs/making-levels.html">Make your own levels and add them to this game!</a></p>
       </div>
     </div>
     <div id="loading"><div>loading...</div></div>
