@@ -41,7 +41,7 @@ const s_tileVertexShader = `#version 300 es
   uniform mat4 u_matrix;
   uniform mat4 u_texMatrix;
 
-  out vec2 v_texcoord;
+  out highp vec2 v_texcoord;
 
   void main() {
     gl_Position = u_matrix * position;
@@ -50,7 +50,7 @@ const s_tileVertexShader = `#version 300 es
 `;
 
 const s_tileFragmentShader = `#version 300 es
-  precision mediump float;
+  precision highp float;
 
   uniform highp usampler2D u_tilemap;
   uniform sampler2D u_tilemapColors;
@@ -58,7 +58,7 @@ const s_tileFragmentShader = `#version 300 es
   uniform vec2 u_tilemapSize;
   uniform vec2 u_tilesetSize;
 
-  in vec2 v_texcoord;
+  in highp vec2 v_texcoord;
 
   out vec4 fragColor;
 
