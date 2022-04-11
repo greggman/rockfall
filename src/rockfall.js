@@ -1072,8 +1072,9 @@ async function main() {
         const secondsLeft = Math.floor(Math.max(0, timeLimitTicks - ticks) * settings.frameRate);
         timeElem.textContent = secondsLeft.toString().padStart(4, '0');
         if (finished && secondsLeft) {
-          addScore(1, 0);
-          timeLimitTicks -= Math.max(1, (1 / settings.frameRate) | 0);
+          const points = secondsLeft > 25 ? 10 : 1;
+          addScore(points, 0);
+          timeLimitTicks -= Math.max(1, (points / settings.frameRate) | 0);
           playSound('endScore');
         } else {
           endTimer += deltaTime;
