@@ -347,7 +347,7 @@ async function main() {
 
     goalElem.classList.remove('exit-open');
     timeElem.style.color = '';
-    const timeLimitTicks = Math.ceil(settings.timeLimit / settings.frameRate);
+    let timeLimitTicks = Math.ceil(settings.timeLimit / settings.frameRate);
     const requiredCount = settings.requiredCount || 1;
 
     const numCountDigits = (Math.log10(requiredCount) | 0) + 1;
@@ -1056,15 +1056,23 @@ async function main() {
       }
 
       if (finished || players[0].dead) {
-        endTimer += deltaTime;
-        if (endTimer >= settings.endDuration) {
-          const ndx = finished
-              ? (settings.level + 1) % levels.length
-              : settings.level;
-          if (ndx === 0 && finished) {
-            randomizeLevel0();
+        const secondsLeft = Math.floor(Math.max(0, timeLimitTicks - ticks) * settings.frameRate);
+        timeElem.textContent = secondsLeft.toString().padStart(4, '0');
+        if (finished && secondsLeft) {
+          addScore(1, 0);
+          timeLimitTicks -= Math.max(1, (1 / settings.frameRate) | 0);
+          playSound('endScore');
+        } else {
+          endTimer += deltaTime;
+          if (endTimer >= settings.endDuration) {
+            const ndx = finished
+                ? (settings.level + 1) % levels.length
+                : settings.level;
+            if (ndx === 0 && finished) {
+              randomizeLevel0();
+            }
+            setLevel(ndx);
           }
-          setLevel(ndx);
         }
       }
 
