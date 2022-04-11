@@ -121,7 +121,9 @@ After that I thought it would be fun to use the tilemap shader I wrote for
 
 [This is the result](https://greggman.github.io/rockfall/).
 
-Note: In the original, IIRC, Butterflies explode into diamonds, not eggs.
+Note: Differences from the original:
+
+In the original, Butterflies explode into diamonds, not eggs.
 It would probably be best to make a 3rd enemy that explodes into diamonds
 for the variety but in these random levels it's arguably more fun that butterflies
 explode into eggs so you can see lots of movement. Also in the original
