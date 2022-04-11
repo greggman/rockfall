@@ -283,12 +283,16 @@ async function main() {
   const tileSize = settings.tileSize;
   const tilesAcross = 32;
   const tilesDown = 32;
+  let tileTexture32x32;
   function makeTileTexture(gl) {
     if (!settings.genTiles && settings.tileSize === 32) {
-      return twgl.createTexture(gl, {
-        src: 'tiled/rockfall-tiles.png',
-        minMag: gl.NEAREST,
-      });
+      if (!tileTexture32x32) {
+        tileTexture32x32 = twgl.createTexture(gl, {
+          src: 'tiled/rockfall-tiles.png',
+          minMag: gl.NEAREST,
+        });
+      }
+      return tileTexture32x32;
     }
     const canvas = generateTileTexture(tilesAcross, tilesDown, tileSize);
     if (settings.showTiles) {
