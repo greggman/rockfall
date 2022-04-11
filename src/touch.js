@@ -7,8 +7,8 @@ import {
   kRightBit,
 } from './input.js';
 
-const kLRBits = kLeftBit | kRightBit;
-const kUDBits = kUpBit | kDownBit;
+// const kLRBits = kLeftBit | kRightBit;
+// const kUDBits = kUpBit | kDownBit;
 
 export function initTouch(target) {
   let touchBits = 0;
