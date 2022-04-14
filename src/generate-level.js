@@ -51,6 +51,13 @@ export function randomLevel(settings) {
       available.push(y * mapWidth + x);
     }
   }
+  // remove 5 in each direction of player just to hopefully
+  // give the player an exit
+  const w = mapWidth - 2;
+  for (let i = Math.min(6, mapHeight - 2); i >= 1; --i) {
+     available.splice(i * w, 1);
+  }
+  available.splice(1, Math.min(5, mapWidth - 3));
   shuffleArray(available, randFn);
 
   function place(sym, stat, rep, many, offset = 1) {
