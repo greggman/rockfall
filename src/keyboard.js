@@ -7,42 +7,58 @@ import {
   kFireBit,
 } from './input.js';
 
-const playerKeysToBits = [
-  new Map([
-    [ 'KeyW'     , kUpBit    ],
-    [ 'KeyS'     , kDownBit  ],
-    [ 'KeyA'     , kLeftBit  ],
-    [ 'KeyD'     , kRightBit ],
-    [ 'ShiftLeft', kFireBit  ],
-  ]),
-  new Map([
+const dirKeysToBits = new Map([
+    [ 'KeyW'       , kUpBit    ],
+    [ 'KeyS'       , kDownBit  ],
+    [ 'KeyA'       , kLeftBit  ],
+    [ 'KeyD'       , kRightBit ],
     [ 'ArrowUp'    , kUpBit    ],
     [ 'ArrowDown'  , kDownBit  ],
     [ 'ArrowLeft'  , kLeftBit  ],
     [ 'ArrowRight' , kRightBit ],
-    [ 'ShiftRight' , kFireBit  ],
-  ]),
-];
+]);
+
+const fireKeysToBits = new Map([
+  [ 'ShiftLeft'  , kFireBit  ],
+  [ 'ShiftRight' , kFireBit  ],
+]);
 
 export function initKeyboard(target) {
   const keyState = new Map();     // its state now
   const latchedState = new Map(); // was pressed since last time read
-  target.addEventListener('keydown', e => {
-    keyState.set(e.code, true);
-    latchedState.set(e.code, true);
+
+  // Store the directional keys in a least recently used array
+  // and return the bits from the last key only. Since we don't use
+  // diagonals this works.
+  let lruDirKeys = [];
+
+  const removeLRUKey = code => {
+    lruDirKeys = lruDirKeys.filter(c => c !== code);
+  };
+
+  target.addEventListener('keydown', ev => {
+    const code = ev.code;
+    keyState.set(code, true);
+    latchedState.set(code, true);
+    if (dirKeysToBits.has(code)) {
+      removeLRUKey(code);
+      lruDirKeys.push(code);
+    }
   });
-  target.addEventListener('keyup', e => {
-    keyState.set(e.code, false);
+  target.addEventListener('keyup', ev => {
+    const code = ev.code;
+    keyState.set(code, false);
+    removeLRUKey(code);
   });
 
-  return function(p) {
-    const keysToBits = playerKeysToBits[p];
+  return function() {
     let bits = 0;
-    if (keysToBits) {
-      for (const [key, bit] of keysToBits.entries()) {
-        bits |= (keyState.get(key) | latchedState.get(key)) ? bit : 0;
-        latchedState.set(key, false);
-      }
+    for (const [key, bit] of fireKeysToBits.entries()) {
+      bits |= (keyState.get(key) | latchedState.get(key)) ? bit : 0;
+      latchedState.set(key, false);
+    }
+    if (lruDirKeys.length) {
+      bits |= dirKeysToBits.get(lruDirKeys[lruDirKeys.length - 1]);
     }
     return bits;
   };
