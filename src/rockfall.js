@@ -49,6 +49,7 @@ import {
   kSymRock,
   kSymExit,
   kSymOpenExit,
+  kSymWall,
 } from './symbols.js';
 import {
   generateTileTexture,
@@ -149,6 +150,7 @@ async function main() {
     [kSymGuard,     [0.2 , 0.2, 0.2]],
     [kSymRock,      [0.04, 0.1, 0.1]],
     [kSymAmoeba,    [0.1,  0.1, 0.1]],
+    [kSymWall,      [0,    0, [-0.6, -0.7]]],
   ]);
 
   function getColorForSym(sym) {
