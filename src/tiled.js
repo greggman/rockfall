@@ -2,6 +2,7 @@
 
 import {
   kSymBorder,
+  // kSymDiamond,
 } from './symbols.js';
 import { basenameNoExt } from './utils.js';
 
@@ -27,6 +28,12 @@ export function parseTiledLevel(data, url) {
     const {name, value} = prop;
     settings[name] = value;
   }
+
+  // let c = 0;
+  // map.forEach(t => {
+  //   c = c + (t === kSymDiamond ? 1 : 0);
+  // });
+  // console.log(url, 'num diamonds:', c);
 
   return {
     mapWidth,
