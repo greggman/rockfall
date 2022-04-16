@@ -88,7 +88,6 @@ async function main() {
   const kEggTime  = 63;
   const kMoveBits = 3;
 
-  const kAmoebaGrowthRate =  2;
   const kCWise      = -1;
   const kCCWise     =  1;
 
@@ -104,6 +103,7 @@ async function main() {
     walls: 10,                        // number of walls
     magicWalls: 2,                    // number of magic walls
     maxAmoebas: 100,                  // how many amoebas with it turns into eggs
+    amoebaGrowthRate: 200,            // lower is faster
     magicTime: 250,                   // how many ticks the magic walls stay active
     tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
     scrollRate: 0.0125,               // scroll speed
@@ -604,7 +604,7 @@ async function main() {
               map[newPos] === kSymDirt) {
 
             amoebaGrowFlag = true;
-            if (randInt(256) < kAmoebaGrowthRate) {
+            if (randInt(settings.amoebaGrowthRate) === 0) {
               mapFlags[newPos] |= kMoved;
               if (dir === kUp || dir === kLeft) {
                 mapFlags[newPos] &= kUnmoved;
