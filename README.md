@@ -67,6 +67,8 @@ These settings can be set with query parameters
 | walls         |      10 | number of walls |
 | magicWalls    |       2 | number of magic walls |
 | maxAmoebas    |     100 | how many amoebas when it turns into eggs |
+| amoebaGrowthRate |  200 | lower is faster |
+| amoebaMinTicksToGrow | 50 | Force the amoeba to grow within this many ticks |
 | magicTime     |     250 | how many ticks the magic walls stay active |
 | tileSize      |      32 | size of tiles (note | you can also Cmd/Ctrl +/- in browser) |
 | scrollRate    |  0.0125 | scroll speed |

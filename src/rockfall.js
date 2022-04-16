@@ -104,11 +104,12 @@ async function main() {
     magicWalls: 2,                    // number of magic walls
     maxAmoebas: 100,                  // how many amoebas with it turns into eggs
     amoebaGrowthRate: 200,            // lower is faster
+    amoebaMinTicksToGrow: 100,        // Force the amoeba to grow within this many ticks
     magicTime: 250,                   // how many ticks the magic walls stay active
     tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
     scrollRate: 0.0125,               // scroll speed
     diamondPoints: 100,               // points for collecting diamond
-    eggPoints: 10 ,                   // points for collecting egg
+    eggPoints: 10,                    // points for collecting egg
     dirtPoints: 1,                    // points for digging dirt
     mapWidth: 80,                     // map width in tiles
     mapHeight: 25,                    // map height in tiles
@@ -418,6 +419,7 @@ async function main() {
 
     let     amoebaGrowFlag  = 0;
     let     amoebaChangeSym = 0;
+    let     amoebaTicksSinceLastGrow = 0;
     let     flashTime = 0;
     let     flashDuration = 30;
     let     flashColor;
@@ -604,7 +606,8 @@ async function main() {
               map[newPos] === kSymDirt) {
 
             amoebaGrowFlag = true;
-            if (randInt(settings.amoebaGrowthRate) === 0) {
+            if (randInt(settings.amoebaGrowthRate) === 0 || amoebaTicksSinceLastGrow > settings.amoebaMinTicksToGrow) {
+              amoebaTicksSinceLastGrow = 0;
               mapFlags[newPos] |= kMoved;
               if (dir === kUp || dir === kLeft) {
                 mapFlags[newPos] &= kUnmoved;
@@ -817,6 +820,8 @@ async function main() {
         } else if (amoebaCount >= settings.maxAmoebas) {
           amoebaChangeSym = amoebaMorph;
           playSound('amoebaToEggs');
+        } else {
+          ++amoebaTicksSinceLastGrow;
         }
       }
     }
