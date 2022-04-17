@@ -23,11 +23,6 @@ const fireKeysToBits = new Map([
   [ 'ShiftRight' , kFireBit  ],
 ]);
 
-const keysToBits = new Map([
-  ...dirKeysToBits,
-  ...fireKeysToBits,
-]);
-
 export function initKeyboard(target) {
   const keyState = new Map();     // its state now
   const latchedState = new Map(); // was pressed since last time read
@@ -36,13 +31,10 @@ export function initKeyboard(target) {
   // and return the bits from the last key only. Since we don't use
   // diagonals this works.
   let lruDirKeys = [];
-  const keysToRemove = [];
 
   const removeLRUKey = code => {
-    lruDirKeys = lruDirKeys.filter(c => c.code !== code);
+    lruDirKeys = lruDirKeys.filter(c => c !== code);
   };
-
-let cnt = 0;
 
   target.addEventListener('keydown', ev => {
     const code = ev.code;
@@ -50,44 +42,24 @@ let cnt = 0;
     latchedState.set(code, true);
     if (dirKeysToBits.has(code)) {
       removeLRUKey(code);
-      lruDirKeys.push({code});
+      lruDirKeys.push(code);
     }
   });
   target.addEventListener('keyup', ev => {
     const code = ev.code;
     keyState.set(code, false);
-    keysToRemove.push(code);
+    removeLRUKey(code);
   });
 
-  return function(p) {
-    if (p !== 0) {
-      return 0;
-    }
+  return function() {
     let bits = 0;
     for (const [key, bit] of fireKeysToBits.entries()) {
       bits |= (keyState.get(key) | latchedState.get(key)) ? bit : 0;
-      if (latchedState.get(key)) {
-        latchedState.set(key, false);
-      }
-    }
-    for (let i = keysToRemove.length - 1; i >= 0; --i) {
-      const code = keysToRemove[i];
-      const ndx = lruDirKeys.findIndex(c => c.code === code);
-      if (ndx >= 0) {
-        const key = lruDirKeys[ndx];
-        if (key.seen) {
-          removeLRUKey(code);
-          keysToRemove.splice(i, 1);
-        }
-      }
+      latchedState.set(key, false);
     }
     if (lruDirKeys.length) {
-      const key = lruDirKeys[lruDirKeys.length - 1];
-      key.seen = true;
-      const code = key.code;
-      bits |= dirKeysToBits.get(code);
+      bits |= dirKeysToBits.get(lruDirKeys[lruDirKeys.length - 1]);
     }
-
     return bits;
   };
 }
