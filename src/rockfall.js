@@ -212,7 +212,8 @@ async function main() {
     }
   }
 
-  const gl = document.querySelector('#playField').getContext('webgl2', {premultipliedAlpha: false});
+  const gl = document.querySelector('#playField').getContext('webgl2', {alpha: false});
+  gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
   const restartElem = document.querySelector('#restart');
   const scoreElem = document.querySelector('#score');
   const splashElem = document.querySelector('#splash');

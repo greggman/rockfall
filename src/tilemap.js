@@ -109,6 +109,7 @@ const s_tileFragmentShader = `#version 300 es
     vec3 hsv = rgb2hsv(color.rgb);
     vec3 rgb = hsv2rgb(hsv + tileColor.rgb);
     fragColor = vec4(rgb, color.a + tileColor.a);
+    fragColor.rgb *= fragColor.a;
   }
 `;
 
