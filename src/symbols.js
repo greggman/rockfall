@@ -23,6 +23,7 @@ export const kSymExit            = 0x0015;    // exit
 export const kSymOpenExit        = 0x0016;    // open exit
 export const kSymDirtFaceUp      = 0x0017;    // Dirt E. Face
 export const kSymDirtFaceDown    = 0x0018;    // Dirt E. Face
+export const kSymDoor            = 0x0019;    // Door
 
 export const symbolToCharMap = new Map([
   [kSymSpace,           ' '],    // space
@@ -50,10 +51,26 @@ export const symbolToCharMap = new Map([
   [kSymOpenExit,        '🔳'],   // open exit
   [kSymDirtFaceUp,      '👆'],   // Dirty E. Face
   [kSymDirtFaceDown,    '👇'],   // Dirty E. Face
+  [kSymDoor,            '🚪'],   // Door
 ]);
 
 export const symSpaceSet = new Set([
   kSymSpace,
+]);
+
+export const symRockFallSet = new Set([
+  kSymSpace,
+  kSymEgg,
+  kSymEggWiggle,
+  kSymEggHatch,
+  kSymEggOpen,
+  kSymWall,
+  kSymDiamond,
+  kSymRock,
+  kSymExit,
+  kSymOpenExit,
+  kSymDoor,
+  kSymMagicWall,
 ]);
 
 export const symDirtFaceSet = new Set([
@@ -72,4 +89,16 @@ export const symExplodeFromRockSet = new Set([
   kSymDirtFaceRight,
   kSymButterfly,
   kSymGuard,
+]);
+
+export const symOpenToPlayerSet = new Set([
+  kSymDirt,
+  kSymSpace,
+  kSymDiamond,
+  kSymEgg,
+  kSymEggWiggle,
+  kSymEggHatch,
+  kSymEggOpen,
+  kSymOpenExit,
+  kSymDoor,
 ]);

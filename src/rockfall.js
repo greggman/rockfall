@@ -52,8 +52,11 @@ import {
   kSymExit,
   kSymOpenExit,
   kSymWall,
+  kSymDoor,
   symDirtFaceSet,
+  symRockFallSet,
   symExplodeFromRockSet,
+  symOpenToPlayerSet,
 } from './symbols.js';
 import {
   generateTileTexture,
@@ -575,6 +578,7 @@ async function main() {
           count: 0,      // items collection
           pushTurns: 0,  // # of turns rocks have been pushed
           pushDelay: 0,  // Rock Delay, number of times rock must be pushed.
+          underSym: kSymSpace,
         });
         addScore(0, i);
         map[pos] = kSymDirtFace;
@@ -631,6 +635,12 @@ async function main() {
       }
     }
 
+    const mineralSoundsMap = new Map([
+      [kSymRock,    'rock'   ],
+      [kSymDiamond, 'diamond'],
+      [kSymEgg,     'eggFall'],
+    ]);
+
     function doMineral(pos, minSym) {
       const leftDownOffset = mapWidth - 1;
       const rightDownOffset = mapWidth + 1;
@@ -641,22 +651,15 @@ async function main() {
       const leftSym  = map[pos - 1];
       const rightSym  = map[pos + 1];
 
-      if (downSym >= kSymMagicWall || downSym === kSymSpace) {
+      if (symRockFallSet.has(downSym)) {
         if (downSym === kSymSpace) {
           map[pos] = kSymSpace;
           const newPos = pos + mapWidth;
           setTile(newPos, minSym, mapColors[pos], mapFlags[pos] | kFall | kMoved);
           if (map[newPos + mapWidth] !== kSymSpace) {
-            switch (minSym) {
-              case kSymRock:
-                playSound('rock', rand(0.1));
-                break;
-              case kSymDiamond:
-                playSound('diamond', rand(0.1));
-                break;
-              case kSymEgg:
-                playSound('eggFall', rand(0.1));
-                break;
+            const sound = mineralSoundsMap.get(minSym);
+            if (sound) {
+              playSound(sound, rand(0.1));
             }
           }
         } else if ((mapFlags[pos] & kFall) && downSym === kSymMagicWall) {
@@ -910,21 +913,17 @@ async function main() {
       }
 
       if (input & kFireBit) {  // Fire Button, should be using better routines.
-        if (c === kSymDirt || c === kSymDiamond || (c >= kSymEgg && c <= kSymEggHatch)) {
+        if (collectable) {
           setTile(newPos, kSymSpace);
         }
-      } else if (c === kSymDirt ||
-                 c === kSymSpace ||
-                 c === kSymDiamond ||
-                 (c >= kSymEgg && c <= kSymEggHatch) ||
-                 c === kSymOpenExit) {
-
+      } else if (symOpenToPlayerSet.has(c)) {
         if (c === kSymOpenExit) {
           finished = true;
           playSound('beamMeUp');
         }
         // move Dirt Face
-        setTile(dirtFacePos, kSymSpace);
+        setTile(dirtFacePos, player.underSym);
+        player.underSym = c === kSymDoor ? kSymDoor : kSymSpace;
         dirtFacePos = newPos;
         setTile(dirtFacePos, dfSym);
 
