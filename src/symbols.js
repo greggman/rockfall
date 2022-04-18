@@ -21,6 +21,8 @@ export const kSymDiamond         = 0x0013;    // diamond
 export const kSymRock            = 0x0014;    // rock
 export const kSymExit            = 0x0015;    // exit
 export const kSymOpenExit        = 0x0016;    // open exit
+export const kSymDirtFaceUp      = 0x0017;    // Dirt E. Face
+export const kSymDirtFaceDown    = 0x0018;    // Dirt E. Face
 
 export const symbolToCharMap = new Map([
   [kSymSpace,           ' '],    // space
@@ -46,4 +48,28 @@ export const symbolToCharMap = new Map([
   [kSymRock,            '🌑'],   // rock 🌑🌰🧅    // these are not available on Windows 10 -> 🪨
   [kSymExit,            '🧧'],   // exit
   [kSymOpenExit,        '🔳'],   // open exit
+  [kSymDirtFaceUp,      '👆'],   // Dirty E. Face
+  [kSymDirtFaceDown,    '👇'],   // Dirty E. Face
+]);
+
+export const symSpaceSet = new Set([
+  kSymSpace,
+]);
+
+export const symDirtFaceSet = new Set([
+  kSymDirtFace,
+  kSymDirtFaceUp,
+  kSymDirtFaceDown,
+  kSymDirtFaceLeft,
+  kSymDirtFaceRight,
+]);
+
+export const symExplodeFromRockSet = new Set([
+  kSymDirtFace,
+  kSymDirtFaceUp,
+  kSymDirtFaceDown,
+  kSymDirtFaceLeft,
+  kSymDirtFaceRight,
+  kSymButterfly,
+  kSymGuard,
 ]);

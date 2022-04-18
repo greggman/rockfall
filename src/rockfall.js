@@ -31,6 +31,8 @@ import {
   kSymBorder,
   kSymDirt,
   kSymDirtFace,
+  kSymDirtFaceUp,
+  kSymDirtFaceDown,
   kSymDirtFaceRight,
   kSymDirtFaceLeft,
   kSymButterfly,
@@ -50,6 +52,8 @@ import {
   kSymExit,
   kSymOpenExit,
   kSymWall,
+  symDirtFaceSet,
+  symExplodeFromRockSet,
 } from './symbols.js';
 import {
   generateTileTexture,
@@ -394,6 +398,8 @@ async function main() {
       for (let i = 0; i < map.length; ++i) {
         switch (map[i]) {
           case kSymDirtFace:
+          case kSymDirtFaceUp:
+          case kSymDirtFaceDown:
           case kSymDirtFaceLeft:
           case kSymDirtFaceRight:
             starts.push(i);
@@ -689,7 +695,7 @@ async function main() {
             mapFlags[pos] &= kUnFall;
           }
         }
-      } else if ((mapFlags[pos] & kFall) && downSym >= kSymDirtFace && downSym <= kSymGuard) {
+      } else if ((mapFlags[pos] & kFall) && symExplodeFromRockSet.has(downSym)) {
         addExplosion(downSym, pos - 1);
       } else {
         mapFlags[pos] &= kUnFall;
@@ -710,9 +716,7 @@ async function main() {
           }
           setTile(newPos, sym, mapColors[pos]);
           return;
-        } else if ((map[newPos] === kSymDirtFace ||
-                    map[newPos] === kSymDirtFaceRight ||
-                    map[newPos] === kSymDirtFaceLeft) ||
+        } else if (symDirtFaceSet.has(map[newPos]) ||
                     map[newPos] === kSymAmoeba ||
                    ((mapFlags[newPos] & kFall) && dir === 0)) {
           addExplosion(sym, pos - (mapWidth + 1));
@@ -792,6 +796,15 @@ async function main() {
       [ kSymMagicWall,       doMagicWall,           ],  // REMOVE THIS!
     ]);
 
+    const collectableMap = new Map([
+      [kSymDiamond,   { sound: 'coin',       score: settings.diamondPoints, count: 1 }],
+      [kSymEgg,       { sound: 'eggCollect', score: settings.eggPoints,     count: 1 }],
+      [kSymEggWiggle, { sound: 'eggCollect', score: settings.eggPoints,     count: 1 }],
+      [kSymEggHatch,  { sound: 'eggCollect', score: settings.eggPoints,     count: 1 }],
+      [kSymEggOpen,   { sound: 'eggCollect', score: settings.eggPoints,     count: 1 }],
+      [kSymDirt,      { sound: 'step',       score: settings.dirtPoints,    count: 0 }],
+    ]);
+
     function nextGen() {
       ++ticks;
       if (!finished && !players[0].dead) {
@@ -866,10 +879,10 @@ async function main() {
       let newOffset = 0;
       let dfSym = kSymDirtFaceRight;
       if (input & kDownBit) {
-         newOffset =  mapWidth;
+         newOffset =  mapWidth; dfSym = kSymDirtFaceDown;
       }
       if (input & kUpBit) {
-         newOffset = -mapWidth;
+         newOffset = -mapWidth; dfSym = kSymDirtFaceUp;
       }
       if (input & kRightBit) {
          newOffset =     1; dfSym = kSymDirtFaceRight;
@@ -887,19 +900,13 @@ async function main() {
       const newPos = dirtFacePos + newOffset;      // new position
       const c  = map[newPos];  // Chr at new position
 
-      if (c === kSymDiamond) {
-        playSound('coin');
-        addScore(settings.diamondPoints, playerNdx);
-        addCount(playerNdx);
-      }
-      if (c >= kSymEgg && c <= kSymEggOpen) {
-        playSound('eggCollect');
-        addScore(settings.eggPoints, playerNdx);
-        addCount(playerNdx);
-      }
-      if (c === kSymDirt) {
-        playSound('step');
-        addScore(settings.dirtPoints, playerNdx);
+      const collectable = collectableMap.get(c);
+      if (collectable) {
+        playSound(collectable.sound);
+        addScore(collectable.score, playerNdx);
+        if (collectable.count) {
+          addCount(playerNdx);
+        }
       }
 
       if (input & kFireBit) {  // Fire Button, should be using better routines.
@@ -1049,9 +1056,7 @@ async function main() {
         for (let i = 0; i < numPlayers; i++) {
           const player = players[i];
           const newPos = player.pos;
-          if (map[newPos] >= kSymDirtFace &&
-              map[newPos] <= kSymDirtFaceLeft &&
-              player.dead === false) {
+          if (symDirtFaceSet.has(map[newPos]) && player.dead === false) {
             dirtFace(i);
           } else if (!player.dead) {
             player.dead = true;
