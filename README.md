@@ -196,6 +196,9 @@ be fun to make more types of things. Random simple ideas:
 * Diggers (enemies that dig dirt)
 * Diamond eaters (enemies that eat diamonds)
 * Diamond makers (enemies that eat rocks and hatch diamonds)
+* Feed - touch it and for the next N seconds you drop (dirt, monster food)
+* Doors - you can go through, monster can't
+* Doors the open and close on pass through
 * Rotation (the GPU renderer can draw at any angle so, turn 45 degrees and have rocks slide. Or turn 90, 180, 270, and down is a new direction.
   this could be random, or time based, or there could be an object you touch to rotate or 4 objects to orient or drop a rock on etc...)
 
