@@ -12,6 +12,10 @@
 
 * 🙂 Player: A, S, D, W or ⬅️, ➡️, ⬆️, ⬇️ to move
 
+* 🧧 Exit: Opens when you've collected 'goal' number of diamonds/eggs
+
+* 🔳 Open Exit: Completes the level
+
 * 🟫 Dirt: Can be dug
 
 * ⬜️ Wall: Unmovable, un-diggable, but explodable
@@ -34,6 +38,14 @@
 * 🏧 Magic Wall: The first time something drops on it it turns on. While on, any
   rock or egg dropped on it will become a diamond. Any diamond dropped on it
   will become a rock. Stops after a few seconds.
+
+* 🦀 goes only left/right or up/down
+
+* 🪲 only turns when it hits something
+
+* 🚪 player can pass through but nothing else.
+
+* 💣 explodes when it falls on anything but dirt or when touched by an enemy.
 
 Rocks, Eggs, and Diamonds will fall if there is space below them or if they are
 sitting on top of another rock, egg, or diamond and there is space for them to
