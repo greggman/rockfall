@@ -87,6 +87,12 @@ the edge of the cage they're in. If we didn't set their initial direction
 They'd end up all initially trying the same direction and then adjusting
 to their situation.
 
+<img src="imgs/making-levels/without-dir.gif" width="223">
+
+With the initial directions set we can get them to go as expected
+
+<img src="imgs/making-levels/with-dir.gif" width="223">
+
 # Please consider submitting your level to this repo
 
 If you know github then you can create a pull request. Otherwise,
