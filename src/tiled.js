@@ -1,7 +1,7 @@
 /* eslint-env browser */
 
 import {
-  kUp,
+  // kUp,
   kDown,
   kLeft,
   kRight,

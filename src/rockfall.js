@@ -37,6 +37,7 @@ import {
   kSymDirtFaceLeft,
   kSymButterfly,
   kSymGuard,
+  kSymSideWalker,
   kSymPatroller,
   kSymDiamondExplode,
   kSymDiamondExplode2,
@@ -154,12 +155,14 @@ async function main() {
   // a single number will by -v/+v, An array of 2 numbers
   // specifies min,max
   const colorRanges = new Map([
-    [kSymDirt,      [0.02, [-0.1, -0.2], [0.1, 0.2]]],
-    [kSymButterfly, [0.1 , 0.0, 0.0]],
-    [kSymGuard,     [0.2 , 0.2, 0.2]],
-    [kSymRock,      [0.04, 0.1, 0.1]],
-    [kSymAmoeba,    [0.1,  0.1, 0.1]],
-    [kSymWall,      [0,    0, [-0.6, -0.7]]],
+    [kSymDirt,       [0.02, [-0.1, -0.2], [0.1, 0.2]]],
+    [kSymButterfly,  [0.1 , 0.0, 0.0]],
+    [kSymGuard,      [0.2 , 0.2, 0.2]],
+    [kSymPatroller,  [[0.0, 0.2] , 0.2, 0.0]],
+    [kSymSideWalker, [0.05, 0.2, 0.2]],
+    [kSymRock,       [0.04, 0.1, 0.1]],
+    [kSymAmoeba,     [0.1,  0.1, 0.1]],
+    [kSymWall,       [0,    0, [-0.6, -0.7]]],
   ]);
 
   function getColorForSym(sym) {
@@ -789,6 +792,7 @@ async function main() {
       [ kSymGuard,           makeDoEnemyFn(kCCWise) ],
       [ kSymButterfly,       makeDoEnemyFn(kCWise)  ],
       [ kSymPatroller,       makeDoEnemyFn(kCWise, false)  ],
+      [ kSymSideWalker,      makeDoEnemyFn(2, false)  ],
       [ kSymEgg,             doEgg                  ],
       [ kSymEggWiggle,       doEgg                  ],
       [ kSymEggHatch,        doEgg                  ],
