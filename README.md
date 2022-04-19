@@ -184,14 +184,14 @@ etc...
 Add more rules, entities: The number one reason I wrote this was I thought it might
 be fun to make more types of things. Random simple ideas:
 
-- [*] Enemies that only go left/right or up/down 🦀
-- [*] Enemies that only turn when they hit something 🪲
+- [x] Enemies that only go left/right or up/down 🦀
+- [x] Enemies that only turn when they hit something 🪲
 - [ ] Enemies that path find
 - [ ] Water (can flow left/right and go down, maybe Diamonds float up in water, maybe rocks fall slower)
 - [ ] Gas (can flow left/right and go up, maybe can light gas on fire)
 - [ ] Balloons (float up, opposite of rocks)
 - [ ] Fire (spreads. Maybe need something burnable)
-- [*] Bombs (make chain explosions) 💣
+- [x] Bombs (make chain explosions) 💣
 - [ ] Bomberman Bombs (bombs that fill space and eat just one edge of dirt)
 - [ ] Ice Rocks (rocks that when pushed continue left/right)
 - [ ] Ice Bombs (bombs that when pushed continue left/right)
@@ -199,7 +199,7 @@ be fun to make more types of things. Random simple ideas:
 - [ ] Diamond eaters (enemies that eat diamonds)
 - [ ] Diamond makers (enemies that eat rocks and hatch diamonds)
 - [ ] Feed - touch it and for the next N seconds you drop (dirt, monster food)
-- [*] Doors - you can go through, monster can't 🚪
+- [x] Doors - you can go through, monster can't 🚪
 - [ ] Doors the open and close on pass through
 - [ ] Rotation (the GPU renderer can draw at any angle so, turn 45 degrees and have rocks slide. Or turn 90, 180, 270, and down is a new direction.
   this could be random, or time based, or there could be an object you touch to rotate or 4 objects to orient or drop a rock on etc...)
