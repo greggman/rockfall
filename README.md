@@ -20,6 +20,8 @@
 
 * ⬜️ Wall: Unmovable, un-diggable, but explodable
 
+* 🟪 Border: Un-explodable
+
 * 🌑 Rock: Pushable left or right.
 
 * 💎 Diamond: 100 points
@@ -35,10 +37,6 @@
 * 🦠 Amoeba: Grows. If it reaches 100 Amoeba they all turn to eggs. If it's
   surrounded so it can't grow they all turn into diamonds.
 
-* 🏧 Magic Wall: The first time something drops on it it turns on. While on, any
-  rock or egg dropped on it will become a diamond. Any diamond dropped on it
-  will become a rock. Stops after a few seconds.
-
 * 🦀 goes only left/right or up/down
 
 * 🪲 only turns when it hits something
@@ -46,6 +44,10 @@
 * 🚪 player can pass through but nothing else.
 
 * 💣 explodes when it falls on anything but dirt or when touched by an enemy.
+
+* 🏧 Magic Wall: The first time something drops on it it turns on. While on, any
+  rock or egg dropped on it will become a diamond. Any diamond dropped on it
+  will become a rock. Stops after a few seconds.
 
 Rocks, Bombs, Eggs, and Diamonds will fall if there is space below them or if they are
 sitting on top of another rock, egg, or diamond and there is space for them to
