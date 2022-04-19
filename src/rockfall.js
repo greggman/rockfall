@@ -76,6 +76,7 @@ import {
 } from './touch.js';
 import {
   applyQuerySettings,
+  basenameNoExt,
   clamp,
   lerp,
   minMagnitude,
@@ -106,7 +107,7 @@ async function main() {
 
   // initial # of objects on screen
   const settings = {
-    level: 0,                         // level to use
+    level: 'random',                  // level to use
     seed: 0,                          // seed for random level
     amoebas: 1,                       // number of amoebas
     butterflies: 5,                   // number of butterflies
@@ -151,6 +152,7 @@ async function main() {
 
   levels.push({
     name: 'Random',
+    filename: 'random',
     level: randomLevel(settings),
   });
 
@@ -182,6 +184,7 @@ async function main() {
     const fullName = `${name}(${license ? `${license}` : 'CC-BY'})${author ? ` by: ${author}` : ''}`;
     return {
       name: fullName,
+      filename: basenameNoExt(url),
       level,
     };
   }
@@ -193,17 +196,29 @@ async function main() {
   }
 
   levels.push(...(await Promise.all(levelPaths.map(loadTiledLevel))));
-  settings.level = Math.min(levels.length - 1, settings.level);
+
+  const levelFilenameToIndex = filename => levels.findIndex(lvl => lvl.filename === filename);
+
+  {
+    let ndx = levelFilenameToIndex(settings.level);
+    if (ndx < 0) {
+      ndx = parseInt(settings.level);
+      if (Number.isNaN(ndx)) {
+        ndx = 0;
+      }
+    }
+    settings.level = levels[ndx].filename;
+  }
 
   async function loadLevel(file) {
     const data = JSON.parse(await file.text());
     const level = prepTiledLevel(data, file.name);
-    const ndx = levels.findIndex(l => l.name === level.name);
+    const ndx = levels.findIndex(l => l.filename === level.filename);
     if (ndx >= 0) {
       levels.splice(ndx, 1);
     }
     levels.push(level);
-    settings.level = levels.length - 1;
+    settings.level = level.filename;
     updateLevelSelection();
     restart();
   }
@@ -252,7 +267,7 @@ async function main() {
   }
 
   const restart = () => {
-    setLevel(settings.level);
+    setLevelByFilename(settings.level);
   };
 
   const restartAndRandomize = () => {
@@ -260,17 +275,21 @@ async function main() {
     restart();
   };
 
-  function setLevel(ndx) {
+  function setLevelByFilename(filename) {
+    setLevelByIndex(levelFilenameToIndex(filename));
+  }
+
+  function setLevelByIndex(ndx) {
     const url = new URL(window.location);
     const params = new URLSearchParams(url.search);
-    params.set('level', ndx);
+    params.set('level', levels[ndx].filename);
     params.delete('seed');
     if (ndx === 0) {
       params.set('seed', settings.seed);
     }
     url.search = params.toString();
     window.history.replaceState({}, '', url.toString());
-    settings.level = ndx;
+    settings.level = levels[ndx].filename;
     if (ndx === 0) {
       levels[0].level = randomLevel(settings);
     }
@@ -326,11 +345,12 @@ async function main() {
     const selectElem = document.createElement('select');
     nameElem.innerHTML = '';
     nameElem.appendChild(selectElem);
+    const currentNdx = levelFilenameToIndex(settings.level);
     for (let i = 0; i < levels.length; ++i) {
       const level = levels[i];
       const elem = document.createElement('option');
       elem.textContent = level.name;
-      if (i === settings.level) {
+      if (i === currentNdx) {
         elem.selected = true;
       }
       selectElem.appendChild(elem);
@@ -340,14 +360,14 @@ async function main() {
       if (ndx === 0) {
         randomizeLevel0();
       }
-      setLevel(ndx);
+      setLevelByIndex(ndx);
     });
   }
   updateLevelSelection();
 
   let magicSound;
   let currentLevel;
-  setLevel(settings.level);
+  setLevelByFilename(settings.level);
 
   function startLevel({level}) {
     currentLevel = level;
@@ -1123,13 +1143,14 @@ async function main() {
         } else {
           endTimer += deltaTime;
           if (endTimer >= settings.endDuration) {
+            const currentNdx = levelFilenameToIndex(settings.level);
             const ndx = finished
-                ? (settings.level + 1) % levels.length
-                : settings.level;
+                ? (currentNdx + 1) % levels.length
+                : currentNdx;
             if (ndx === 0 && finished) {
               randomizeLevel0();
             }
-            setLevel(ndx);
+            setLevelByIndex(ndx);
           }
         }
       }
