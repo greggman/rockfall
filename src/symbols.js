@@ -45,7 +45,7 @@ export const symbolToCharMap = new Map([
   [kSymAmoeba,          '🦠'],   // amoeba
   [kSymMagicWall,       '🏧'],   // magic wall
   [kSymEgg,             '🥚'],   // monster egg
-  [kSymEggWiggle,       '🍆'],   // egg wiggle
+  [kSymEggWiggle,       '⚪️'],   // egg wiggle
   [kSymEggHatch,        '🐣'],   // egg hatch
   [kSymEggOpen,         '🥥'],   // egg opening
   [kSymWall,            '⬜️'],   // wall
