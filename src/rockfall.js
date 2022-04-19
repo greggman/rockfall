@@ -1054,7 +1054,7 @@ async function main() {
     };
 
     let then = 0;
-    let delay = 0;
+    let delay = 1; //settings.frameRate;
     function process(now) {
       now *= 0.001;
       const deltaTime = Math.min(now - then, 0.1);
