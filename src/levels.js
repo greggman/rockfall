@@ -9,7 +9,7 @@ const levelPaths = [
   'tiled/grid.tmj',         // 7
   'tiled/down-n-out.tmj',   // 8
   'tiled/vault.tmj',        // 9
-  'tiled/door-test.tmj',    // 10
+  'tiled/test-map.tmj',     // 10
 ];
 
 export default levelPaths;
