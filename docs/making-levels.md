@@ -74,6 +74,19 @@ You can add custom properties to set level settings.
 
 Note: author, license, and name need to be type `string`
 
+## Setting enemy initial directions
+
+Enemies (👾 🦋 🪲 🦀) have an initial direction. You can set their
+initial direction in Tiled by using the rotate icon on the toolbar.
+
+<img src="imgs/making-levels/step-07-rotate.png" width="852"> 
+
+Above you can see the enemy tiles have been rotated to set their
+initial direction. In the map above, the enemies travel around
+the edge of the cage they're in. If we didn't set their initial direction
+They'd end up all initially trying the same direction and then adjusting
+to their situation.
+
 # Please consider submitting your level to this repo
 
 If you know github then you can create a pull request. Otherwise,
