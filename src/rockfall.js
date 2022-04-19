@@ -139,7 +139,6 @@ async function main() {
     minRockPushTurns: 1,              // number of turns until you can start pushing rocks (set to 0 for instant)
     showTiles: false,                 // So we can save a new .png
     testSounds: false,                // Test the sounds
-    genTiles: false,                  // Gen tiles instead of loading png
     debug: false,
   };
   function randomizeLevel0() {
@@ -304,7 +303,7 @@ async function main() {
   const tilesDown = 32;
   let tileTexture32x32;
   function makeTileTexture(gl) {
-    if (!settings.genTiles && settings.tileSize === 32) {
+    if (!settings.showTiles && settings.tileSize === 32) {
       if (!tileTexture32x32) {
         tileTexture32x32 = twgl.createTexture(gl, {
           src: 'tiled/rockfall-tiles.png',
