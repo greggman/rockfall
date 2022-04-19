@@ -29,8 +29,8 @@ export function generateTileTexture(tilesAcross, tilesDown, tileSize) {
   ctx.textBaseline = 'top';
   ctx.fillStyle = 'black';
   for (const [id, char] of symbolToCharMap) {
-    const x = id * tileSize;
-    const y = 0;
+    const x = (id % tilesAcross) * tileSize;
+    const y = (id / tilesAcross | 0) * tileSize;
     ctx.clearRect(x, y, tileSize, tileSize);
     // add a clipping path so characters don't bleed into neighboring tiles.
     ctx.save();

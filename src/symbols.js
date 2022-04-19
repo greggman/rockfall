@@ -26,6 +26,8 @@ export const kSymDirtFaceDown    = 0x0018;    // Dirt E. Face
 export const kSymDoor            = 0x0019;    // Door
 export const kSymPatroller       = 0x001A;
 export const kSymSideWalker      = 0x001B;
+export const kSymBomb            = 0x001C;
+export const kSymBombTriggered   = 0x001D;
 
 export const symbolToCharMap = new Map([
   [kSymSpace,           ' '],    // space
@@ -36,10 +38,10 @@ export const symbolToCharMap = new Map([
   [kSymDirtFaceLeft,    '👈'],   // Dirty E. Face
   [kSymButterfly,       '🦋'],   // butterfly
   [kSymGuard,           '👾'],   // guardian
-  [kSymDiamondExplode,  '🔥'],   // diamond explosion
-  [kSymDiamondExplode2, '💥'],   // diamond explosion
-  [kSymSpaceExplode,    '🌩'],   // space explosion
-  [kSymSpaceExplode2,   '💨'],   // space explosion
+  [kSymDiamondExplode,  '🌩'],   // diamond explosion
+  [kSymDiamondExplode2, '💨'],   // diamond explosion
+  [kSymSpaceExplode,    '🔥'],   // space explosion
+  [kSymSpaceExplode2,   '💥'],   // space explosion
   [kSymAmoeba,          '🦠'],   // amoeba
   [kSymMagicWall,       '🏧'],   // magic wall
   [kSymEgg,             '🥚'],   // monster egg
@@ -56,10 +58,17 @@ export const symbolToCharMap = new Map([
   [kSymDoor,            '🚪'],   // Door
   [kSymPatroller,       '🪲'],   // Patroller
   [kSymSideWalker,      '🦀'],   // SideWalker
+  [kSymBomb,            '💣'],   // Bomb
+  [kSymBombTriggered,   '❤️‍🔥'],   // Bomb
 ]);
 
 export const symSpaceSet = new Set([
   kSymSpace,
+]);
+
+export const symPushableSet = new Set([
+  kSymRock,
+  kSymBomb,
 ]);
 
 export const symRockFallSet = new Set([
@@ -85,6 +94,12 @@ export const symDirtFaceSet = new Set([
   kSymDirtFaceRight,
 ]);
 
+export const symEnemyKillsSet = new Set([
+  ...symDirtFaceSet,
+  kSymAmoeba,
+  kSymBomb,
+]);
+
 export const symExplodeFromRockSet = new Set([
   kSymDirtFace,
   kSymDirtFaceUp,
@@ -95,6 +110,7 @@ export const symExplodeFromRockSet = new Set([
   kSymGuard,
   kSymPatroller,
   kSymSideWalker,
+  kSymBomb,
 ]);
 
 export const symOpenToPlayerSet = new Set([

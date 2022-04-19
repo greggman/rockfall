@@ -51,6 +51,8 @@ import {
   kSymEggOpen,
   kSymDiamond,
   kSymRock,
+  kSymBomb,
+  kSymBombTriggered,
   kSymExit,
   kSymOpenExit,
   kSymWall,
@@ -59,6 +61,8 @@ import {
   symRockFallSet,
   symExplodeFromRockSet,
   symOpenToPlayerSet,
+  symPushableSet,
+  symEnemyKillsSet,
 } from './symbols.js';
 import {
   generateTileTexture,
@@ -596,7 +600,10 @@ async function main() {
         let pos = explosion.pos;
         for (let y = 0; y < 3; y++) {
           for (let i = pos; i <= pos + 2; i++) {
-            if (map[i] !== kSymBorder) {
+            const c = map[i];
+            if (c === kSymBomb) {
+              setTile(i, kSymBombTriggered);
+            } else if (c !== kSymBorder) {
               setTile(i, sym);
             }
           }
@@ -709,6 +716,20 @@ async function main() {
       }
     }
 
+    function doBomb(pos, sym) {
+      const newPos = pos + mapWidth;
+      const downSym  = map[newPos];
+      if (downSym === kSymSpace) {
+        map[pos] = kSymSpace;
+        setTile(newPos, sym, mapColors[pos], mapFlags[pos] | kFall | kMoved);
+      } else if ((mapFlags[pos] & kFall) && downSym !== kSymDirt) {
+        map[pos] = kSymSpace;
+        addExplosion(downSym, pos - 1);
+      } else {
+        mapFlags[pos] &= kUnFall;
+      }
+    }
+
     function doEnemy(pos, sym, searchDirection, followWall) {
       const scan = -searchDirection;
       let dir  = (mapFlags[pos] + (followWall ? searchDirection : 0)) & kMoveBits;
@@ -723,9 +744,9 @@ async function main() {
           }
           setTile(newPos, sym, mapColors[pos]);
           return;
-        } else if (symDirtFaceSet.has(map[newPos]) ||
-                    map[newPos] === kSymAmoeba ||
+        } else if (symEnemyKillsSet.has(map[newPos]) ||
                    ((mapFlags[newPos] & kFall) && dir === 0)) {
+          map[newPos] = kSymSpace;
           addExplosion(sym, pos - (mapWidth + 1));
           return;
         }
@@ -764,6 +785,10 @@ async function main() {
       }
     }
 
+    function doNewExplosion(pos) {
+      addExplosion(kSymSpaceExplode, pos - mapWidth - 1);
+    }
+
     function doExplode(pos) {
       map[pos] += 1;
       mapColors[pos] = 0;
@@ -791,8 +816,8 @@ async function main() {
       [ kSymDiamond,         doMineral              ],
       [ kSymGuard,           makeDoEnemyFn(kCCWise) ],
       [ kSymButterfly,       makeDoEnemyFn(kCWise)  ],
-      [ kSymPatroller,       makeDoEnemyFn(kCWise, false)  ],
-      [ kSymSideWalker,      makeDoEnemyFn(2, false)  ],
+      [ kSymPatroller,       makeDoEnemyFn(kCWise, false) ],
+      [ kSymSideWalker,      makeDoEnemyFn(2, false) ],
       [ kSymEgg,             doEgg                  ],
       [ kSymEggWiggle,       doEgg                  ],
       [ kSymEggHatch,        doEgg                  ],
@@ -803,6 +828,8 @@ async function main() {
       [ kSymDiamondExplode2, doDiamondExplode       ],
       [ kSymSpaceExplode2,   doSpaceExplode         ],
       [ kSymMagicWall,       doMagicWall,           ],  // REMOVE THIS!
+      [ kSymBomb,            doBomb,                ],
+      [ kSymBombTriggered,   doNewExplosion,        ],
     ]);
 
     const collectableMap = new Map([
@@ -933,7 +960,7 @@ async function main() {
         dirtFacePos = newPos;
         setTile(dirtFacePos, dfSym);
 
-      } else if (map[newPos] === kSymRock && (newOffset !== -mapWidth)) {
+      } else if (symPushableSet.has(map[newPos]) && (newOffset !== -mapWidth)) {
 
         // push rocks
         if (player.pushDelay !== newOffset) {
@@ -951,7 +978,7 @@ async function main() {
           do {
             q += newOffset;
             ++numRocks;
-          } while (map[q] === kSymRock && (settings.canPushWithRocksAbove || map[q - mapWidth] !== kSymRock));
+          } while (symPushableSet.has(map[q]) && (settings.canPushWithRocksAbove || !symPushableSet.has(map[q - mapWidth])));
           player.pushTurns = settings.minRockPushTurns + (numRocks - 1) * settings.pushTurnsPerRock;
 
           if (map[q] !== kSymSpace || numRocks > settings.maxPushRocks) {
@@ -967,20 +994,20 @@ async function main() {
             let q = newPos;
             do {
               q += newOffset;
-              if (!settings.canPushWithRocksAbove && map[q - mapWidth] === kSymRock) {
+              if (!settings.canPushWithRocksAbove && symPushableSet.has(map[q - mapWidth])) {
                 q = 0;
               }
-            } while (map[q] === kSymRock && q !== 0);
+            } while (symPushableSet.has(map[q]) && q !== 0);
 
             if (q !== 0 && map[q] === kSymSpace) {
               setTile(dirtFacePos, kSymSpace);
               dirtFacePos = newPos;
-              map[dirtFacePos] = dfSym;
-              map[q] = kSymRock;
               while (q !== dirtFacePos) {
+                map[q] = map[q - newOffset];
                 mapColors[q] = mapColors[q - newOffset];
                 q -= newOffset;
               }
+              map[dirtFacePos] = dfSym;
               mapColors[dirtFacePos] = 0;
             }
 
