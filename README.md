@@ -47,7 +47,7 @@
 
 * 💣 explodes when it falls on anything but dirt or when touched by an enemy.
 
-Rocks, Eggs, and Diamonds will fall if there is space below them or if they are
+Rocks, Bombs, Eggs, and Diamonds will fall if there is space below them or if they are
 sitting on top of another rock, egg, or diamond and there is space for them to
 fall.
 
