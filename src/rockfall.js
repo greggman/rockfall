@@ -37,6 +37,7 @@ import {
   kSymDirtFaceLeft,
   kSymButterfly,
   kSymGuard,
+  kSymPatroller,
   kSymDiamondExplode,
   kSymDiamondExplode2,
   kSymSpaceExplode,
@@ -705,9 +706,9 @@ async function main() {
       }
     }
 
-    function doEnemy(pos, sym, searchDirection) {
+    function doEnemy(pos, sym, searchDirection, followWall) {
       const scan = -searchDirection;
-      let dir  = (mapFlags[pos] + searchDirection) & kMoveBits;
+      let dir  = (mapFlags[pos] + (followWall ? searchDirection : 0)) & kMoveBits;
 
       for (let i = 0; i < 2; i++) {
         const newPos = pos + directionMapOffset[dir];
@@ -731,9 +732,9 @@ async function main() {
       mapFlags[pos] = dir;
     }
 
-    function makeDoEnemyFn(searchDirection) {
+    function makeDoEnemyFn(searchDirection, followWall = true) {
       return function(pos, sym) {
-        doEnemy(pos, sym, searchDirection);
+        doEnemy(pos, sym, searchDirection, followWall);
       };
     }
 
@@ -787,6 +788,7 @@ async function main() {
       [ kSymDiamond,         doMineral              ],
       [ kSymGuard,           makeDoEnemyFn(kCCWise) ],
       [ kSymButterfly,       makeDoEnemyFn(kCWise)  ],
+      [ kSymPatroller,       makeDoEnemyFn(kCWise, false)  ],
       [ kSymEgg,             doEgg                  ],
       [ kSymEggWiggle,       doEgg                  ],
       [ kSymEggHatch,        doEgg                  ],

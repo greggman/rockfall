@@ -24,6 +24,7 @@ export const kSymOpenExit        = 0x0016;    // open exit
 export const kSymDirtFaceUp      = 0x0017;    // Dirt E. Face
 export const kSymDirtFaceDown    = 0x0018;    // Dirt E. Face
 export const kSymDoor            = 0x0019;    // Door
+export const kSymPatroller       = 0x001A;
 
 export const symbolToCharMap = new Map([
   [kSymSpace,           ' '],    // space
@@ -52,6 +53,7 @@ export const symbolToCharMap = new Map([
   [kSymDirtFaceUp,      '👆'],   // Dirty E. Face
   [kSymDirtFaceDown,    '👇'],   // Dirty E. Face
   [kSymDoor,            '🚪'],   // Door
+  [kSymPatroller,       '🪲'],   // Patroller
 ]);
 
 export const symSpaceSet = new Set([
@@ -89,6 +91,7 @@ export const symExplodeFromRockSet = new Set([
   kSymDirtFaceRight,
   kSymButterfly,
   kSymGuard,
+  kSymPatroller,
 ]);
 
 export const symOpenToPlayerSet = new Set([
