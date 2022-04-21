@@ -31,9 +31,20 @@ export function initKeyboard(target) {
   // and return the bits from the last key only. Since we don't use
   // diagonals this works.
   let lruDirKeys = [];
+  const removeKeys = [];
 
   const removeLRUKey = code => {
-    lruDirKeys = lruDirKeys.filter(c => c !== code);
+    lruDirKeys = lruDirKeys.filter(c => c.code !== code);
+  };
+
+  const removeIfSeen = code => {
+    const newLRUDirKeys = lruDirKeys.filter(c => c.code !== code || !c.seen);
+    const wasRemoved = newLRUDirKeys.length !== lruDirKeys.length;
+    if (wasRemoved) {
+      lruDirKeys = newLRUDirKeys;
+    } else {
+      removeKeys.push(code);
+    }
   };
 
   target.addEventListener('keydown', ev => {
@@ -42,13 +53,13 @@ export function initKeyboard(target) {
     latchedState.set(code, true);
     if (dirKeysToBits.has(code)) {
       removeLRUKey(code);
-      lruDirKeys.push(code);
+      lruDirKeys.push({code});
     }
   });
   target.addEventListener('keyup', ev => {
     const code = ev.code;
     keyState.set(code, false);
-    removeLRUKey(code);
+    removeIfSeen(code);
   });
 
   return function() {
@@ -58,8 +69,14 @@ export function initKeyboard(target) {
       latchedState.set(key, false);
     }
     if (lruDirKeys.length) {
-      bits |= dirKeysToBits.get(lruDirKeys[lruDirKeys.length - 1]);
+      const key = lruDirKeys[lruDirKeys.length - 1];
+      bits |= dirKeysToBits.get(key.code);
+      key.seen = true;
     }
+    while (removeKeys.length) {
+      removeLRUKey(removeKeys.pop());
+    }
+
     return bits;
   };
 }
