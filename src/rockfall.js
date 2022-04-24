@@ -1,6 +1,12 @@
 /* eslint-env browser */
 import * as twgl from '../3rdParty/twgl-full.module.js';
 import {
+  clearDebugText,
+  ctx as debugCtx,
+  init as initDebug,
+  setDebugText,
+} from './debug.js';
+import {
   kUp,
   kLeft,
 } from './directions.js';
@@ -140,7 +146,8 @@ async function main() {
     minRockPushTurns: 1,              // number of turns until you can start pushing rocks (set to 0 for instant)
     showTiles: false,                 // So we can save a new .png
     testSounds: false,                // Test the sounds
-    debug: false,
+    debugScrolling: false,
+    debugTouch: false,
   };
   function randomizeLevel0() {
     settings.seed = randInt(0x7FFFFFFF);
@@ -255,16 +262,7 @@ async function main() {
   let processFn = () => {};
   let killPlayerFn = () => {};
 
-  let ctx;
-  let debugElem;
-  if (settings.debug) {
-    ctx = document.createElement('canvas').getContext('2d');
-    ctx.canvas.className = 'debug';
-    document.body.appendChild(ctx.canvas);
-    debugElem = document.createElement('pre');
-    debugElem.className = 'debug';
-    document.body.appendChild(debugElem);
-  }
+  initDebug(settings);
 
   const restart = () => {
     setLevelByFilename(settings.level);
@@ -314,7 +312,7 @@ async function main() {
   splashElem.addEventListener('click', hideSplashOnUseGesture);
   window.addEventListener('keydown', hideSplashOnUseGesture, {once: true});
 
-  const getTouchBits = initTouch(gl.canvas);
+  const getTouchBits = initTouch(gl.canvas, settings);
   const getKeyBits = initKeyboard(window);
 
   const tileSize = settings.tileSize;
@@ -536,7 +534,8 @@ async function main() {
       targetX = Math.min(Math.max(0, targetX), maxRight);
       targetY = Math.min(Math.max(0, targetY), maxBottom);
 
-      if (ctx) {
+      if (settings.debugScrolling && debugCtx) {
+        const ctx = debugCtx;
         ctx.save();
         ctx.translate(-scrollTileX * tileSize, -scrollTileY * tileSize);
         ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
@@ -1126,10 +1125,13 @@ async function main() {
         }
       }
 
-      if (ctx) {
+      if (debugCtx) {
+        const ctx = debugCtx;
         twgl.resizeCanvasToDisplaySize(ctx.canvas);
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        debugElem.textContent = '';
+        if (settings.debugScrolling) {
+          clearDebugText();
+        }
       }
 
       if (finished || players[0].dead) {
@@ -1198,11 +1200,11 @@ async function main() {
         tileDrawOptions.scrollY = (Math.max(0, scrollTileY) * tileSize | 0) / tileSize;
 
         tilemap.draw(gl, tileDrawOptions);
-        if (debugElem) {
-          debugElem.textContent = `\n\n
+        if (settings.debugScrolling) {
+          setDebugText(`\n\n
 targetTileX,Y: ${targetTileX}, ${targetTileY}
 lerpRateX: ${lerpRateX}
-lerpRateY: ${lerpRateY}`;
+lerpRateY: ${lerpRateY}`);
         }
       }
 
