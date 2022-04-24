@@ -9,9 +9,6 @@ import {
   kRightBit,
 } from './input.js';
 
-// const kLRBits = kLeftBit | kRightBit;
-// const kUDBits = kUpBit | kDownBit;
-
 export function initTouch(target, settings) {
   const log = settings.debugTouch
       ? (...args) => {
@@ -26,8 +23,6 @@ export function initTouch(target, settings) {
   const minTouchDistance = 8;
   let startX;
   let startY;
-//  let lastX;
-//  let lastY;
 
   function inputBitsFromOldAndNewPositions(oldX, oldY, newX, newY) {
     const deltaX = newX - oldX;
@@ -53,22 +48,10 @@ export function initTouch(target, settings) {
     const touch = ev.touches[0];
     startX = touch.clientX;
     startY = touch.clientY;
-//    lastX = startX;
-//    lastY = startY;
     touchBits = 0;
     start = true;
     log('start:');
   }
-
-  /*
-
-  states:
-     have direction
-        start => new
-
-     have no direction
-        got direction
-  */
 
   function handleTouchMove(ev) {
     ev.preventDefault();
@@ -98,16 +81,6 @@ export function initTouch(target, settings) {
       }
     }
     log(`move: ds(${newX - startX},${newY - startY}), ${touchBits}`);
-//    // remove opposites.
-//    // I'm sure there's simpler way but
-//    const lrBits = touchBits & kLRBits;
-//    const udBits = touchBits & kUDBits;
-//    const clearBits = (lrBits ? (lrBits ^ kLRBits) : 0) |
-//                      (udBits ? (udBits ^ kUDBits) : 0);
-//    latchBits &= 0xFFFF ^ clearBits;
-//
-//    lastX = newX;
-//    lastY = newY;
   }
 
   function handleTouchEnd(ev) {
