@@ -95,7 +95,7 @@
         {
          "name":"requiredCount",
          "type":"int",
-         "value":300
+         "value":600
         }, 
         {
          "name":"timeLimit",
