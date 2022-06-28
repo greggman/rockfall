@@ -663,6 +663,12 @@ async function main() {
     function doAmoeba(pos) {
       amoebaCount++;
       if (amoebaChangeSym === 0) {
+        // This really shouldn't be done like this
+        const h = Math.sin(pos * 2.371 + ticks * 0.1) * 0.1;
+        const s = Math.sin(pos * 1.71 + ticks * 0.13) * 0.1;
+        const v = Math.sin(pos * 4.21 + ticks * 0.17) * 0.1;
+        const color = snorm32(h, s, v, 0);
+        setTile(pos, kSymAmoeba, color, mapFlags[pos]);
         let dir = randInt(256) & kMoveBits;
         const oldDir = dir;
         do {
