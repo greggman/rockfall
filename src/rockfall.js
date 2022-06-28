@@ -116,7 +116,7 @@ async function main() {
 
   // initial # of objects on screen
   const settings = {
-    level: 'random',                  // level to use
+    level: 't1',                      // level to use
     seed: 0,                          // seed for random level
     amoebas: 1,                       // number of amoebas
     butterflies: 5,                   // number of butterflies
