@@ -1031,12 +1031,13 @@ async function main() {
           setTile(newPos, kSymSpace);
         }
       } else if (symOpenToPlayerSet.has(c)) {
-        if (c === kSymOpenExit) {
-          finished = true;
-          playSound('beamMeUp');
-        } else if (c === kSymFire) {
+        if (c === kSymFire) {
           addExplosion(kSymSpaceExplode, newPos - mapWidth - 1);
         } else {
+          if (c === kSymOpenExit) {
+            finished = true;
+            playSound('beamMeUp');
+          }
           // move Dirt Face
           setTile(dirtFacePos, player.underSym);
           player.underSym = c === kSymDoor ? kSymDoor : kSymSpace;
