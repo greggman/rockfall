@@ -30,6 +30,7 @@ export const kSymBomb            = 0x001C;
 export const kSymBombTriggered   = 0x001D;
 export const kSymBalloon         = 0x001E;
 export const kSymSpike           = 0x001F;
+export const kSymFire            = 0x0100;
 
 export const symbolToCharMap = new Map([
   [kSymSpace,           ' '],    // space
@@ -42,7 +43,7 @@ export const symbolToCharMap = new Map([
   [kSymGuard,           '👾'],   // guardian
   [kSymDiamondExplode,  '🌩'],   // diamond explosion
   [kSymDiamondExplode2, '💨'],   // diamond explosion
-  [kSymSpaceExplode,    '🔥'],   // space explosion
+  [kSymSpaceExplode,    '🏵'],   // space explosion
   [kSymSpaceExplode2,   '💥'],   // space explosion
   [kSymAmoeba,          '🦠'],   // amoeba
   [kSymMagicWall,       '🏧'],   // magic wall
@@ -64,6 +65,7 @@ export const symbolToCharMap = new Map([
   [kSymBombTriggered,   '❤️‍🔥'],   // Bomb
   [kSymBalloon,         '🎈'],   // Balloon
   [kSymSpike,           '⚙️'],   // Spike
+  [kSymFire,            '🔥'],   // Fire
 ]);
 
 export const symSpaceSet = new Set([
@@ -74,6 +76,10 @@ export const symPushableSet = new Set([
   kSymRock,
   kSymBomb,
   kSymBalloon,
+]);
+
+export const symBurnableSet = new Set([
+  kSymDirt,
 ]);
 
 // symbols rocks fall from
@@ -106,6 +112,7 @@ export const symEnemyKillsSet = new Set([
   ...symDirtFaceSet,
   kSymAmoeba,
   kSymBomb,
+  kSymFire,
 ]);
 
 export const symExplodeFromRockSet = new Set([
@@ -131,4 +138,5 @@ export const symOpenToPlayerSet = new Set([
   kSymEggOpen,
   kSymOpenExit,
   kSymDoor,
+  kSymFire,
 ]);

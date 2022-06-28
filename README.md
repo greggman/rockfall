@@ -203,7 +203,7 @@ be fun to make more types of things. Random simple ideas:
 - [ ] Enemies that path find
 - [ ] Water (can flow left/right and go down, maybe Diamonds float up in water, maybe rocks fall slower)
 - [ ] Gas (can flow left/right and go up, maybe can light gas on fire)
-- [ ] Balloons (float up, opposite of rocks)
+- [*] Balloons (float up, opposite of rocks)
 - [ ] Fire (spreads. Maybe need something burnable)
 - [x] Bombs (make chain explosions) 💣
 - [ ] Bomberman Bombs (bombs that fill space and eat just one edge of dirt)

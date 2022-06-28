@@ -13,6 +13,7 @@ import {
   kSymButterfly,
   kSymAmoeba,
   kSymMagicWall,
+  kSymFire,
 } from './symbols.js';
 import {
   shuffleArray,
@@ -103,6 +104,7 @@ export function randomLevel(settings) {
   place(kSymButterfly, kDown, kSymSpace, settings.butterflies);
   place(kSymAmoeba,    0,     kSymDirt,  settings.amoebas);
   place(kSymMagicWall, 0,     kSymDirt,  settings.magicWalls);
+  place(kSymFire,      0,     kSymDirt,  settings.fire);
 
   return {
     mapWidth,

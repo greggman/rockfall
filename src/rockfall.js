@@ -68,12 +68,14 @@ import {
   kSymDoor,
   kSymBalloon,
   kSymSpike,
+  kSymFire,
   symDirtFaceSet,
   symRockFallSet,
   symExplodeFromRockSet,
   symOpenToPlayerSet,
   symPushableSet,
   symEnemyKillsSet,
+  symBurnableSet,
 } from './symbols.js';
 import {
   generateTileTexture,
@@ -111,6 +113,7 @@ async function main() {
   const kFall     = 64;     // added to status when falling
   const kUnFall   = 191;    // Status value when FALLING
   const kEggTime  = 63;
+  const kFireTime = 63;
   const kMoveBits = 3;
 
   const kCWise      = -1;
@@ -127,10 +130,13 @@ async function main() {
     rocks: 280,                       // number of rocks
     walls: 10,                        // number of walls
     magicWalls: 2,                    // number of magic walls
+    fire: 0,                          // number of fire
     maxAmoebas: 100,                  // how many amoebas with it turns into eggs
     amoebaGrowthRate: 200,            // lower is faster
     amoebaMinTicksToGrow: 100,        // Force the amoeba to grow within this many ticks
-    magicTime: 250,                   // how many ticks the magic walls stay active
+    fireSpreadRate: 10,               // lower is faster
+    maxFireAge: 40,                   // Frames when fire dies (must be less than 63)
+    magicTime: 250,                   // how many ticks the magic walls stay active,
     tileSize: 32,                     // size of tiles (note: you can also Cmd/Ctrl +/- in browser)
     scrollRate: 0.0125,               // scroll speed
     diamondPoints: 100,               // points for collecting diamond
@@ -174,6 +180,7 @@ async function main() {
     [kSymRock,       [0.04, 0.1, 0.1]],
     [kSymAmoeba,     [0.1,  0.1, 0.1]],
     [kSymWall,       [0,    0, [-0.6, -0.7]]],
+    [kSymFire,       [0.05, 0.0, 0.0]],
   ]);
 
   function getColorForSym(sym) {
@@ -267,7 +274,7 @@ async function main() {
   const levelNameElem = document.querySelector('#level-name');
   const levelDescElem = document.querySelector('#level-description');
 
-  startElem.addEventListener('animationend', (e) => {
+  startElem.addEventListener('animationend', () => {
     startElem.classList.remove('slide-in-out');
     startElem.classList.add('slide-off');
   });
@@ -682,6 +689,23 @@ async function main() {
       }
     }
 
+    function doFire(pos) {
+      const time = mapFlags[pos] & kFireTime;
+      if (time === settings.maxFireAge) {
+        map[pos] = kSymSpace;
+      } else {
+        setTile(pos, kSymFire, undefined, time + 1);
+        const dir = randInt(256) & kMoveBits;
+        const newPos = pos + directionMapOffset[dir];
+        const sym = map[newPos];
+        if (symBurnableSet.has(sym) && randInt(settings.fireSpreadRate) === 0) {
+          setTile(newPos, kSymFire, undefined, 0);
+          playSound('burn');
+        }
+      }
+    }
+
+
     const mineralSoundsMap = new Map([
       [kSymRock,    'rock'   ],
       [kSymDiamond, 'diamond'],
@@ -880,6 +904,7 @@ async function main() {
       [ kSymMagicWall,       doMagicWall,           ],  // REMOVE THIS!
       [ kSymBomb,            doBomb,                ],
       [ kSymBombTriggered,   doNewExplosion,        ],
+      [ kSymFire,            doFire,                ],
     ]);
 
     const collectableMap = new Map([
@@ -1003,13 +1028,15 @@ async function main() {
         if (c === kSymOpenExit) {
           finished = true;
           playSound('beamMeUp');
+        } else if (c === kSymFire) {
+          addExplosion(kSymSpaceExplode, newPos - mapWidth - 1);
+        } else {
+          // move Dirt Face
+          setTile(dirtFacePos, player.underSym);
+          player.underSym = c === kSymDoor ? kSymDoor : kSymSpace;
+          dirtFacePos = newPos;
+          setTile(dirtFacePos, dfSym);
         }
-        // move Dirt Face
-        setTile(dirtFacePos, player.underSym);
-        player.underSym = c === kSymDoor ? kSymDoor : kSymSpace;
-        dirtFacePos = newPos;
-        setTile(dirtFacePos, dfSym);
-
       } else if (symPushableSet.has(map[newPos]) && (newOffset !== -mapWidth)) {
 
         // push rocks

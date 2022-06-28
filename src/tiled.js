@@ -42,7 +42,10 @@ export function parseTiledLevel(data, url) {
 
   // copy each line into the middle
   map.fill(kSymBorder);
-  const tiles = data.layers[0].data.map(v => Math.max(0, v - 1));
+  const tiles = data.layers[0].data.map(v => {
+    v = Math.max(0, v - 1);
+    return (v & 0x1F) | ((v & 0x3E0) << 3);
+  });
   for (let y = 0; y < data.height; ++y) {
     map.set(tiles.slice(y * data.width, (y + 1) * data.width), (y + 1) * mapWidth + 1);
   }
