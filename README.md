@@ -204,7 +204,11 @@ be fun to make more types of things. Random simple ideas:
 - [ ] Water (can flow left/right and go down, maybe Diamonds float up in water, maybe rocks fall slower)
 - [ ] Gas (can flow left/right and go up, maybe can light gas on fire)
 - [*] Balloons (float up, opposite of rocks)
-- [ ] Fire (spreads. Maybe need something burnable)
+- [*] Fire (spreads. Maybe need something burnable)
+      At the moment it burns at random and burns out after N frames
+      which means it's unpredictable and therefore unreliable unlike
+      the amoeba. One solution might be if it's required to grow if it
+      can so it spreads as far as possible.
 - [x] Bombs (make chain explosions) 💣
 - [ ] Bomberman Bombs (bombs that fill space and eat just one edge of dirt)
 - [ ] Ice Rocks (rocks that when pushed continue left/right)
