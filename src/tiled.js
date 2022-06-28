@@ -43,8 +43,11 @@ export function parseTiledLevel(data, url) {
   // copy each line into the middle
   map.fill(kSymBorder);
   const tiles = data.layers[0].data.map(v => {
+    // tiled numbers from 1 to N
+    // we number by row/col where row is (bits 15-8) 0xFF00 and col is (bits 7-0) 0x00FF
+    // plus there are flip and rotation bits in top 0xFF000000
     v = Math.max(0, v - 1);
-    return (v & 0x1F) | ((v & 0x3E0) << 3);
+    return (v & 0x1F) | ((v & 0x3E0) << 3) | (v & 0xFFFF0000);
   });
   for (let y = 0; y < data.height; ++y) {
     map.set(tiles.slice(y * data.width, (y + 1) * data.width), (y + 1) * mapWidth + 1);
