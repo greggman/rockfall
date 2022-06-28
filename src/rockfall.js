@@ -26,7 +26,10 @@ import {
 import {
   initKeyboard,
 } from './keyboard.js';
-import levelPaths from './levels.js';
+import {
+  tutorialLevelPaths,
+  levelPaths,
+ } from './levels.js';
 import {
   init as initSounds,
   sounds,
@@ -157,12 +160,6 @@ async function main() {
   const g_settings = settings;
   applyQuerySettings(settings);
 
-  levels.push({
-    name: 'Random',
-    filename: 'random',
-    level: randomLevel(settings),
-  });
-
   // Per symbol, how much to adjust hue, saturation, value.
   // a single number will by -v/+v, An array of 2 numbers
   // specifies min,max
@@ -202,7 +199,13 @@ async function main() {
     return prepTiledLevel(data, url);
   }
 
-  levels.push(...(await Promise.all(levelPaths.map(loadTiledLevel))));
+  levels.push(...(await Promise.all([...tutorialLevelPaths, ...levelPaths].map(loadTiledLevel))));
+  const randomLevelNdx = tutorialLevelPaths.length;
+  levels.splice(randomLevelNdx, 0, {
+    name: 'Random',
+    filename: 'random',
+    level: randomLevel(settings),
+  });
 
   const levelFilenameToIndex = filename => levels.findIndex(lvl => lvl.filename === filename);
 
@@ -258,6 +261,14 @@ async function main() {
   const goalElem = document.querySelector('#goal');
   const timeElem = document.querySelector('#time');
   const dieElem = document.querySelector('#die');
+  const startElem = document.querySelector('#start');
+  const levelNameElem = document.querySelector('#level-name');
+  const levelDescElem = document.querySelector('#level-description');
+
+  startElem.addEventListener('animationend', (e) => {
+    startElem.classList.remove('slide-in-out');
+    startElem.classList.add('slide-off');
+  });
 
   let processFn = () => {};
   let killPlayerFn = () => {};
@@ -282,14 +293,14 @@ async function main() {
     const params = new URLSearchParams(url.search);
     params.set('level', levels[ndx].filename);
     params.delete('seed');
-    if (ndx === 0) {
+    if (ndx === randomLevelNdx) {
       params.set('seed', settings.seed);
     }
     url.search = params.toString();
     window.history.replaceState({}, '', url.toString());
     settings.level = levels[ndx].filename;
-    if (ndx === 0) {
-      levels[0].level = randomLevel(settings);
+    if (ndx === randomLevelNdx) {
+      levels[randomLevelNdx].level = randomLevel(settings);
     }
     startLevel(levels[ndx]);
   }
@@ -355,7 +366,7 @@ async function main() {
     }
     selectElem.addEventListener('change', () => {
       const ndx = selectElem.selectedIndex;
-      if (ndx === 0) {
+      if (ndx === randomLevelNdx) {
         randomizeLevel0();
       }
       setLevelByIndex(ndx);
@@ -393,6 +404,11 @@ async function main() {
 
     goalElem.classList.remove('exit-open');
     timeElem.style.color = '';
+    startElem.style.display = '';
+    levelNameElem.textContent = settings.name || settings.filename;
+    levelDescElem.textContent = settings.description || '';
+    startElem.classList.remove('slide-off');
+    startElem.classList.add('slide-in-out');
     let timeLimitTicks = Math.ceil(settings.timeLimit / settings.frameRate);
     const requiredCount = settings.requiredCount || 1;
 
@@ -1149,7 +1165,7 @@ async function main() {
             const ndx = finished
                 ? (currentNdx + 1) % levels.length
                 : currentNdx;
-            if (ndx === 0 && finished) {
+            if (ndx === randomLevelNdx && finished) {
               randomizeLevel0();
             }
             setLevelByIndex(ndx);

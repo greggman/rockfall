@@ -98,6 +98,7 @@
       }
       #splash,
       #loading,
+      #start,
       #end {
         position: absolute;
         left: 0;
@@ -117,10 +118,26 @@
       #splash {
         font-size: 24pt;
       }
+      #start {
+        font-size: 24pt;
+        background: transparent;
+        user-select: none;
+        pointer-events: none;
+      }
       #end {
         align-items: stretch;
         text-align: center;
         background: none;
+      }
+      #start * {
+        margin-block: 0.50em;
+      }
+      #start>div {
+        background-color: rgba(50, 50, 248, 0.5);
+        border: 0.2em solid white;
+        border-radius: 1em;
+        max-width: 800px;
+        padding: 0.5em;
       }
       #splash * {
         margin-block: 0.50em;
@@ -199,8 +216,36 @@
           color: white;
           width: 100%;
         }
-
       }
+      .slide-in-out {
+        animation: anim-slide-in-out 2s forwards;
+      }
+      .slide-off {
+        animation: anim-slide-off 0.1s forwards;
+      }
+      @keyframes anim-slide-off {
+        from {
+          transform: translate(-100%);
+        }
+        to {
+          transform: translate(-101%);
+        }
+      }
+      @keyframes anim-slide-in-out {
+        from {
+          transform: translate(-100%);
+        }
+        10% {
+          transform: translate(0);
+        }
+        90% {
+          transform: translate(0);
+        }
+        to {
+          transform: translate(100%);
+        }
+      }
+
     </style>
   </head>
   <body>
@@ -216,6 +261,12 @@
           <div id="name"></div>
         </div>
         <div id="github"><a target="_blank" href="https://github.com/greggman/rockfall#rules"><span>?</span><img src="resources/images/octocat-icon.svg"></a></div>
+      </div>
+    </div>
+    <div id="start">
+      <div>
+        <h1 id="level-name"></h1>
+        <p id="level-description"></p>
       </div>
     </div>
     <!--

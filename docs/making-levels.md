@@ -71,6 +71,7 @@ You can add custom properties to set level settings.
 | author        |         | string | your name |
 | license       |         | string | default CC-BY ([Creative Commons](https://creativecommons.org/share-your-work/) Only Please) |
 | name          |         | string | default is filename |
+| description   |         | string |  |
 
 Note: author, license, and name need to be type `string`
 
