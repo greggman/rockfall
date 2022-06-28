@@ -28,6 +28,8 @@ export const kSymPatroller       = 0x001A;
 export const kSymSideWalker      = 0x001B;
 export const kSymBomb            = 0x001C;
 export const kSymBombTriggered   = 0x001D;
+export const kSymBalloon         = 0x001E;
+export const kSymSpike           = 0x001F;
 
 export const symbolToCharMap = new Map([
   [kSymSpace,           ' '],    // space
@@ -60,6 +62,8 @@ export const symbolToCharMap = new Map([
   [kSymSideWalker,      '🦀'],   // SideWalker
   [kSymBomb,            '💣'],   // Bomb
   [kSymBombTriggered,   '❤️‍🔥'],   // Bomb
+  [kSymBalloon,         '🎈'],   // Balloon
+  [kSymSpike,           '⚙️'],   // Spike
 ]);
 
 export const symSpaceSet = new Set([
@@ -69,8 +73,10 @@ export const symSpaceSet = new Set([
 export const symPushableSet = new Set([
   kSymRock,
   kSymBomb,
+  kSymBalloon,
 ]);
 
+// symbols rocks fall from
 export const symRockFallSet = new Set([
   kSymSpace,
   kSymEgg,
@@ -80,10 +86,12 @@ export const symRockFallSet = new Set([
   kSymWall,
   kSymDiamond,
   kSymRock,
+  kSymBalloon,
   kSymExit,
   kSymOpenExit,
   kSymDoor,
   kSymMagicWall,
+  kSymSpike,
 ]);
 
 export const symDirtFaceSet = new Set([

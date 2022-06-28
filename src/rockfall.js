@@ -66,6 +66,8 @@ import {
   kSymOpenExit,
   kSymWall,
   kSymDoor,
+  kSymBalloon,
+  kSymSpike,
   symDirtFaceSet,
   symRockFallSet,
   symExplodeFromRockSet,
@@ -686,28 +688,29 @@ async function main() {
       [kSymEgg,     'eggFall'],
     ]);
 
-    function doMineral(pos, minSym) {
-      const leftDownOffset = mapWidth - 1;
-      const rightDownOffset = mapWidth + 1;
+    function doStack(pos, minSym, dir) {
+      const nextRow = mapWidth * dir;
+      const leftNextOffset = nextRow - 1;
+      const rightNextOffset = nextRow + 1;
 
-      const leftDownSym = map[pos + leftDownOffset];
-      const downSym  = map[pos + mapWidth];
-      const rightDownSym = map[pos + rightDownOffset];
+      const leftNextSym = map[pos + leftNextOffset];
+      const nextSym  = map[pos + nextRow];
+      const rightNextSym = map[pos + rightNextOffset];
       const leftSym  = map[pos - 1];
       const rightSym  = map[pos + 1];
 
-      if (symRockFallSet.has(downSym)) {
-        if (downSym === kSymSpace) {
+      if (symRockFallSet.has(nextSym)) {
+        if (nextSym === kSymSpace) {
           map[pos] = kSymSpace;
-          const newPos = pos + mapWidth;
+          const newPos = pos + nextRow;
           setTile(newPos, minSym, mapColors[pos], mapFlags[pos] | kFall | kMoved);
-          if (map[newPos + mapWidth] !== kSymSpace) {
+          if (map[newPos + nextRow] !== kSymSpace) {
             const sound = mineralSoundsMap.get(minSym);
             if (sound) {
               playSound(sound, rand(0.1));
             }
           }
-        } else if ((mapFlags[pos] & kFall) && downSym === kSymMagicWall) {
+        } else if ((mapFlags[pos] & kFall) && nextSym === kSymMagicWall) {
           let sym = kSymSpace;
 
           if (!magicFlag) {
@@ -717,12 +720,13 @@ async function main() {
             }
           }
 
-          const newPos = pos + mapWidth * 2;
+          const newPos = pos + nextRow * 2;
           if (magicTime && map[newPos] === kSymSpace) {
             switch (minSym) {
               case kSymEgg:     sym = kSymGuard;    break;
               case kSymDiamond: sym = kSymRock;     break;
               case kSymRock:    sym = kSymDiamond;  break;
+              case kSymBalloon: sym = kSymBalloon;  break;
             }
           }
           map[pos] = kSymSpace;
@@ -730,12 +734,15 @@ async function main() {
           if (sym !== kSymSpace) {
             setTile(newPos, sym, mapColors[pos], mapFlags[pos] | kFall | kMoved);
           }
+        } else if (minSym === kSymBalloon && nextSym === kSymSpike) {
+          map[pos] = kSymDiamond;
+          playSound('diamondSpikeBirth', rand(0.1));
         } else {
-          if (leftDownSym === kSymSpace && leftSym === kSymSpace) {
+          if (leftNextSym === kSymSpace && leftSym === kSymSpace) {
             map[pos] = kSymSpace;
             const newPos = pos - 1;
             setTile(newPos, minSym, mapColors[pos], mapFlags[pos] | kFall);
-          } else if (rightDownSym === kSymSpace && rightSym === kSymSpace) {
+          } else if (rightNextSym === kSymSpace && rightSym === kSymSpace) {
             map[pos] = kSymSpace;
             const newPos = pos + 1;
             setTile(newPos, minSym, mapColors[pos], mapFlags[pos] | kFall | kMoved);
@@ -743,11 +750,19 @@ async function main() {
             mapFlags[pos] &= kUnFall;
           }
         }
-      } else if ((mapFlags[pos] & kFall) && symExplodeFromRockSet.has(downSym)) {
-        addExplosion(downSym, pos - 1);
+      } else if ((mapFlags[pos] & kFall) && symExplodeFromRockSet.has(nextSym) && minSym !== kSymBalloon) {
+        addExplosion(nextSym, pos - 1);
       } else {
         mapFlags[pos] &= kUnFall;
       }
+    }
+
+    function doMineral(pos, sym) {
+      doStack(pos, sym, 1);
+    }
+
+    function doBalloon(pos, sym) {
+      doStack(pos, sym, -1);
     }
 
     function doBomb(pos, sym) {
@@ -848,6 +863,7 @@ async function main() {
     const tileFnMap = new Map([
       [ kSymRock,            doMineral              ],
       [ kSymDiamond,         doMineral              ],
+      [ kSymBalloon,         doBalloon              ],
       [ kSymGuard,           makeDoEnemyFn(kCCWise) ],
       [ kSymButterfly,       makeDoEnemyFn(kCWise)  ],
       [ kSymPatroller,       makeDoEnemyFn(kCWise, false) ],
