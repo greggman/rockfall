@@ -37,13 +37,13 @@
 * 🦠 Amoeba: Grows. If it reaches 100 Amoeba they all turn to eggs. If it's
   surrounded so it can't grow they all turn into diamonds.
 
-* 🦀 goes only left/right or up/down
+* 🦀 SideWalker: goes only left/right or up/down
 
-* 🪲 only turns when it hits something
+* 🪲 Patroller: only turns when it hits something
 
-* 🚪 player can pass through but nothing else.
+* 🚪 Door: player can pass through but nothing else.
 
-* 💣 explodes when it falls on anything but dirt or when touched by an enemy.
+* 💣 Bomb: explodes when it falls on anything but dirt or when touched by an enemy.
 
 * 🏧 Magic Wall: The first time something drops on it it turns on. While on, any
   rock or egg dropped on it will become a diamond. Any diamond dropped on it
@@ -84,9 +84,16 @@ These settings can be set with query parameters
 | rocks         |     280 | number of rocks |
 | walls         |      10 | number of walls |
 | magicWalls    |       2 | number of magic walls |
+| fire          |       0 | number of fire |
+| balloons      |       3 | number of balloons |
+| bomb          |       3 | number of bombs |
+| sideWalkers   |       3 | number of side walkers |
+| patrollers    |       3 | number of patrollers |
 | maxAmoebas    |     100 | how many amoebas when it turns into eggs |
 | amoebaGrowthRate |  200 | lower is faster |
 | amoebaMinTicksToGrow | 50 | Force the amoeba to grow within this many ticks |
+| fireSpreadRate |     10 | lower is faster |
+| maxFireAge    |      40 | Frames when fire dies (must be less than 63) |
 | magicTime     |     250 | how many ticks the magic walls stay active |
 | tileSize      |      32 | size of tiles (note | you can also Cmd/Ctrl +/- in browser) |
 | scrollRate    |  0.0125 | scroll speed |

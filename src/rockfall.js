@@ -133,6 +133,10 @@ async function main() {
     walls: 10,                        // number of walls
     magicWalls: 2,                    // number of magic walls
     fire: 0,                          // number of fire
+    balloons: 3,                      // number of balloons
+    bomb: 3,                          // number of bombs
+    sideWalkers: 3,                   // number of side walkers
+    patrollers: 3,                    // number of patrollers
     maxAmoebas: 100,                  // how many amoebas with it turns into eggs
     amoebaGrowthRate: 200,            // lower is faster
     amoebaMinTicksToGrow: 100,        // Force the amoeba to grow within this many ticks

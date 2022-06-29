@@ -1,6 +1,7 @@
 import {
   kUp,
   kDown,
+  kLeft,
 } from './directions.js';
 import {
   kSymDirt,
@@ -14,6 +15,11 @@ import {
   kSymAmoeba,
   kSymMagicWall,
   kSymFire,
+  kSymBalloon,
+  kSymBomb,
+  kSymSideWalker,
+  kSymPatroller,
+  kSymSpike,
 } from './symbols.js';
 import {
   shuffleArray,
@@ -74,14 +80,23 @@ export function randomLevel(settings) {
 
   shuffleArray(available, randFn);
 
-  function place(sym, stat, rep, many, offset = 1) {
+  function placeIfDirt(pos, sym) {
+    if (map[pos] !== kSymDirt) {
+      return false;
+    }
+    map[pos] = sym;
+    return true;
+  }
+
+  function place(sym, stat, rep, many, offset = 1, fn) {
     let count = 0;
     while (available.length && count < many) {
       const pos = available.pop();
-      if (map[pos] === kSymDirt) {
+      if (placeIfDirt(pos, sym)) {
+        if (fn) {
+          fn(pos);
+        }
         count++;
-        map[pos] = sym;
-
         const offsets = [
           offset,
           mapWidth,
@@ -97,14 +112,37 @@ export function randomLevel(settings) {
     }
   }
 
-  place(kSymDiamond,   0,     kSymDirt,  settings.diamonds);
-  place(kSymWall,      0,     kSymDirt,  settings.walls);
-  place(kSymRock,      0,     kSymDirt,  settings.rocks);
-  place(kSymGuard,     kUp,   kSymSpace, settings.guards, -1);
-  place(kSymButterfly, kDown, kSymSpace, settings.butterflies);
-  place(kSymAmoeba,    0,     kSymDirt,  settings.amoebas);
-  place(kSymMagicWall, 0,     kSymDirt,  settings.magicWalls);
-  place(kSymFire,      0,     kSymDirt,  settings.fire);
+  function placeSpike(pos) {
+    const x = pos % mapWidth;
+    const y = pos / mapWidth | 0;
+    const newY = randFn() * y | 0;
+    const newPos = mapWidth * newY + x;
+    placeIfDirt(newPos, kSymSpike);
+  }
+
+  function placeSideWalker(pos) {
+    const offset = randFn() < 0.5 ? 1 : mapWidth;
+    mapFlags[pos] = offset === 1 ? kLeft : kUp;
+    placeIfDirt(pos + offset, kSymSpace);
+    placeIfDirt(pos - offset, kSymSpace);
+  }
+
+  function placePatroller(pos) {
+    mapFlags[pos] = randFn() * 4 | 0;
+  }
+
+  place(kSymDiamond,    0,     kSymDirt,  settings.diamonds);
+  place(kSymWall,       0,     kSymDirt,  settings.walls);
+  place(kSymRock,       0,     kSymDirt,  settings.rocks);
+  place(kSymGuard,      kUp,   kSymSpace, settings.guards, -1);
+  place(kSymButterfly,  kDown, kSymSpace, settings.butterflies);
+  place(kSymAmoeba,     0,     kSymDirt,  settings.amoebas);
+  place(kSymMagicWall,  0,     kSymDirt,  settings.magicWalls);
+  place(kSymFire,       0,     kSymDirt,  settings.fire);
+  place(kSymBalloon,    0,     kSymDirt,  settings.balloons, 0, placeSpike);
+  place(kSymBomb,       0,     kSymDirt,  settings.bombs);
+  place(kSymSideWalker, 0,     kSymSpace, settings.sideWalkers, 0, placeSideWalker);
+  place(kSymPatroller,  0,     kSymSpace, settings.patrollers, 0, placePatroller);
 
   return {
     mapWidth,
