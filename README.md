@@ -49,6 +49,10 @@
   rock or egg dropped on it will become a diamond. Any diamond dropped on it
   will become a rock. Stops after a few seconds.
 
+* 🔥 Fire: Burns dirt. Not dangerous to stand next to but you die if you walk in it. Kills Enemies
+
+* 🎈 Balloon: Floats up, if it hit's spike ⚙️ bursts into diamond. 
+
 Rocks, Bombs, Eggs, and Diamonds will fall if there is space below them or if they are
 sitting on top of another rock, egg, or diamond and there is space for them to
 fall.
@@ -203,12 +207,8 @@ be fun to make more types of things. Random simple ideas:
 - [ ] Enemies that path find
 - [ ] Water (can flow left/right and go down, maybe Diamonds float up in water, maybe rocks fall slower)
 - [ ] Gas (can flow left/right and go up, maybe can light gas on fire)
-- [*] Balloons (float up, opposite of rocks)
-- [*] Fire (spreads. Maybe need something burnable)
-      At the moment it burns at random and burns out after N frames
-      which means it's unpredictable and therefore unreliable unlike
-      the amoeba. One solution might be if it's required to grow if it
-      can so it spreads as far as possible.
+- [x] Balloons (float up, opposite of rocks) 🎈
+- [x] Fire (spreads. Burns dirt) 🔥
 - [x] Bombs (make chain explosions) 💣
 - [ ] Bomberman Bombs (bombs that fill space and eat just one edge of dirt)
 - [ ] Ice Rocks (rocks that when pushed continue left/right)
@@ -218,7 +218,8 @@ be fun to make more types of things. Random simple ideas:
 - [ ] Diamond makers (enemies that eat rocks and hatch diamonds)
 - [ ] Feed - touch it and for the next N seconds you drop (dirt, monster food)
 - [x] Doors - you can go through, monster can't 🚪
-- [ ] Doors the open and close on pass through
+- [ ] Doors that open and close on pass through. In other words you can always
+      go through but enemies can't unless you leave them open.
 - [ ] Rotation (the GPU renderer can draw at any angle so, turn 45 degrees and have rocks slide. Or turn 90, 180, 270, and down is a new direction.
   this could be random, or time based, or there could be an object you touch to rotate or 4 objects to orient or drop a rock on etc...)
 
