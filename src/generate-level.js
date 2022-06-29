@@ -30,7 +30,7 @@ export function randomLevel(settings) {
 
   const mapBuffer = new ArrayBuffer(mapArea * 4);
   const map = new Uint32Array(mapBuffer);
-  const mapFlags = new Uint8Array(mapArea);
+  const mapFlags = new Uint16Array(mapArea);
   map.fill(kSymDirt);
 
   for (let i = 0; i < mapWidth; i++) {

@@ -108,13 +108,15 @@ async function main() {
   const kAgeHatch  = 61;
 
   // status flags bits
-  const kMoved    = 128;    // Status value when moved
-  const kUnmoved  = 127;
-  const kFall     = 64;     // added to status when falling
-  const kUnFall   = 191;    // Status value when FALLING
-  const kEggTime  = 63;
-  const kFireTime = 63;
-  const kMoveBits = 3;
+  const kMoved        = 128;    // Status value when moved
+  const kUnmoved      = 0xFFFF ^ kMoved;
+  const kFall         = 64;     // added to status when falling
+  const kUnFall       = 0xFFFF ^ kFall;    // Status value when FALLING
+  const kEggTimeBits  = 63;
+  const kFireTimeBits = 63;
+  const kBurnDirBits  = 0xF000;
+  const kBurnDirShift = 12;
+  const kMoveBits     = 3;
 
   const kCWise      = -1;
   const kCCWise     =  1;
@@ -696,17 +698,22 @@ async function main() {
     }
 
     function doFire(pos) {
-      const time = mapFlags[pos] & kFireTime;
-      if (time === settings.maxFireAge) {
+      const flags = mapFlags[pos];
+      const time = Math.min((flags & kFireTimeBits) + 1, settings.maxFireAge);
+      if ((time === settings.maxFireAge) &&
+          ((flags & kBurnDirBits) === kBurnDirBits)) {
         map[pos] = kSymSpace;
       } else {
-        setTile(pos, kSymFire, undefined, time + 1);
+        setTile(pos, kSymFire, undefined, (flags & (0xFFFF ^ kEggTimeBits)) | time);
         const dir = randInt(256) & kMoveBits;
         const newPos = pos + directionMapOffset[dir];
         const sym = map[newPos];
-        if (symBurnableSet.has(sym) && randInt(settings.fireSpreadRate) === 0) {
-          setTile(newPos, kSymFire, undefined, 0);
-          playSound('burn');
+        if (randInt(settings.fireSpreadRate) === 0) {
+          mapFlags[pos] |= (1 << (dir + kBurnDirShift));
+          if (symBurnableSet.has(sym)) {
+            setTile(newPos, kSymFire, undefined, 0);
+            playSound('burn');
+          }
         }
       }
     }
@@ -846,7 +853,7 @@ async function main() {
         mapFlags[pos] += 1;
       }
 
-      const age = mapFlags[pos] & kEggTime;
+      const age = mapFlags[pos] & kEggTimeBits;
       if (age === kAgeWiggle) {
         map[pos] = kSymEggWiggle;
         playSound('hatch', rand(0, 0.1));

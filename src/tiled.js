@@ -38,7 +38,7 @@ export function parseTiledLevel(data, url) {
 
   const mapBuffer = new ArrayBuffer(mapArea * 4);
   const map = new Uint32Array(mapBuffer);
-  const mapFlags = new Uint8Array(mapArea);
+  const mapFlags = new Uint16Array(mapArea);
 
   // copy each line into the middle
   map.fill(kSymBorder);
