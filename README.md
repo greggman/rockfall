@@ -211,12 +211,17 @@ be fun to make more types of things. Random simple ideas:
 
 - [x] Enemies that only go left/right or up/down 🦀
 - [x] Enemies that only turn when they hit something 🪲
+- [ ] Smart Enemy: Always moves toward you 🧠 
+- [ ] Indistrutable: Just drives around and gets in the way 🗿
 - [ ] Enemies that path find
-- [ ] Water (can flow left/right and go down, maybe Diamonds float up in water, maybe rocks fall slower)
+- [ ] Water (can flow left/right and go down, maybe Diamonds float up in water, maybe rocks fall slower) 🟦
 - [ ] Gas (can flow left/right and go up, maybe can light gas on fire)
 - [x] Balloons (float up, opposite of rocks) 🎈
 - [x] Fire (spreads. Burns dirt) 🔥
 - [x] Bombs (make chain explosions) 💣
+- [ ] Firework: touch it, drop something on it, it ticks then starts a fire? 🧨 
+- [ ] Cloud: Makes water? 🌧️ 
+- [ ] Freeze enemies for a few seconds when you touch it 🚦 🔴⭕️
 - [ ] Bomberman Bombs (bombs that fill space and eat just one edge of dirt)
 - [ ] Ice Rocks (rocks that when pushed continue left/right)
 - [ ] Ice Bombs (bombs that when pushed continue left/right)
