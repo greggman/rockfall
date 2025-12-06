@@ -53,21 +53,22 @@
 
 * 🎈 Balloon: Floats up, if it hit's spike ⚙️ bursts into diamond. 
 
-Rocks, Bombs, Eggs, and Diamonds will fall if there is space below them or if they are
-sitting on top of another rock, egg, or diamond and there is space for them to
-fall.
+Rocks, Bombs, Eggs, and Diamonds will fall if there is space below them or if
+they are sitting on top of another rock, egg, or diamond and there is space for
+them to fall.
 
-You can restart by clicking in the top left corner or select another level
-by clicking the name.
+You can restart by clicking in the top left corner or select another level by
+clicking the name.
 
 Note: You can dig one tile without moving by holding shift.
 
-The first level is random so and there is no real theme so it's just a proof of concept. In fact given it's random it's possible it's impossible to complete.
-If so click the 🔄 icon to generate a new level. If you get stuck you can
-kill yourself by clicking the ☠️ icon. Note that having the entrance blocked
-means you can't do the level but having the exit blocked may mean you can
-challenge yourself to lure some enemies over there and drop rocks on them
-to mine a way into the exit 😛
+The first level is random so and there is no real theme so it's just a proof of
+concept. In fact given it's random it's possible it's impossible to complete. If
+so click the 🔄 icon to generate a new level. If you get stuck you can kill
+yourself by clicking the ☠️ icon. Note that having the entrance blocked means
+you can't do the level but having the exit blocked may mean you can challenge
+yourself to lure some enemies over there and drop rocks on them to mine a way
+into the exit 😛
 
 A real game would require hand designed or algorithmically generated levels.
 
@@ -116,12 +117,14 @@ These settings can be set with query parameters
 
 Examples:
 
-* [larger level](https://greggman.github.io/rockfall/?mapWidth=200&mapHeight=200&rocks=8000&guards=80&butterflies=80&diamonds=100)
-* [tiny level](https://greggman.github.io/rockfall/?mapWidth=10&mapHeight=10&rocks=2)
-* [small tiles](https://greggman.github.io/rockfall/?mapWidth=100&mapHeight=100&tileSize=8&rocks=2000&guards=20&butterflies=20&diamonds=25)
-* [faster](https://greggman.github.io/rockfall/?frameRate=0.0167&amoebas=10&maxAmoebas=1000&butterflies=2)
+* [larger level](https://greggman.github.io/rockfall/?level=random&mapWidth=200&mapHeight=200&rocks=8000&guards=80&butterflies=80&diamonds=100)
+* [tiny level](https://greggman.github.io/rockfall/?level=random&mapWidth=10&mapHeight=10&rocks=2)
+* [small tiles](https://greggman.github.io/rockfall/?level=random&mapWidth=100&mapHeight=100&tileSize=8&rocks=2000&guards=20&butterflies=20&diamonds=25)
+* [faster](https://greggman.github.io/rockfall/?level=random&frameRate=0.0167&amoebas=10&maxAmoebas=1000&butterflies=2)
 * [Magic Wall](https://greggman.github.io/rockfall/?level=1) (built with Tiled)
 * [Hatchery](https://greggman.github.io/rockfall/?level=2) (built with Tiled)
+
+Note: The level parameters only work when `level=random`
 
 ## History
 
@@ -138,9 +141,9 @@ a 16k cartridge!
 In any case, John got something working. [The code](https://github.com/greggman/rockfall/blob/master/ROCK4.ACT) was not all that big. As such, over the years I've ported it
 several times. I [ported it to C](https://github.com/greggman/rockfall/blob/master/rockfall.c) at some point. According to the comments that was 1992.
 
-I once ported it to Z80 assembly for the original GameBoy when I was first learning how it works.
-I ported it to Java for some feature phone around 2003-2004 to bring to a job interview
-at Namco Japan for their mobile division.
+I once ported it to Z80 assembly for the original GameBoy when I was first
+learning how it works. I ported it to Java for some feature phone around
+2003-2004 to bring to a job interview at Namco Japan for their mobile division.
 
 Recently (March 2022) I was going though some old backups and I saw it sitting there
 and decided it might be fun to port it to JavaScript.
@@ -154,12 +157,11 @@ After that I thought it would be fun to use the tilemap shader I wrote for
 
 Note: Differences from the original:
 
-In the original, Butterflies explode into diamonds, not eggs.
-It would probably be best to make a 3rd enemy that explodes into diamonds
-for the variety but in these random levels it's arguably more fun that butterflies
-explode into eggs so you can see lots of movement. Also in the original
-you can only push a single rock. If 2 or more rocks are in a row they can not
-be pushed.
+In the original, Butterflies explode into diamonds, not eggs. It would probably
+be best to make a 3rd enemy that explodes into diamonds for the variety but in
+these random levels it's arguably more fun that butterflies explode into eggs so
+you can see lots of movement. Also in the original you can only push a single
+rock. If 2 or more rocks are in a row they can not be pushed.
 
 ## Design
 
@@ -167,8 +169,8 @@ Currently the first level is just randomly generated.
 
 For this game to be fun really requires well designed levels. The original Atari
 game had 60 or so levels. Each level had themes, a required number of items to
-open the exit, and a time limit. In other words, if the level required 40
-items then you'd need to collect 40 diamonds or eggs to open the exit and then make it
+open the exit, and a time limit. In other words, if the level required 40 items
+then you'd need to collect 40 diamonds or eggs to open the exit and then make it
 to the exit before the time limit. 
 
 The first few levels were mostly just rocks, walls, and diamonds. Some levels
@@ -177,15 +179,15 @@ on them they'd generate diamonds. Other levels, some diamonds might be
 surrounded by walls so you need to lure guardians next to the walls and drop
 rocks on their heads to explode the walls.
 
-Another example was the magic wall. It turns rocks into diamonds
-but you can only use it once. So, you'd need to dig around and push as many
-rocks as possible into position and also dig out space below the magic wall
-so that once you turned it on you could push all the rocks into the magic wall
-and have them all turn into diamonds.
+Another example was the magic wall. It turns rocks into diamonds but you can
+only use it once. So, you'd need to dig around and push as many rocks as
+possible into position and also dig out space below the magic wall so that once
+you turned it on you could push all the rocks into the magic wall and have them
+all turn into diamonds.
 
 Yet another example was having the amoeba at the bottom of some level and you'd
-need to find a way to surround it with rocks so that it turned into diamonds before
-it grew too big and turned into eggs and then butterflies.
+need to find a way to surround it with rocks so that it turned into diamonds
+before it grew too big and turned into eggs and then butterflies.
 
 Anyway, all of those are interesting puzzles to solve but they require a level
 designer. PRs welcome!
@@ -196,15 +198,14 @@ designer. PRs welcome!
 
 ## Enhancements / Ideas
 
-At the moment I just used the system's emoji for graphics. Ideally, at a minimum,
-someone would draw custom graphics including animated tiles for the gem spinning,
-the butterfly flapping, the monsters moving, the amoeba oozing, the magic wall
-animating, the egg hatching, explosions.
+At the moment I just used the system's emoji for graphics. Ideally, at a
+minimum, someone would draw custom graphics including animated tiles for the gem
+spinning, the butterfly flapping, the monsters moving, the amoeba oozing, the
+magic wall animating, the egg hatching, explosions.
 
-It might also be fun to try to make the graphics appear to not be tile based
-but actually keep them tile based. Change the shader (or the game logic) to
-add edge tiles. Add something to the shader to offset moving characters over time.
-etc...
+It might also be fun to try to make the graphics appear to not be tile based but
+actually keep them tile based. Change the shader (or the game logic) to add edge
+tiles. Add something to the shader to offset moving characters over time. etc...
 
 Add more rules, entities: The number one reason I wrote this was I thought it might
 be fun to make more types of things. Random simple ideas:
