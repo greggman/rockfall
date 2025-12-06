@@ -8,7 +8,7 @@
   "keywords": [],
   "author": "Gregg Tavares",
   "devDependencies": {
-    "eslint": "^8.11.0",
+    "eslint": "^8.57.1",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-optional-comma-spacing": "^0.0.4",
     "eslint-plugin-require-trailing-comma": "^0.0.1"
